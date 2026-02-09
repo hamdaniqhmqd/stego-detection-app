@@ -6,9 +6,9 @@ export async function processAIInterpretation(
     decodedText: string
 ) {
     try {
-        console.log('🔄 Processing AI interpretation...')
-        console.log('Force decode ID:', forceDecodeId)
-        console.log('Text preview:', decodedText)
+        // console.log('🔄 Processing AI interpretation...')
+        // console.log('Force decode ID:', forceDecodeId)
+        // console.log('Text preview:', decodedText)
 
         // Skip AI if no meaningful text
         if (!decodedText || decodedText.trim().length < 10) {
@@ -24,7 +24,7 @@ export async function processAIInterpretation(
 
         // Call AI
         const interpretation = await interpretWithAI(decodedText)
-        console.log('✅ AI interpretation received:', interpretation)
+        // console.log('✅ AI interpretation received:', interpretation)
 
         // Save to database
         const { error } = await supabaseServer
@@ -33,15 +33,15 @@ export async function processAIInterpretation(
             .eq('id', forceDecodeId)
 
         if (error) {
-            console.error('❌ Database update error:', error)
+            // console.error('❌ Database update error:', error)
             throw error
         }
 
-        console.log('💾 Interpretation saved to database')
+        // console.log('💾 Interpretation saved to database')
         return interpretation
 
     } catch (error: any) {
-        console.error('❌ AI service error:', error)
+        // console.error('❌ AI service error:', error)
 
         // Save error to database instead of throwing
         const errorMsg = `Gagal melakukan interpretasi AI: ${error.message}`

@@ -4,8 +4,8 @@ export const runtime = 'nodejs'
 
 export async function interpretWithAI(text: string) {
     try {
-        console.log('🤖 Sending FULL force-decode result to Gemini...')
-        console.log('Text length:', text.length)
+        // console.log('🤖 Sending FULL force-decode result to Gemini...')
+        // console.log('Text length:', text.length)
 
         const response = await fetch(
             'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
@@ -38,7 +38,7 @@ export async function interpretWithAI(text: string) {
         }
 
         const data = await response.json()
-        console.log('✅ Gemini response received:', data)
+        // console.log('✅ Gemini response received:', data)
 
         const interpretation =
             data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
