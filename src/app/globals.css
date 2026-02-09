@@ -24,3 +24,37 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.scrollbar_x_custom {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Scrollbar horizontal */
+.scrollbar_x_custom::-webkit-scrollbar {
+  height: 4px;
+  /* ketebalan horizontal scrollbar */
+  background-color: #ececec;
+}
+
+.scrollbar_x_custom::-webkit-scrollbar-thumb {
+  background-color: #b9b9b9;
+  border-radius: 10px;
+}
+
+/* Scrollbar vertikal */
+.scrollbar_y_custom {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.scrollbar_y_custom::-webkit-scrollbar {
+  width: 4px;
+  /* ketebalan vertikal scrollbar */
+  background-color: #ececec;
+}
+
+.scrollbar_y_custom::-webkit-scrollbar-thumb {
+  background-color: #b9b9b9;
+  border-radius: 10px;
+}

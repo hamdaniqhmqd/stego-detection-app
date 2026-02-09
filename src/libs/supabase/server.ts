@@ -4,10 +4,10 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 // Debug log - PENTING untuk melihat masalahnya
-console.log('=== SUPABASE SERVER CONFIG ===')
-console.log('URL:', supabaseUrl)
-console.log('Key exists:', !!supabaseKey)
-console.log('Key length:', supabaseKey?.length || 0)
+// console.log('=== SUPABASE SERVER CONFIG ===')
+// console.log('URL:', supabaseUrl)
+// console.log('Key exists:', !!supabaseKey)
+// console.log('Key length:', supabaseKey?.length || 0)
 
 if (!supabaseUrl || !supabaseKey) {
     throw new Error(

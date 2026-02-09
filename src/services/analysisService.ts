@@ -5,7 +5,7 @@ export async function createAnalysis(
     name: string,
     size: number
 ) {
-    console.log('🔍 Creating analysis with:', { imageUrl, name, size })
+    // console.log('🔍 Creating analysis with:', { imageUrl, name, size })
 
     const { data, error } = await supabaseServer
         .from('analysis')
@@ -19,10 +19,10 @@ export async function createAnalysis(
         .single()
 
     if (error) {
-        console.error('❌ Analysis creation error:', error)
+        // console.error('❌ Analysis creation error:', error)
         throw error
     }
 
-    console.log('✅ Analysis created:', data)
+    // console.log('✅ Analysis created:', data)
     return data
 }
