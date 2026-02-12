@@ -1,5 +1,6 @@
 import MainLayouts from '@/components/Layouts/MainLayouts';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 /**
  * SEO Metadata
@@ -51,15 +52,15 @@ export default function Home() {
             <div className="mt-6 flex flex-col items-center gap-4">
               <span className="text-sm text-gray-900 font-semibold">Coba Sekarang</span>
               <div className="flex items-center gap-2">
-                <button
+                <Link href="/dashboard/buat_stego"
                   className={`relative flex items-center rounded bg-teal-600 py-2 px-6 text-lg font-semibold text-white hover:bg-teal-700`}>
                   Buat Stego
-                </button>
+                </Link>
 
-                <button
+                <Link href="/dashboard/analisis_stego"
                   className={`relative flex items-center rounded bg-teal-50 py-2 px-6 text-lg font-semibold border-2 border-teal-700 text-teal-700 hover:bg-teal-100`}>
                   Analisis Stego
-                </button>
+                </Link>
               </div>
             </div>
           </div>

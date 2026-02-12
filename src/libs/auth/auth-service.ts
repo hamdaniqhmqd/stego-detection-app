@@ -1,7 +1,7 @@
 // src/libs/auth-service.ts
 // FRONTEND AUTH SERVICE - Single file untuk semua operasi autentikasi
 
-import { AuthResponse, LoginRequest, RegisterRequest, VerifyOTPRequest } from "@/types/auth";
+import { AuthResponse, LoginRequest, RegisterRequest } from "@/types/auth";
 import { User } from "@supabase/supabase-js";
 
 const API_BASE = '/api/auth';

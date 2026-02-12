@@ -8,8 +8,9 @@ export interface User {
     role: 'pengguna' | 'superadmin';
     fullname?: string;
     photo?: string;
+    is_verified?: boolean;
+    verified_at?: boolean;
     created_at: string;
-    verifed_at?: boolean;
     updated_at?: string; // timestamp
     deleted_at?: string; // timestamp
 }
