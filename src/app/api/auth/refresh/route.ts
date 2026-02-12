@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     // Cek apakah user masih aktif
     const { data: user, error: userError } = await supabaseServer
       .from('users')
-      .select('id, username, email, role')
+      .select('id, username, email, role, is_verified, verified_at')
       .eq('id', payload.userId)
       .is('deleted_at', null)
       .single();

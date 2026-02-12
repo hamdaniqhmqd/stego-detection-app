@@ -3,38 +3,46 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/libs/supabase/server';
 import { generateAccessToken, generateRefreshToken, getRefreshTokenExpiry } from '@/libs/auth/jwt';
+import { getWaktuWIB } from '@/utils/format';
 import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password: password_input } = body;
+    const nowWIB = getWaktuWIB();
 
     // Validasi input
     if (!email || !password_input) {
       return NextResponse.json({
-        success: false, message: 'Email dan password harus diisi',
+        success: false,
+        message: 'Email/Username dan password harus diisi',
         redirect_url: null,
         data: null
       }, { status: 400 });
     }
 
-    // Cari user berdasarkan email
-    const { data: user, error: userError } = await supabaseServer
+    // ✅ PERBAIKAN: Cari user berdasarkan email ATAU username
+    const { data: users, error: userError } = await supabaseServer
       .from('users')
-      .select('id, username, email, password, role, verifed_at, created_at, deleted_at')
-      .eq('email', email.toLowerCase())
-      .single();
+      .select('id, username, email, password, role, is_verified, verified_at, created_at, deleted_at')
+      .or(`email.eq.${email.toLowerCase()},username.eq.${email}`) // Cari di email atau username
+      .is('deleted_at', null)
+      .limit(1);
 
-    if (userError || !user) {
+    // Cek apakah user ditemukan
+    if (userError || !users || users.length === 0) {
       return NextResponse.json({
         success: false,
-        message: 'Akun tidak ditemukan',
+        message: 'Email/Username atau password salah',
         redirect_url: null,
         data: null
       }, { status: 401 });
     }
 
+    const user = users[0];
+
+    // Cek apakah akun sudah dihapus
     if (user.deleted_at) {
       return NextResponse.json({
         success: false,
@@ -44,16 +52,28 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // Verify password
-    const isPasswordValid = password_input === user.password;
+    // ✅ Verify password dengan bcrypt
+    const isPasswordValid = await bcrypt.compare(password_input, user.password);
 
     if (!isPasswordValid) {
       return NextResponse.json({
         success: false,
-        message: 'Email atau password salah',
+        message: 'Email/Username atau password salah',
         redirect_url: null,
         data: null
       }, { status: 401 });
+    }
+
+    // ✅ PERBAIKAN: Cek apakah email sudah diverifikasi
+    if (!user.is_verified) {
+      // User belum verifikasi email
+      return NextResponse.json({
+        success: false,
+        message: 'Email Anda belum diverifikasi. Silakan cek inbox email Anda.',
+        redirect_url: `/auth/check-email?email=${encodeURIComponent(user.email)}`,
+        data: null,
+        needsVerification: true,
+      }, { status: 403 }); // 403 Forbidden
     }
 
     // Generate tokens
@@ -68,7 +88,9 @@ export async function POST(request: NextRequest) {
 
     // Simpan refresh token ke database
     const userAgent = request.headers.get('user-agent') || null;
-    const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const ipAddress = request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
 
     const payloadRefreshToken = {
       user_id: user.id,
@@ -76,6 +98,7 @@ export async function POST(request: NextRequest) {
       user_agent: userAgent,
       ip_address: ipAddress,
       expires_at: getRefreshTokenExpiry().toISOString(),
+      created_at: nowWIB.toISOString(),
     };
 
     const { error: insertError } = await supabaseServer
@@ -83,17 +106,17 @@ export async function POST(request: NextRequest) {
       .insert(payloadRefreshToken);
 
     if (insertError) {
-      // console.error('Error inserting refresh token:', insertError);
+      console.error('Error inserting refresh token:', insertError);
       return NextResponse.json({
         success: false,
-        message: `Error inserting refresh token: ${insertError.message}`,
+        message: 'Gagal menyimpan sesi login',
         redirect_url: null,
         data: null
       }, { status: 500 });
     }
 
     // Prepare user response (tanpa password)
-    const { password, ...userResponse } = user;
+    const { password, deleted_at, ...userResponse } = user;
 
     // Set cookies
     const response = NextResponse.json({
@@ -101,44 +124,40 @@ export async function POST(request: NextRequest) {
       message: 'Login berhasil',
       user: userResponse,
       redirect_url: null,
-      data: null,
+      data: userResponse,
     });
 
-    // 🔧 FIX: Cookie settings untuk localhost
+    // Cookie settings
     const isProduction = process.env.NODE_ENV === 'production';
 
     // Set access token cookie
     response.cookies.set('accessToken', accessToken, {
       httpOnly: true,
-      secure: isProduction, // false di development
-      sameSite: isProduction ? 'none' : 'lax', // 'lax' untuk localhost
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 60 * 60 * 24, // 1 day
       path: '/',
-      // Hapus domain di localhost, biarkan browser auto-detect
       ...(isProduction && { domain: process.env.COOKIE_DOMAIN }),
     });
 
     // Set refresh token cookie
     response.cookies.set('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: isProduction, // false di development
-      sameSite: isProduction ? 'none' : 'lax', // 'lax' untuk localhost
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/',
-      // Hapus domain di localhost
       ...(isProduction && { domain: process.env.COOKIE_DOMAIN }),
     });
 
-    // console.log('✅ Cookies set successfully');
-    // console.log('Access Token length:', accessToken.length);
-    // console.log('Refresh Token length:', refreshToken.length);
-
     return response;
   } catch (error) {
-    // console.error('Login error:', error);
+    console.error('Login error:', error);
     return NextResponse.json({
       success: false,
-      message: 'Terjadi kesalahan server'
+      message: 'Terjadi kesalahan server',
+      redirect_url: null,
+      data: null
     }, { status: 500 });
   }
 }

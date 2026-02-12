@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
         // Ambil data user terbaru dari database
         const { data: user, error } = await supabaseServer
             .from('users')
-            .select('id, username, email, role, created_at, updated_at')
+            .select('id, username, email, role, is_verified, verified_at, created_at, updated_at')
             .eq('id', decoded.userId)
             .is('deleted_at', null)
             .single();

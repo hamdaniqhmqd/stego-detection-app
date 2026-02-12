@@ -1,17 +1,21 @@
 // src/types/auth.ts
 
+export type UserRole = 'pengguna' | 'superadmin';
+
 export interface User {
     id: string;
     username: string;
     email: string;
     password: string;
-    role: 'pengguna' | 'superadmin';
+    role: UserRole;
     fullname?: string;
     photo?: string;
+    bg_photo?: string;
     created_at: string;
-    verifed_at?: boolean;
-    updated_at?: string; // timestamp
-    deleted_at?: string; // timestamp
+    is_verified?: boolean;
+    verified_at?: string; // ✅ Ikuti typo di database
+    updated_at?: string;
+    deleted_at?: string;
 }
 
 export interface AuthUser {
@@ -21,22 +25,23 @@ export interface AuthUser {
     role?: string;
 }
 
-// Custom JWT Payload dengan index signature untuk kompatibilitas dengan jose
 export interface JWTPayload {
     userId: string;
     email: string;
     role: string;
     iat?: number;
     exp?: number;
-    [key: string]: any; // Index signature untuk kompatibilitas dengan jose
+    [key: string]: any;
 }
 
 export interface AuthResponse {
     success: boolean;
     message?: string;
+    redirectUrl?: string;
     user?: User;
     accessToken?: string;
-    needsVerification?: boolean; // Flag untuk redirect ke verification page
+    needsVerification?: boolean;
+    emailSent?: boolean;
 }
 
 export interface RefreshToken {
@@ -58,12 +63,7 @@ export interface RegisterRequest {
     username: string;
     email: string;
     password: string;
-    role: 'klien' | 'freelancer' | 'superadmin';
-}
-
-export interface VerifyOTPRequest {
-    email: string;
-    verification_code: string;
+    role: UserRole;
 }
 
 export interface EmailVerification {
@@ -73,37 +73,12 @@ export interface EmailVerification {
     verification_code: string;
     type: 'register' | 'forgot_password';
     expires_at: string;
-    verified_at?: string;
+    is_verified?: boolean;
+    verified_at?: string; // ✅ Ikuti typo di database
     created_at: string;
     updated_at?: string;
 }
 
-export interface AuthResponse {
-    success: boolean;
-    message?: string;
-    redirectUrl?: string;
-    user?: User;
-    accessToken?: string;
-}
-
-export interface RefreshToken {
-    id: string;
-    user_id: string;
-    refresh_token: string;
-    user_agent: string | null;
-    ip_address: string | null;
-    expires_at: string;
-    created_at: string;
-}
-
-export interface LoginRequest {
-    email: string;
-    password: string;
-}
-
-export interface RegisterRequest {
-    username: string;
-    email: string;
-    password: string;
-    role: 'freelancer' | 'klien' | 'superadmin';
+export interface VerifyEmailRequest {
+    token: string;
 }
