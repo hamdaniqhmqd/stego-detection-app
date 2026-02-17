@@ -1,18 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 
-/* =====================
- * Component
- * ===================== */
 const Navbar: React.FC = () => {
-    const [isOpen, setIsOpen] = useState(false);
-
     return (
-        <nav className="relativez-20 w-full bg-gray-950">
-            <div className="container mx-auto flex max-w-screen-xl flex-wrap items-center justify-between py-3">
+        <nav className="relative w-full container mx-auto bg-gray-950">
+            <div className="flex items-center justify-between px-4 py-3">
                 {/* Brand */}
                 <Link
                     href={"#"}
@@ -30,7 +24,7 @@ const Navbar: React.FC = () => {
                         Masuk
                     </Link>
 
-                    <Link href={'#'}
+                    <Link href={'/auth/register'}
                         className={`relative flex items-center rounded py-1.5 px-4 text-sm font-semibold text-gray-50 hover:bg-gray-900`}>
                         Daftar
                     </Link>

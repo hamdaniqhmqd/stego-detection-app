@@ -86,14 +86,23 @@ export default function FormLogin() {
   return (
     <section className="form_login lg:py-20 sm:py-14 py-10 container mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <div className="flex justify-center items-center p-6">
-          <div className="content sm:w-[448px] w-full bg-white p-8 rounded-lg shadow-[0_-2px_20px_rgba(209,213,219,0.3),0_4px_20px_rgba(209,213,219,0.3)] hover:shadow-[0_-6px_30px_rgba(209,213,219,0.4),0_6px_30px_rgba(209,213,219,0.4)] transition-shadow duration-300">
+        <div className="flex flex-col justify-center gap-6 items-center p-4 md:p-0">
+          <div className="md:hidden w-full flex flex-col justify-center items-center">
+            <h3 className="heading3 text-center text-2xl font-bold text-gray-950">
+              Masuk ke Akun Anda
+            </h3>
+            <p className="text-center text-gray-600 text-sm mt-2 max-w-md md:w-2/3">
+              Selamat datang kembali! Masukkan email/username dan password Anda untuk mengakses akun.
+            </p>
+          </div>
+
+          <div className="content sm:w-md w-full bg-white p-6 md:p-8 rounded-lg shadow-[0_-2px_20px_rgba(209,213,219,0.3),0_4px_20px_rgba(209,213,219,0.3)] hover:shadow-[0_-6px_30px_rgba(209,213,219,0.4),0_6px_30px_rgba(209,213,219,0.4)] transition-shadow duration-300">
 
             {/* Error Alert */}
             {error && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-start">
-                  <svg className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-5 w-5 text-red-600 mt-0.5 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <p className="text-sm text-red-800">{error}</p>
@@ -105,7 +114,7 @@ export default function FormLogin() {
             {success && (
               <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-start">
-                  <svg className="h-5 w-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-5 w-5 text-green-600 mt-0.5 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <p className="text-sm text-green-800">{success}</p>
@@ -116,7 +125,7 @@ export default function FormLogin() {
             <form className="form mt-2" onSubmit={handleSubmit}>
               {/* ✅ Email/Username Field */}
               <div className="form-group">
-                <label className="block font-medium text-gray-600 text-md">
+                <label className="block font-medium text-gray-900 text-md">
                   Username atau Email
                 </label>
                 <input
@@ -125,7 +134,7 @@ export default function FormLogin() {
                   name="emailOrUsername"
                   value={emailOrUsername}
                   onChange={(e) => setEmailOrUsername(e.target.value)}
-                  className="block w-full px-4 h-[50px] mt-3 text-gray-700 placeholder-gray-500 bg-white border border-gray-400 rounded-lg focus:border-gray-900 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-gray-900"
+                  className="block w-full px-4 h-12 mt-3 text-gray-700 placeholder-gray-500 bg-white border border-gray-400 rounded-lg focus:border-gray-900 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-gray-900"
                   placeholder="Masukkan email atau username"
                   required
                   disabled={isLoading}
@@ -135,7 +144,7 @@ export default function FormLogin() {
 
               {/* Password Field */}
               <div className="form-group mt-6 relative">
-                <label className="block font-medium text-gray-600 text-md">
+                <label className="block font-medium text-gray-900 text-md">
                   Kata Sandi
                 </label>
 
@@ -146,7 +155,7 @@ export default function FormLogin() {
                     name="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full px-4 h-[50px] mt-3 text-gray-700 placeholder-gray-500 bg-white border border-gray-400 rounded-lg focus:border-gray-900 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-gray-900"
+                    className="block w-full px-4 h-12 mt-3 text-gray-700 placeholder-gray-500 bg-white border border-gray-400 rounded-lg focus:border-gray-900 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-gray-900"
                     placeholder="Masukkan kata sandi Anda"
                     required
                     disabled={isLoading}
@@ -179,8 +188,8 @@ export default function FormLogin() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end mt-6">
-                <Link className="text-black hover:underline text-sm" href="/forgot-password">
+              <div className="flex items-center justify-end mt-3">
+                <Link className="text-gray-800 hover:underline hover:text-gray-900 text-sm" href="#">
                   Lupa kata sandi?
                 </Link>
               </div>
@@ -188,7 +197,7 @@ export default function FormLogin() {
               <div className="block-button mt-6">
                 <button
                   type="submit"
-                  className="w-full py-3 text-white bg-gray-900 hover:bg-gray-800 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="w-full py-3 text-white bg-gray-900 hover:bg-gray-950 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -205,7 +214,7 @@ export default function FormLogin() {
                 </button>
               </div>
 
-              <div className="navigate mt-6">
+              <div className="navigate mt-3">
                 <div className="flex items-center justify-center gap-1 text-sm">
                   <span className="text-gray-600">Belum memiliki akun?</span>
                   <Link className="text-gray-700 hover:underline hover:text-gray-800 font-medium" href="/auth/register">
@@ -217,7 +226,7 @@ export default function FormLogin() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex-col items-center justify-center hidden md:flex">
           <h3 className="heading3 text-center text-2xl font-bold text-gray-950">
             Masuk ke Akun Anda
           </h3>

@@ -3,7 +3,7 @@
 import { JWTPayload } from '@/types/auth';
 import { SignJWT, jwtVerify } from 'jose';
 
-const ACCESS_TOKEN_EXPIRY = '15m'; // 15 menit
+const ACCESS_TOKEN_EXPIRY = '1d'; // 1 hari
 const REFRESH_TOKEN_EXPIRY = '7d'; // 7 hari
 
 // Convert secret string to Uint8Array

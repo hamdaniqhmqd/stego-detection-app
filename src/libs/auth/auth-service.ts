@@ -97,25 +97,15 @@ class AuthService {
      */
     async refreshToken(): Promise<{ success: boolean; accessToken?: string }> {
         try {
-            // console.log('🔄 Attempting to refresh token...');
-            // console.log('🍪 Current cookies:', document.cookie);
-
             const response = await fetch(`${API_BASE}/refresh`, {
                 method: 'POST',
-                credentials: 'include', // PENTING: Untuk mengirim cookies
+                credentials: 'include',
             });
 
             const result = await response.json();
-
-            // console.log('📥 Refresh response:', {
-            //     status: response.status,
-            //         success: result.success,
-            //             message: result.message
-            // });
-
             return result;
         } catch (error) {
-            // console.error('Refresh token error:', error);
+            console.error('Refresh token error:', error);
             return { success: false };
         }
     }
@@ -125,45 +115,32 @@ class AuthService {
      */
     async getCurrentUser(): Promise<User | null> {
         try {
-            // console.log('👤 Fetching current user...');
-            // console.log('🍪 Cookies available:', document.cookie);
-
-            const response = await fetch('/api/auth/me', {
+            const response = await fetch(`${API_BASE}/me`, {
                 method: 'GET',
-                credentials: 'include', // PENTING: Untuk mengirim cookies
+                credentials: 'include',
             });
 
-            // console.log('📥 /me response status:', response.status);
-
             if (!response.ok) {
-                // console.log('⚠️ Access token invalid, trying refresh...');
-
                 const refreshResult = await this.refreshToken();
-
                 if (refreshResult.success) {
-                    // console.log('✅ Token refreshed, retrying /me...');
-
-                    const retryResponse = await fetch('/api/auth/me', {
+                    const retryResponse = await fetch(`${API_BASE}/me`, {
                         method: 'GET',
                         credentials: 'include',
                     });
+                    console.log('Retry response:', retryResponse);
 
                     if (retryResponse.ok) {
                         const data = await retryResponse.json();
-                        // console.log('✅ User fetched after refresh:', data.user);
                         return data.user;
                     }
                 }
-
-                // console.log('❌ Failed to get user after refresh attempt');
                 return null;
             }
 
             const data = await response.json();
-            // console.log('✅ User fetched successfully:', data.user);
             return data.user;
         } catch (error) {
-            // console.error('Get current user error:', error);
+            console.error('Get current user error:', error);
             return null;
         }
     }

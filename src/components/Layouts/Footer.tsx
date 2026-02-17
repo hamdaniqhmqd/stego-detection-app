@@ -3,99 +3,64 @@
 import Link from 'next/link';
 import React from 'react';
 
-type FooterLink = {
-    label: string;
-    href: string;
-};
-
-type FooterSection = {
-    title: string;
-    links: FooterLink[];
-};
-
-const BRAND = {
-    name: 'Flowbite',
-    url: 'https://flowbite.com/',
-    logo: 'https://flowbite.com/docs/images/logo.svg',
-};
-
-const FOOTER_SECTIONS: FooterSection[] = [
-    {
-        title: 'Resources',
-        links: [
-            { label: 'Flowbite', href: 'https://flowbite.com/' },
-            { label: 'Tailwind CSS', href: 'https://tailwindcss.com/' },
-        ],
-    },
-    {
-        title: 'Follow us',
-        links: [
-            { label: 'Github', href: 'https://github.com/themesberg/flowbite' },
-            { label: 'Discord', href: 'https://discord.gg/4eeurUVvTy' },
-        ],
-    },
-    {
-        title: 'Legal',
-        links: [
-            { label: 'Privacy Policy', href: '#' },
-            { label: 'Terms & Conditions', href: '#' },
-        ],
-    },
-];
-
-const COPYRIGHT = {
-    year: 2023,
-    text: 'All Rights Reserved.',
-};
-
 const Footer: React.FC = () => {
     return (
         <footer className="bg-black">
-            <div className="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
-                <div className="md:flex md:justify-between">
+            <div className="mx-auto w-full p-4 py-6 lg:py-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                     {/* Brand */}
-                    <div className="">
+                    <div className="w-full col-span-2">
                         <Link
                             href={"#"}
-                            className="flex items-center space-x-3 rtl:space-x-reverse"
+                            className="flex items-center space-x-3 rtl:space-x-reverse mb-1"
                         >
-                            <span className="self-center whitespace-nowrap text-xl font-semibold text-heading">
-                                Stego Detection App
-                            </span>
+                            <h2 className="self-center whitespace-nowrap text-xl font-semibold text-heading">
+                                Deteksi Stego
+                            </h2>
                         </Link>
+                        <p className="text-sm text-gray-500">
+                            Aplikasi Deteksi Steganografi LSB untuk membuat dan menganalisa pesan tersembunyi dengan bantuan AI sebagai media Interpretasinya.
+                            Sebagai himbauan, sistem ini bersifat prototype dan masih dalam tahap pengembangan, jadi sistem ini tidak digunakan sebagai acuan mutlak sistem keamanan informasi.
+                        </p>
                     </div>
 
-                    <div className="flex items-center gap-2 md:gap-4">
-                        <div className="flex items-center gap-2 md:gap-4">
-                            <Link href={'#'}
-                                className={`relative flex items-center text-white hover:text-gray-200`}>
-                                Buat Stego
-                            </Link>
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="w-full flex flex-col">
+                            <h2 className="text-lg text-gray-50 mb-1 font-semibold">Menu</h2>
+                            <div className="flex items-center flex-wrap gap-2 text-sm">
+                                <Link href={'/dashboard/buat_stego'}
+                                    className={`relative flex items-center text-gray-500 hover:text-gray-300 hover:underline text-nowrap`}>
+                                    Buat Stego
+                                </Link>
 
-                            <Link href={'#'}
-                                className={`relative flex items-center text-white hover:text-gray-200`}>
-                                Analisis Stego
-                            </Link>
+                                <Link href={'/dashboard/analisis_stego'}
+                                    className={`relative flex items-center text-gray-500 hover:text-gray-300 hover:underline text-nowrap`}>
+                                    Analisis Stego
+                                </Link>
+                            </div>
                         </div>
 
-                        <div className="flex items-center gap-2 md:gap-4">
-                            <Link href={'#'}
-                                className={`relative flex items-center text-white hover:text-gray-200`}>
-                                Masuk
-                            </Link>
+                        <div className="w-full flex flex-col">
+                            <h2 className="text-lg text-gray-50 mb-1 font-semibold">Autentikasi</h2>
+                            <div className="flex items-center flex-wrap gap-2 text-sm">
+                                <Link href={'/auth/login'}
+                                    className={`relative flex items-center text-gray-500 hover:text-gray-300 hover:underline text-nowrap`}>
+                                    Masuk
+                                </Link>
 
-                            <Link href={'#'}
-                                className={`relative flex items-center text-white hover:text-gray-200`}>
-                                Daftar
-                            </Link>
+                                <Link href={'/auth/register'}
+                                    className={`relative flex items-center text-gray-500 hover:text-gray-300 hover:underline text-nowrap`}>
+                                    Daftar
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <hr className="my-6 border-default sm:mx-auto lg:my-8" />
+                <hr className="my-4 border-default sm:mx-auto lg:my-6" />
 
                 <div className="flex items-center justify-center">
-                    <span className="text-sm text-body sm:text-center">
+                    <span className="text-sm text-gray-200 sm:text-center">
                         © 2026 <Link href="#" className="hover:underline">Stego Detection</Link>. All Rights Reserved.
                     </span>
                 </div>

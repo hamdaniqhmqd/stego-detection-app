@@ -25,35 +25,47 @@ export async function POST(request: NextRequest) {
     // ✅ PERBAIKAN: Cari user berdasarkan email ATAU username
     const { data: users, error: userError } = await supabaseServer
       .from('users')
-      .select('id, username, email, password, role, is_verified, verified_at, created_at, deleted_at')
+      .select('id, username, email, password, role, fullname, photo, is_verified, verified_at, created_at, deleted_at')
       .or(`email.eq.${email.toLowerCase()},username.eq.${email}`) // Cari di email atau username
-      .is('deleted_at', null)
-      .limit(1);
+      .single();
 
     // Cek apakah user ditemukan
-    if (userError || !users || users.length === 0) {
+    if (userError || !users) {
       return NextResponse.json({
         success: false,
-        message: 'Email/Username atau password salah',
+        message: 'Akun tidak ditemukan',
         redirect_url: null,
         data: null
-      }, { status: 401 });
+      }, {
+        status: 401
+      });
     }
 
-    const user = users[0];
-
-    // Cek apakah akun sudah dihapus
-    if (user.deleted_at) {
+    //
+    if (users.deleted_at) {
       return NextResponse.json({
         success: false,
         message: 'Akun tidak aktif, silahkan hubungi admin untuk mengaktifkannya kembali',
         redirect_url: null,
         data: null
-      }, { status: 401 });
+      }, {
+        status: 401
+      });
+    }
+
+    if (!users.is_verified) {
+      return NextResponse.json({
+        success: false,
+        message: 'Akun belum diverifikasi',
+        redirect_url: `/auth/check-email?email=${encodeURIComponent(users.email)}`,
+        data: users
+      }, {
+        status: 401
+      });
     }
 
     // ✅ Verify password dengan bcrypt
-    const isPasswordValid = await bcrypt.compare(password_input, user.password);
+    const isPasswordValid = await bcrypt.compare(password_input, users.password);
 
     if (!isPasswordValid) {
       return NextResponse.json({
@@ -64,23 +76,11 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // ✅ PERBAIKAN: Cek apakah email sudah diverifikasi
-    if (!user.is_verified) {
-      // User belum verifikasi email
-      return NextResponse.json({
-        success: false,
-        message: 'Email Anda belum diverifikasi. Silakan cek inbox email Anda.',
-        redirect_url: `/auth/check-email?email=${encodeURIComponent(user.email)}`,
-        data: null,
-        needsVerification: true,
-      }, { status: 403 }); // 403 Forbidden
-    }
-
     // Generate tokens
     const tokenPayload = {
-      userId: user.id,
-      email: user.email,
-      role: user.role,
+      userId: users.id,
+      email: users.email,
+      role: users.role,
     };
 
     const accessToken = await generateAccessToken(tokenPayload);
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       'unknown';
 
     const payloadRefreshToken = {
-      user_id: user.id,
+      user_id: users.id,
       refresh_token: refreshToken,
       user_agent: userAgent,
       ip_address: ipAddress,
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare user response (tanpa password)
-    const { password, deleted_at, ...userResponse } = user;
+    const { password, deleted_at, ...userResponse } = users;
 
     // Set cookies
     const response = NextResponse.json({
