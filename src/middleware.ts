@@ -24,9 +24,10 @@ export async function middleware(request: NextRequest) {
   const authRoutes = [
     '/auth/login',
     '/auth/register',
-    '/auth/verify-email',
-    '/auth/forgot-password',
-    '/auth/reset-password',
+    '/auth/verification-failed',
+    '/auth/verification-success',
+    '/auth/resend-verification',
+    '/auth/check-email',
   ];
 
   const isPenggunaRoute = penggunaRoutes.some((route) =>

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import authService from '@/libs/auth/auth-service';
-import { AuthUser, User } from '@/types/auth';
+import { AuthUser } from '@/types/Users';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setIsLoading(true);
       const currentUser = await authService.getCurrentUser();
-      // console.log('Fetched user:', currentUser);
+      console.log('Fetched user:', currentUser);
       setUser(currentUser as AuthUser);
     } catch (error) {
       // console.error('Failed to fetch user:', error);

@@ -1,4 +1,6 @@
-export function buildPrompt(decodedText: string) {
+// libs/ai/prompt.ts
+
+export function buildPrompt(decodedText: string): string {
     const cleanText = decodedText
         .replace(/[^\x20-\x7E\n\r\t]/g, '')
         .trim()

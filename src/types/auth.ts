@@ -1,29 +1,6 @@
 // src/types/auth.ts
 
-export type UserRole = 'pengguna' | 'superadmin';
-
-export interface User {
-    id: string;
-    username: string;
-    email: string;
-    password: string;
-    role: UserRole;
-    fullname?: string;
-    photo?: string;
-    bg_photo?: string;
-    created_at: string;
-    is_verified?: boolean;
-    verified_at?: string; // ✅ Ikuti typo di database
-    updated_at?: string;
-    deleted_at?: string;
-}
-
-export interface AuthUser {
-    id: string;
-    email: string;
-    username?: string;
-    role?: string;
-}
+import { User, UserRole } from "./Users";
 
 export interface JWTPayload {
     userId: string;

@@ -10,21 +10,21 @@ export default function VerificationSuccess() {
     const router = useRouter();
     const [countdown, setCountdown] = useState(5);
 
-    useEffect(() => {
-        // Auto redirect ke login setelah 5 detik
-        const timer = setInterval(() => {
-            setCountdown((prev) => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    router.push('/auth/login');
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
+    // useEffect(() => {
+    //     // Auto redirect ke login setelah 5 detik
+    //     const timer = setInterval(() => {
+    //         setCountdown((prev) => {
+    //             if (prev <= 1) {
+    //                 clearInterval(timer);
+    //                 router.push('/auth/login');
+    //                 return 0;
+    //             }
+    //             return prev - 1;
+    //         });
+    //     }, 1000);
 
-        return () => clearInterval(timer);
-    }, [router]);
+    //     return () => clearInterval(timer);
+    // }, [router]);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -49,7 +49,7 @@ export default function VerificationSuccess() {
 
                     {/* Title */}
                     <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                        Verifikasi Berhasil! 🎉
+                        Verifikasi Berhasil!
                     </h2>
 
                     {/* Description */}

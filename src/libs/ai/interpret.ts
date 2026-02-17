@@ -1,12 +1,11 @@
+// libs/ai/interpret.ts
+
 import { buildPrompt } from './prompt'
 
 export const runtime = 'nodejs'
 
-export async function interpretWithAI(text: string) {
+export async function interpretWithAI(text: string): Promise<string> {
     try {
-        // console.log('🤖 Sending FULL force-decode result to Gemini...')
-        // console.log('Text length:', text.length)
-
         const response = await fetch(
             'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
             {
@@ -23,8 +22,7 @@ export async function interpretWithAI(text: string) {
                         },
                     ],
                     generationConfig: {
-                        temperature: 0.3, // lebih deterministik
-                        // maxOutputTokens: 600, // singkat
+                        temperature: 0.3,
                     },
                 }),
             }
@@ -32,13 +30,10 @@ export async function interpretWithAI(text: string) {
 
         if (!response.ok) {
             const errorText = await response.text()
-            throw new Error(
-                `Gemini API failed: ${response.status} - ${errorText}`
-            )
+            throw new Error(`Gemini API failed: ${response.status} - ${errorText}`)
         }
 
         const data = await response.json()
-        // console.log('✅ Gemini response received:', data)
 
         const interpretation =
             data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''

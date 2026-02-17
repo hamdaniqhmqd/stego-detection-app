@@ -51,10 +51,10 @@ body {
 .scrollbar_y_custom::-webkit-scrollbar {
   width: 4px;
   /* ketebalan vertikal scrollbar */
-  background-color: #ececec;
+  background-color: #b5b5b5;
 }
 
 .scrollbar_y_custom::-webkit-scrollbar-thumb {
-  background-color: #b9b9b9;
+  background-color: #141414;
   border-radius: 10px;
 }

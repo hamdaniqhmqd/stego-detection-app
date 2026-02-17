@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import SidebarLayout from './Sidebar';
 import { useAuth } from '@/provider/AuthProvider';
+import Link from 'next/link';
 
 export default function DashboardLayoutUsers({ children, className }: Readonly<{ children: React.ReactNode; className?: string }>) {
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(false);
-    const { user } = useAuth();
+    const { user, isLoading } = useAuth();
 
     const closeMobileSidebar = () => {
         setIsMobileSidebarOpen(false);
@@ -24,12 +25,12 @@ export default function DashboardLayoutUsers({ children, className }: Readonly<{
     return (
         <main className={`bg-gray-50 h-screen flex flex-col w-full overflow-hidden ${className}`}>
             {/* Header untuk Mobile dan Tablet */}
-            <header className="lg:hidden bg-gray-950 border-b border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+            <header className="md:hidden bg-gray-950 border-b border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
                 <div className="flex items-center gap-3">
                     {/* Toggle Button */}
                     <button
                         onClick={toggleMobileSidebar}
-                        className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+                        className="p-2 rounded-md bg-gray-800 hover:bg-gray-700 text-white transition-colors"
                         aria-label="Toggle sidebar"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -38,21 +39,21 @@ export default function DashboardLayoutUsers({ children, className }: Readonly<{
                     </button>
 
                     {/* Logo/Title */}
-                    <h1 className="text-xl font-bold text-white">Stego Detection</h1>
+                    <h1 className="text-xl font-bold text-white">Deteksi Stego</h1>
                 </div>
 
                 {/* User Info - Mobile */}
-                <div className="flex items-center gap-2">
+                <Link href={'/dashboard/profile'} className="flex items-center gap-2">
                     <img
-                        src={`https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=random&color=fff`}
+                        src={user?.photo || `https://ui-avatars.com/api/?name=${user?.username || ''}&background=random&color=fff`}
                         alt="User avatar"
                         className="w-9 h-9 rounded-full object-cover border-2 border-gray-700"
                     />
                     <div className="hidden sm:block">
-                        <p className="text-sm font-semibold text-white">{user?.username || 'User'}</p>
-                        <p className="text-xs text-gray-400">{user?.role || 'Pengguna'}</p>
+                        <p className="text-sm font-semibold text-white">{user?.username || ''}</p>
+                        <p className="text-xs text-gray-400">{user?.email || ''}</p>
                     </div>
-                </div>
+                </Link>
             </header>
 
             {/* Main Content Area */}

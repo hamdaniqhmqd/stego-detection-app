@@ -35,16 +35,19 @@ export default function Home() {
     <>
       <MainLayouts>
         {/* Hero Section */}
-        <section className="w-full py-10">
-          <div className="container mx-auto flex flex-col items-center gap-6 text-center">
+        <section className="w-full lg:py-20 sm:py-14 py-10">
+          <div className="container mx-auto flex flex-col items-center justify-center gap-6 text-center">
 
             <div className="flex flex-col gap-4">
               {/* Title */}
-              <h1 className="text-3xl font-black uppercase text-teal-950">Stego Detection</h1>
+              <h1 className="text-3xl font-black uppercase text-gray-950">Deteksi Stegonografi</h1>
 
               {/* Description */}
               <div className="flex w-full max-w-2xl flex-col gap-2 text-gray-900 text-md">
-                <p className="">Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt ea voluptates non adipisci veritatis corrupti nulla, at id cumque iusto ipsum molestias harum sapiente itaque in vero praesentium quo illum.</p>
+                <p className="text-center text-base">
+                  Aplikasi Deteksi Steganografi LSB untuk membuat dan menganalisa pesan tersembunyi dengan bantuan AI sebagai media Interpretasinya.
+                  Sebagai himbauan, sistem ini bersifat prototype dan masih dalam tahap pengembangan, jadi sistem ini tidak digunakan sebagai acuan mutlak sistem keamanan informasi.
+                </p>
               </div>
             </div>
 
@@ -53,12 +56,12 @@ export default function Home() {
               <span className="text-sm text-gray-900 font-semibold">Coba Sekarang</span>
               <div className="flex items-center gap-2">
                 <Link href="/dashboard/buat_stego"
-                  className={`relative flex items-center rounded bg-teal-600 py-2 px-6 text-lg font-semibold text-white hover:bg-teal-700`}>
+                  className={`relative flex items-center rounded bg-gray-900 py-2 px-6 text-lg font-semibold text-white hover:bg-gray-950`}>
                   Buat Stego
                 </Link>
 
                 <Link href="/dashboard/analisis_stego"
-                  className={`relative flex items-center rounded bg-teal-50 py-2 px-6 text-lg font-semibold border-2 border-teal-700 text-teal-700 hover:bg-teal-100`}>
+                  className={`relative flex items-center rounded bg-gray-50 py-2 px-6 text-lg font-semibold border-2 border-gray-900 text-gray-950 hover:bg-gray-100`}>
                   Analisis Stego
                 </Link>
               </div>
@@ -67,7 +70,7 @@ export default function Home() {
         </section>
 
         {/* Information Section */}
-        <section className="py-10">
+        <section className="py-10 hidden">
 
           <div className="container mx-auto flex flex-col items-center gap-6 text-center">
 

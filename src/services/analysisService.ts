@@ -1,28 +1,21 @@
-import { supabaseServer } from '@/libs/supabase/server' // ← HARUS INI, BUKAN client!
+// services/analysisService.ts
 
-export async function createAnalysis(
-    imageUrl: string,
-    name: string,
-    size: number
-) {
-    // console.log('🔍 Creating analysis with:', { imageUrl, name, size })
+import { supabaseServer } from '@/libs/supabase/server'
+import type { CreateAnalysisPayload } from '@/types/analysis'
 
+export async function createAnalysis(payload: CreateAnalysisPayload) {
     const { data, error } = await supabaseServer
         .from('analysis')
         .insert({
-            image_url: imageUrl,
-            image_name: name,
-            image_size: size,
-            status: 'uploaded'
+            user_id: payload.user_id,
+            file_path: payload.file_path,
+            metode: payload.metode,
+            teknik: payload.teknik,
+            interpretasi_ai: payload.interpretasi_ai,
         })
         .select()
         .single()
 
-    if (error) {
-        // console.error('❌ Analysis creation error:', error)
-        throw error
-    }
-
-    // console.log('✅ Analysis created:', data)
+    if (error) throw error
     return data
 }
