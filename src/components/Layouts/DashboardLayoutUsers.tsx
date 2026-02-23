@@ -23,14 +23,16 @@ export default function DashboardLayoutUsers({ children, className }: Readonly<{
     };
 
     return (
-        <main className={`bg-gray-50 h-screen flex flex-col w-full overflow-hidden ${className}`}>
+        <main className={`bg-neutral-100 h-screen flex flex-col w-full overflow-hidden ${className}`}>
             {/* Header untuk Mobile dan Tablet */}
-            <header className="md:hidden bg-gray-950 border-b border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+            <header className="md:hidden bg-neutral-100 border-b border-neutral-700 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
                 <div className="flex items-center gap-3">
                     {/* Toggle Button */}
                     <button
                         onClick={toggleMobileSidebar}
-                        className="p-2 rounded-md bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+                        className="p-2 rounded-md bg-neutral-100 hover:bg-neutral-700 text-neutral-900
+                        transition duration-300 ease-in-out border border-neutral-700
+                        hover:shadow-[-5px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5"
                         aria-label="Toggle sidebar"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -39,7 +41,7 @@ export default function DashboardLayoutUsers({ children, className }: Readonly<{
                     </button>
 
                     {/* Logo/Title */}
-                    <h1 className="text-xl font-bold text-white">Deteksi Stego</h1>
+                    <h1 className="text-xl font-bold text-neutral-900">Deteksi Stego</h1>
                 </div>
 
                 {/* User Info - Mobile */}
@@ -47,11 +49,11 @@ export default function DashboardLayoutUsers({ children, className }: Readonly<{
                     <img
                         src={user?.photo || `https://ui-avatars.com/api/?name=${user?.username || ''}&background=random&color=fff`}
                         alt="User avatar"
-                        className="w-9 h-9 rounded-full object-cover border-2 border-gray-700"
+                        className="w-9 h-9 rounded-full object-cover border-2 border-neutral-700"
                     />
                     <div className="hidden sm:block">
                         <p className="text-sm font-semibold text-white">{user?.username || ''}</p>
-                        <p className="text-xs text-gray-400">{user?.email || ''}</p>
+                        <p className="text-xs text-neutral-400">{user?.email || ''}</p>
                     </div>
                 </Link>
             </header>
@@ -67,7 +69,7 @@ export default function DashboardLayoutUsers({ children, className }: Readonly<{
                 />
 
                 {/* Content Area */}
-                <div className="relative p-4 md:p-6 lg:p-8 pb-8 md:pb-10 lg:pb-12 flex flex-col gap-3 md:gap-6 flex-1 overflow-y-auto scrollbar_y_custom bg-gray-950">
+                <div className="relative p-4 md:p-6 lg:p-8 pb-8 md:pb-10 lg:pb-12 flex flex-col gap-3 md:gap-6 flex-1 overflow-y-auto scrollbar_y_custom bg-neutral-100">
                     {children}
                 </div>
             </div>

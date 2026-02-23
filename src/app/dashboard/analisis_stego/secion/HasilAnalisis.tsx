@@ -120,14 +120,15 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
         <div className="max-w-7xl mx-auto mt-3 space-y-4">
 
             {/* ── Header ── */}
-            <div className="bg-gray-900 rounded-xl px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="bg-neutral-100 rounded-sm px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3
+                border border-neutral-900">
                 <div className="flex-1">
-                    <h2 className="text-base font-normal text-gray-50">Hasil Analisis</h2>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <h2 className="text-base font-normal text-neutral-900">Hasil Analisis</h2>
+                    <p className="text-xs text-neutral-600 mt-0.5">
                         {decodedItems.length} kombinasi &nbsp;·&nbsp;
-                        Metode: <span className="text-gray-400">force-decode</span> &nbsp;·&nbsp;
+                        Metode: <span className="text-neutral-800 font-semibold">force-decode</span> &nbsp;·&nbsp;
                         {forceDecode.waktu_proses && (
-                            <>Waktu: <span className="text-gray-400">{forceDecode.waktu_proses}</span></>
+                            <span className=''>Waktu: <span className="text-neutral-800 font-semibold">{forceDecode.waktu_proses}</span></span>
                         )}
                     </p>
                 </div>
@@ -137,7 +138,9 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                     <button
                         type="button"
                         onClick={toggleSelectAll}
-                        className="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+                        className="text-xs px-3 py-1.5 text-neutral-900 rounded-sm border border-neutral-800 hover:border-neutral-500
+                        transition-all duration-200 text-left ease-in-out 
+                        hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5"
                     >
                         {allSelected ? 'Batal Semua' : 'Pilih Semua'}
                     </button>
@@ -147,10 +150,14 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                             type="button"
                             onClick={handleInterpretSelected}
                             disabled={isInterpreting}
-                            className={`text-xs px-4 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5
+                            className={`text-xs px-4 py-1.5 rounded-sm 
+                                font-medium flex items-center gap-1.5
+                                border border-neutral-800
+                                transition-all duration-200 text-left ease-in-out 
+                                hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
                                 ${isInterpreting
-                                    ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
-                                    : 'bg-gray-600 hover:bg-gray-500 text-white'
+                                    ? 'bg-neutral-100 text-neutral-700 cursor-not-allowed'
+                                    : 'bg-neutral-100 text-neutral-900'
                                 }`}
                         >
                             {isInterpreting ? (
@@ -164,7 +171,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                             ) : (
                                 <>
                                     Interpretasi AI
-                                    <span className="bg-gray-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
+                                    <span className="bg-neutral-800 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
                                         {selectedKeys.size}
                                     </span>
                                 </>
@@ -184,12 +191,12 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                     return (
                         <div key={ch} className="flex flex-col gap-2">
                             {/* Column header */}
-                            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-900 border ${style.header}`}>
+                            <div className={`flex items-center gap-2 px-3 py-2 rounded-sm bg-neutral-100 border ${style.header}`}>
                                 <span className={`w-2.5 h-2.5 rounded-full ${style.dot}`} />
                                 <span className={`text-xs font-mono font-bold ${style.badge.split(' ')[1]}`}>
                                     Channel {ch}
                                 </span>
-                                <span className="text-xs text-gray-600 ml-auto">{items.length} teknik</span>
+                                <span className="text-xs text-neutral-600 ml-auto">{items.length} teknik</span>
                             </div>
 
                             {/* Cards */}
@@ -212,12 +219,12 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
 
             {/* ── Info pilih untuk AI (jika belum ada yang dipilih & belum ada AI result) ── */}
             {!someSelected && localAIResults.length === 0 && (
-                <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-gray-900 border border-gray-800">
-                    <svg className="h-4 w-4 text-gray-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-neutral-900 border border-neutral-800">
+                    <svg className="h-4 w-4 text-neutral-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <p className="text-xs text-gray-500">
-                        Centang card yang ingin diinterpretasi AI, lalu klik <span className="text-gray-400">Interpretasi AI</span>.
+                    <p className="text-xs text-neutral-500">
+                        Centang card yang ingin diinterpretasi AI, lalu klik <span className="text-neutral-400">Interpretasi AI</span>.
                     </p>
                 </div>
             )}

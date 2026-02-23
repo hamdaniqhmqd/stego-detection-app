@@ -23,7 +23,7 @@ function parseInline(raw: string): React.ReactNode[] {
     return parts.map((part, i) => {
         if (part.startsWith('**') && part.endsWith('**')) {
             return (
-                <strong key={i} className="text-gray-100 font-semibold">
+                <strong key={i} className="text-neutral-950 font-semibold">
                     {part.slice(2, -2)}
                 </strong>
             )
@@ -32,7 +32,7 @@ function parseInline(raw: string): React.ReactNode[] {
             return (
                 <code
                     key={i}
-                    className="font-mono text-[11px] px-1.5 py-0.5 rounded bg-gray-800 text-amber-400 border border-gray-700"
+                    className="font-mono text-[11px] px-1.5 py-0.5 rounded bg-neutral-800 text-amber-400 border border-neutral-700"
                 >
                     {part.slice(1, -1)}
                 </code>
@@ -65,7 +65,7 @@ export function AIInterpretationText({ text }: AIInterpretationTextProps) {
         const headingMatch = trimmed.match(/^(#{1,3})\s+(.+)/)
         if (headingMatch) {
             nodes.push(
-                <p key={i} className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mt-3 mb-1">
+                <p key={i} className="text-[11px] font-semibold text-neutral-800 uppercase tracking-widest mt-3 mb-1">
                     {headingMatch[2]}
                 </p>
             )
@@ -96,11 +96,11 @@ export function AIInterpretationText({ text }: AIInterpretationTextProps) {
                     {listItems.map((li, idx) => (
                         <li key={idx} className="flex gap-2.5">
                             {/* Nomor */}
-                            <span className="flex-shrink-0 w-5 h-5 rounded bg-gray-800 border border-gray-700 text-[10px] font-mono font-bold text-gray-400 flex items-center justify-center mt-0.5">
+                            <span className="shrink-0 w-5 h-5 rounded bg-neutral-200 border border-neutral-700 text-[10px] font-mono font-bold text-neutral-900 flex items-center justify-center mt-0.5">
                                 {li.num}
                             </span>
                             {/* Konten */}
-                            <span className="text-[12px] text-gray-300 leading-relaxed">
+                            <span className="text-[12px] text-neutral-800 leading-relaxed">
                                 {parseInline(li.content)}
                             </span>
                         </li>
@@ -133,8 +133,8 @@ export function AIInterpretationText({ text }: AIInterpretationTextProps) {
                     {listItems.map((content, idx) => (
                         <li key={idx} className="flex gap-2.5 items-start">
                             {/* Dot */}
-                            <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gray-600 mt-1.5" />
-                            <span className="text-[12px] text-gray-300 leading-relaxed">
+                            <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-neutral-600 mt-1.5" />
+                            <span className="text-[12px] text-neutral-900 leading-relaxed">
                                 {parseInline(content)}
                             </span>
                         </li>
@@ -146,7 +146,7 @@ export function AIInterpretationText({ text }: AIInterpretationTextProps) {
 
         // ── Paragraph biasa ──────────────────────────────────────
         nodes.push(
-            <p key={i} className="text-[12px] text-gray-300 leading-relaxed">
+            <p key={i} className="text-[12px] text-neutral-900 leading-relaxed">
                 {parseInline(trimmed)}
             </p>
         )

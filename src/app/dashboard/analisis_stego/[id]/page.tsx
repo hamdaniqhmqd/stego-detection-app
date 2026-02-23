@@ -33,13 +33,13 @@ export default function DetilAnalisisStegoPage() {
     if (isLoading) {
         return (
             <DashboardLayoutUsers>
-                <section className="w-full min-h-screen">
+                <section className="w-full h-full flex items-center justify-center">
                     <div className="flex flex-col items-center justify-center py-32 gap-4">
-                        <svg className="animate-spin h-8 w-8 text-gray-500" viewBox="0 0 24 24" fill="none">
+                        <svg className="animate-spin h-8 w-8 text-neutral-800" viewBox="0 0 24 24" fill="none">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                         </svg>
-                        <p className="text-sm text-gray-500">Memuat detail analisis...</p>
+                        <p className="text-sm text-neutral-800">Memuat detail analisis...</p>
                     </div>
                 </section>
             </DashboardLayoutUsers>
@@ -50,17 +50,20 @@ export default function DetilAnalisisStegoPage() {
     if (error || !data) {
         return (
             <DashboardLayoutUsers>
-                <section className="w-full min-h-screen">
+                <section className="w-full h-full flex items-center justify-center">
                     <div className="flex flex-col items-center justify-center py-32 gap-4">
-                        <div className="p-4 rounded-full bg-red-950/40 border border-red-900">
+                        <div className="p-4 rounded-full bg-red-100 border border-red-600">
                             <svg className="h-8 w-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                         </div>
-                        <p className="text-sm text-red-400">{error ?? 'Data analisis tidak ditemukan'}</p>
+                        <p className="text-sm text-red-600">{error ?? 'Data analisis tidak ditemukan'}</p>
                         <button
                             onClick={() => router.push('/dashboard/analisis_stego')}
-                            className="text-xs px-4 py-2 rounded-lg border border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+                            className="text-xs px-4 py-2 rounded-sm 
+                            border border-neutral-700 text-neutral-900 hover:border-neutral-900 
+                            transition-all duration-200 text-left ease-in-out 
+                            hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5"
                         >
                             ← Kembali ke Analisis
                         </button>
@@ -79,9 +82,9 @@ export default function DetilAnalisisStegoPage() {
                     {/* Page header */}
                     <div className="mb-8 text-center">
                         <div className="inline-flex items-center gap-3 mb-3">
-                            <h1 className="text-2xl font-bold text-gray-50">Detail Analisis Steganografi</h1>
+                            <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-neutral-900">Detail Analisis Steganografi</h1>
                         </div>
-                        <p className="text-gray-300 text-sm w-4/5 md:w-2/3 mx-auto">
+                        <p className="text-neutral-600 text-sm w-4/5 md:w-2/3 mx-auto">
                             Hasil analisis force decode LSB yang telah disimpan. Semua opsi dalam mode tampilan saja.
                         </p>
                     </div>
@@ -101,11 +104,11 @@ export default function DetilAnalisisStegoPage() {
 
                     {/* Jika belum ada force decode (edge case) */}
                     {!data.forceDecode && (
-                        <div className="flex items-center gap-3 px-5 py-4 rounded-xl bg-gray-900 border border-gray-800 max-w-7xl mx-auto">
-                            <svg className="h-4 w-4 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="flex items-center gap-3 px-5 py-4 rounded-xl bg-neutral-900 border border-neutral-800 max-w-7xl mx-auto">
+                            <svg className="h-4 w-4 text-neutral-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-neutral-500">
                                 Hasil decode belum tersedia untuk analisis ini.
                             </p>
                         </div>

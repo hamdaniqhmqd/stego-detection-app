@@ -54,20 +54,24 @@ export default function FormRegister() {
   };
 
   return (
-    <section className="form_login lg:py-20 sm:py-14 py-10 container mx-auto">
+    <section className="form_login min-h-screen flex items-center justify-center lg:py-20 sm:py-14 py-10 container mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div className="flex flex-col justify-center gap-6 items-center p-4 md:p-0">
           <div className="md:hidden w-full flex flex-col justify-center items-center">
-            <h3 className="heading3 text-center text-2xl font-bold text-gray-950">
+            <h3 className="heading3 text-center text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-950">
               Daftar Akun Baru
             </h3>
-            <p className="text-center text-gray-600 text-sm mt-2 max-w-md md:w-2/3">
+            <p className="text-center text-neutral-600 text-sm mt-2 max-w-md md:w-2/3">
               Bergabunglah dengan kami! Lengkapi formulir untuk membuat akun baru.
               Kami akan mengirimkan link verifikasi ke email Anda.
             </p>
           </div>
 
-          <div className="content sm:w-md w-full bg-white p-6 md:p-8 rounded-lg shadow-[0_-2px_20px_rgba(209,213,219,0.3),0_4px_20px_rgba(209,213,219,0.3)] hover:shadow-[0_-6px_30px_rgba(209,213,219,0.4),0_6px_30px_rgba(209,213,219,0.4)] transition-shadow duration-300">
+          <div className="
+            content sm:w-md w-full bg-white p-6 md:p-8 
+            rounded-md border border-slate-900
+            shadow-[-10px_10px_0_rgba(26,26,46,1)]
+          ">
 
             {error && (
               <div className="mt-6 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -77,7 +81,7 @@ export default function FormRegister() {
 
             <form className="form" onSubmit={handleSubmit}>
               <div className="form-group">
-                <label className="block font-medium text-gray-600 text-md">
+                <label className="block font-medium text-neutral-600 text-md">
                   Username <span className="text-red-600 font-semibold">*</span>
                 </label>
                 <input
@@ -86,7 +90,7 @@ export default function FormRegister() {
                   name="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full px-4 h-12 mt-2 text-gray-700 placeholder-gray-500 bg-white border border-gray-400 rounded-lg focus:border-gray-900 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-gray-900"
+                  className="block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900"
                   placeholder="Masukkan username Anda"
                   required
                   disabled={isLoading}
@@ -94,7 +98,7 @@ export default function FormRegister() {
               </div>
 
               <div className="form-group mt-3">
-                <label className="block font-medium text-md text-gray-600">
+                <label className="block font-medium text-md text-neutral-600">
                   Email <span className="text-red-600 font-semibold">*</span>
                 </label>
                 <input
@@ -103,7 +107,7 @@ export default function FormRegister() {
                   name="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full px-4 h-12 mt-2 text-gray-700 placeholder-gray-500 bg-white border border-gray-400 rounded-lg focus:border-gray-900 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-gray-900"
+                  className="block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900"
                   placeholder="Masukkan email Anda"
                   required
                   disabled={isLoading}
@@ -111,9 +115,9 @@ export default function FormRegister() {
               </div>
 
               <div className="relative form-group mt-3">
-                <label className="block font-medium text-md text-gray-600">
+                <label className="block font-medium text-md text-neutral-600">
                   Kata Sandi{' '}
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-neutral-500">
                     (minimal 8 karakter) <span className="text-red-600 font-semibold">*</span>
                   </span>
                 </label>
@@ -124,7 +128,7 @@ export default function FormRegister() {
                     name="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full px-4 h-12 mt-2 text-gray-700 placeholder-gray-500 bg-white border border-gray-400 rounded-lg focus:border-gray-900 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-gray-900"
+                    className="block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900"
                     placeholder="Masukkan kata sandi Anda"
                     required
                     minLength={8}
@@ -133,7 +137,7 @@ export default function FormRegister() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-[50%] -translate-y-1/2 text-gray-600"
+                    className="absolute right-3 top-[50%] -translate-y-1/2 text-neutral-600"
                   >
                     {showPassword ? (
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
@@ -164,7 +168,7 @@ export default function FormRegister() {
               </div>
 
               <div className="form-group mt-3">
-                <label className="block font-medium text-md text-gray-600">
+                <label className="block font-medium text-md text-neutral-600">
                   Konfirmasi Kata Sandi
                 </label>
                 <div className="relative">
@@ -174,7 +178,7 @@ export default function FormRegister() {
                     name="confirmPassword"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="block w-full px-4 h-12 mt-2 text-gray-700 placeholder-gray-500 bg-white border border-gray-400 rounded-lg focus:border-gray-900 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-gray-900"
+                    className="block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900"
                     placeholder="Masukkan kata sandi Anda Lagi"
                     required
                     disabled={isLoading}
@@ -182,7 +186,7 @@ export default function FormRegister() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-[50%] -translate-y-1/2 text-gray-600"
+                    className="absolute right-3 top-[50%] -translate-y-1/2 text-neutral-600"
                   >
                     {showConfirmPassword ? (
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
@@ -212,10 +216,18 @@ export default function FormRegister() {
                 </div>
               </div>
 
-              <div className="block-button mt-4">
+              <div className="block-button mt-8">
                 <button
                   type="submit"
-                  className="w-full py-3 text-white bg-gray-900 hover:bg-gray-800 rounded-lg disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors"
+                  className="
+                    w-full py-3 text-slate-900 font-medium
+                    bg-slate-100 border border-slate-900
+                    hover:bg-slate-50 rounded-sm 
+                    cursor-pointer
+                    disabled:bg-slate-400 disabled:cursor-not-allowed 
+                    transition-all duration-300 ease-in-out
+                    hover:-translate-y-0.5 hover:shadow-[-7px_7px_0_rgba(26,26,46,1)] 
+                  "
                   disabled={isLoading}
                 >
                   {isLoading ? 'Memproses...' : 'Daftar'}
@@ -224,9 +236,9 @@ export default function FormRegister() {
 
               <div className="navigate mt-4">
                 <div className="flex items-center justify-center gap-2 text-base">
-                  <span className="text-gray-600">Sudah memiliki akun?</span>
+                  <span className="text-neutral-600">Sudah memiliki akun?</span>
                   <Link
-                    className="text-gray-700 hover:underline hover:text-gray-800 font-medium"
+                    className="text-neutral-700 hover:underline hover:text-neutral-800 font-medium"
                     href="/auth/login"
                   >
                     Masuk
@@ -237,11 +249,11 @@ export default function FormRegister() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center hidden md:flex">
-          <h3 className="heading3 text-center text-2xl font-bold text-gray-950">
+        <div className="flex-col items-center justify-center hidden md:flex">
+          <h3 className="heading3 text-center text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-950">
             Daftar Akun Baru
           </h3>
-          <p className="text-center text-gray-600 text-sm mt-2 max-w-2/3">
+          <p className="text-center text-neutral-600 text-sm mt-2 max-w-2/3">
             Bergabunglah dengan kami! Lengkapi formulir untuk membuat akun baru.
             Kami akan mengirimkan link verifikasi ke email Anda.
           </p>
