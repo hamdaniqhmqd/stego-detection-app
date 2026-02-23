@@ -35,94 +35,70 @@ export default function Home() {
     <>
       <MainLayouts>
         {/* Hero Section */}
-        <section className="w-full lg:py-20 sm:py-14 py-10">
+        <section className="w-full min-h-screen bg-neutral-100 lg:py-20 sm:py-14 py-10 flex items-center justify-center">
           <div className="container mx-auto flex flex-col items-center justify-center gap-6 text-center">
 
             <div className="flex flex-col gap-4">
               {/* Title */}
-              <h1 className="text-3xl font-black uppercase text-gray-950">Deteksi Stegonografi</h1>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-black uppercase text-neutral-900">Deteksi Steganografi</h1>
 
               {/* Description */}
-              <div className="flex w-full max-w-2xl flex-col gap-2 text-gray-900 text-md">
-                <p className="text-center text-base">
+              <div className="flex w-full max-w-2xl flex-col gap-2 text-neutral-700 text-md">
+                <p className="text-center text-base font-normal">
                   Aplikasi Deteksi Steganografi LSB untuk membuat dan menganalisa pesan tersembunyi dengan bantuan AI sebagai media Interpretasinya.
-                  Sebagai himbauan, sistem ini bersifat prototype dan masih dalam tahap pengembangan, jadi sistem ini tidak digunakan sebagai acuan mutlak sistem keamanan informasi.
                 </p>
               </div>
             </div>
 
             {/* CTA */}
-            <div className="mt-6 flex flex-col items-center gap-4">
-              <span className="text-sm text-gray-900 font-semibold">Coba Sekarang</span>
-              <div className="flex items-center gap-2">
+            <div className="mt-6 flex flex-col items-center gap-2">
+              <span className="text-sm text-neutral-800 font-normal">Coba Sekarang:</span>
+              <div className="flex items-center gap-4">
                 <Link href="/dashboard/buat_stego"
-                  className={`relative flex items-center rounded bg-gray-900 py-2 px-6 text-lg font-semibold text-white hover:bg-gray-950`}>
+                  className={`
+                  relative rounded-sm px-6 py-3
+                  flex flex-col gap-3 cursor-pointer
+                  bg-neutral-100 border border-neutral-900
+                  text-neutral-900 font-semibold
+                  transition-all duration-300 ease-in-out
+                  hover:-translate-y-0.5 hover:shadow-[-5px_5px_0_rgba(26,26,46,1)]
+                  `}>
                   Buat Stego
                 </Link>
 
                 <Link href="/dashboard/analisis_stego"
-                  className={`relative flex items-center rounded bg-gray-50 py-2 px-6 text-lg font-semibold border-2 border-gray-900 text-gray-950 hover:bg-gray-100`}>
+                  className={`
+                    relative rounded-sm px-6 py-3
+                    flex flex-col gap-3 cursor-pointer
+                    bg-neutral-100 border border-neutral-900
+                    text-neutral-900 font-semibold
+                    transition-all duration-300 ease-in-out
+                    hover:-translate-y-0.5 hover:shadow-[-5px_5px_0_rgba(26,26,46,1)]
+                  `}>
                   Analisis Stego
                 </Link>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* Information Section */}
-        <section className="py-10 hidden">
-
-          <div className="container mx-auto flex flex-col items-center gap-6 text-center">
-
-            <div className="w-full grid grid-cols-1 gap-6 md:grid-cols-2">
-
-              <div className="w-full flex flex-col bg-gray-300 p-4 rounded-md">
-                <div className="h-8 w-2/3 bg-gray-50 rounded-md"></div>
-
-                <div className="flex flex-col gap-2 mt-4">
-                  <div className="h-4 w-full bg-gray-50 rounded-md"></div>
-                  <div className="h-4 w-full bg-gray-50 rounded-md"></div>
-                  <div className="h-4 w-full bg-gray-50 rounded-md"></div>
-                  <div className="h-4 w-2/3 bg-gray-50 rounded-md"></div>
-                </div>
-              </div>
-
-              <div className="w-full flex flex-col bg-gray-300 p-4 rounded-md">
-                <div className="h-8 w-2/3 bg-gray-50 rounded-md"></div>
-
-                <div className="flex flex-col gap-2 mt-4">
-                  <div className="h-4 w-full bg-gray-50 rounded-md"></div>
-                  <div className="h-4 w-full bg-gray-50 rounded-md"></div>
-                  <div className="h-4 w-full bg-gray-50 rounded-md"></div>
-                  <div className="h-4 w-2/3 bg-gray-50 rounded-md"></div>
-                </div>
-              </div>
-
-              <div className="w-full flex flex-col bg-gray-300 p-4 rounded-md">
-                <div className="h-8 w-2/3 bg-gray-50 rounded-md"></div>
-
-                <div className="flex flex-col gap-2 mt-4">
-                  <div className="h-4 w-full bg-gray-50 rounded-md"></div>
-                  <div className="h-4 w-full bg-gray-50 rounded-md"></div>
-                  <div className="h-4 w-full bg-gray-50 rounded-md"></div>
-                  <div className="h-4 w-2/3 bg-gray-50 rounded-md"></div>
-                </div>
-              </div>
-
-              <div className="w-full flex flex-col bg-gray-300 p-4 rounded-md">
-                <div className="h-8 w-2/3 bg-gray-50 rounded-md"></div>
-
-                <div className="flex flex-col gap-2 mt-4">
-                  <div className="h-4 w-full bg-gray-50 rounded-md"></div>
-                  <div className="h-4 w-full bg-gray-50 rounded-md"></div>
-                  <div className="h-4 w-full bg-gray-50 rounded-md"></div>
-                  <div className="h-4 w-2/3 bg-gray-50 rounded-md"></div>
-                </div>
-              </div>
+            <div className="w-full max-w-2xl">
+              <p className="text-center text-neutral-800 text-xs">
+                Sebagai himbauan, sistem ini bersifat prototype dan masih dalam tahap pengembangan, jadi sistem ini tidak digunakan sebagai acuan mutlak sistem keamanan informasi.
+              </p>
             </div>
-
           </div>
         </section>
+
+
+
+        <section className="w-full bg-neutral-200 lg:py-20 sm:py-14 py-10">
+
+        </section>
+
+        <section className=""></section>
+
+        <section className=""></section>
+
+        <section className=""></section>
       </MainLayouts>
     </>
   );

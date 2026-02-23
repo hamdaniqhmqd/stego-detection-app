@@ -84,19 +84,23 @@ export default function FormLogin() {
   };
 
   return (
-    <section className="form_login lg:py-20 sm:py-14 py-10 container mx-auto">
+    <section className="form_login min-h-screen flex items-center justify-center lg:py-20 sm:py-14 py-10 container mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div className="flex flex-col justify-center gap-6 items-center p-4 md:p-0">
           <div className="md:hidden w-full flex flex-col justify-center items-center">
-            <h3 className="heading3 text-center text-2xl font-bold text-gray-950">
+            <h3 className="heading3 text-center text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-950">
               Masuk ke Akun Anda
             </h3>
-            <p className="text-center text-gray-600 text-sm mt-2 max-w-md md:w-2/3">
+            <p className="text-center text-neutral-600 text-sm mt-2 max-w-md md:w-2/3">
               Selamat datang kembali! Masukkan email/username dan password Anda untuk mengakses akun.
             </p>
           </div>
 
-          <div className="content sm:w-md w-full bg-white p-6 md:p-8 rounded-lg shadow-[0_-2px_20px_rgba(209,213,219,0.3),0_4px_20px_rgba(209,213,219,0.3)] hover:shadow-[0_-6px_30px_rgba(209,213,219,0.4),0_6px_30px_rgba(209,213,219,0.4)] transition-shadow duration-300">
+          <div className="
+            content sm:w-md w-full bg-white p-6 md:p-8 
+            rounded-md border border-neutral-900
+            shadow-[-10px_10px_0_rgba(26,26,46,1)]
+          ">
 
             {/* Error Alert */}
             {error && (
@@ -125,7 +129,7 @@ export default function FormLogin() {
             <form className="form mt-2" onSubmit={handleSubmit}>
               {/* ✅ Email/Username Field */}
               <div className="form-group">
-                <label className="block font-medium text-gray-900 text-md">
+                <label className="block font-medium text-neutral-900 text-md">
                   Username atau Email
                 </label>
                 <input
@@ -134,7 +138,7 @@ export default function FormLogin() {
                   name="emailOrUsername"
                   value={emailOrUsername}
                   onChange={(e) => setEmailOrUsername(e.target.value)}
-                  className="block w-full px-4 h-12 mt-3 text-gray-700 placeholder-gray-500 bg-white border border-gray-400 rounded-lg focus:border-gray-900 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-gray-900"
+                  className="block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900"
                   placeholder="Masukkan email atau username"
                   required
                   disabled={isLoading}
@@ -144,7 +148,7 @@ export default function FormLogin() {
 
               {/* Password Field */}
               <div className="form-group mt-6 relative">
-                <label className="block font-medium text-gray-900 text-md">
+                <label className="block font-medium text-neutral-900 text-md">
                   Kata Sandi
                 </label>
 
@@ -155,7 +159,7 @@ export default function FormLogin() {
                     name="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full px-4 h-12 mt-3 text-gray-700 placeholder-gray-500 bg-white border border-gray-400 rounded-lg focus:border-gray-900 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-gray-900"
+                    className="block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900"
                     placeholder="Masukkan kata sandi Anda"
                     required
                     disabled={isLoading}
@@ -165,7 +169,7 @@ export default function FormLogin() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-[50%] -translate-y-1/2 text-gray-600 hover:text-gray-800"
+                    className="absolute right-4 top-[30%] -tranneutral-y-1/2 text-neutral-600 hover:text-neutral-800"
                     tabIndex={-1}
                   >
                     {showPassword ? (
@@ -189,7 +193,7 @@ export default function FormLogin() {
               </div>
 
               <div className="flex items-center justify-end mt-3">
-                <Link className="text-gray-800 hover:underline hover:text-gray-900 text-sm" href="#">
+                <Link className="text-neutral-800 hover:underline hover:text-neutral-900 text-sm" href="#">
                   Lupa kata sandi?
                 </Link>
               </div>
@@ -197,7 +201,15 @@ export default function FormLogin() {
               <div className="block-button mt-6">
                 <button
                   type="submit"
-                  className="w-full py-3 text-white bg-gray-900 hover:bg-gray-950 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="
+                  w-full py-3 text-neutral-900 font-medium
+                  bg-neutral-100 border border-neutral-900
+                  hover:bg-neutral-50 rounded-sm 
+                  cursor-pointer
+                  disabled:bg-neutral-300 disabled:cursor-not-allowed 
+                  transition-all duration-300 ease-in-out
+                  hover:-translate-y-0.5 hover:shadow-[-7px_7px_0_rgba(26,26,46,1)] 
+                  "
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -216,8 +228,8 @@ export default function FormLogin() {
 
               <div className="navigate mt-3">
                 <div className="flex items-center justify-center gap-1 text-sm">
-                  <span className="text-gray-600">Belum memiliki akun?</span>
-                  <Link className="text-gray-700 hover:underline hover:text-gray-800 font-medium" href="/auth/register">
+                  <span className="text-neutral-600">Belum memiliki akun?</span>
+                  <Link className="text-neutral-700 hover:underline hover:text-neutral-800 font-medium" href="/auth/register">
                     Daftar di sini
                   </Link>
                 </div>
@@ -227,10 +239,10 @@ export default function FormLogin() {
         </div>
 
         <div className="flex-col items-center justify-center hidden md:flex">
-          <h3 className="heading3 text-center text-2xl font-bold text-gray-950">
+          <h3 className="heading3 text-center text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-950">
             Masuk ke Akun Anda
           </h3>
-          <p className="text-center text-gray-600 text-sm mt-2 max-w-2/3">
+          <p className="text-center text-neutral-600 text-sm mt-2 max-w-2/3">
             Selamat datang kembali! Masukkan email/username dan password Anda untuk mengakses akun.
           </p>
           <img src="/assets/image/photo-gallery.png" alt="" className="mt-6 h-52" />

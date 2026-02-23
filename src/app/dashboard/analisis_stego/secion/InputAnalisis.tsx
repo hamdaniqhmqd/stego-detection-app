@@ -212,26 +212,27 @@ export default function InputAnalisis({
     // Render
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-7xl mx-auto">
 
             {/* Kiri: Upload Gambar */}
-            <div className="bg-gray-900 rounded-md shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+            <div className="bg-neutral-100 rounded-md shadow-sm p-6 
+                border border-neutral-900">
                 <div className="flex items-center justify-between mb-5">
-                    <h2 className="text-base font-normal text-gray-50">{
+                    <h2 className="text-base font-normal text-neutral-900">{
                         readOnly ? 'Preview Gambar' : 'Unggah Gambar'}
                     </h2>
                     {readOnly && (
-                        <span className="text-xs px-2 py-0.5 rounded border border-gray-700 text-gray-500 font-mono">
+                        <span className="text-xs px-2 py-0.5 rounded border border-neutral-700 text-neutral-700 font-mono">
                             readonly
                         </span>
                     )}
                 </div>
 
                 <div
-                    className={`border-2 border-dashed border-gray-800 rounded-xl p-4 text-center transition-all duration-200 bg-gray-950
+                    className={`border border-dashed border-neutral-800 rounded-sm p-4 text-center transition-all duration-200 bg-neutral-100
                         ${readOnly
                             ? 'cursor-default'
-                            : 'hover:border-gray-700 hover:bg-gray-900 cursor-pointer group'
+                            : 'hover:border-neutral-700 hover:bg-neutral-200 cursor-pointer group'
                         }`}
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
@@ -247,7 +248,8 @@ export default function InputAnalisis({
                             {!readOnly && (
                                 <button
                                     onClick={(e) => { e.stopPropagation(); handleReset() }}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-lg hover:scale-110 transform duration-200"
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 
+                                    hover:bg-red-600 transition-colors shadow-lg hover:scale-110 transform duration-200"
                                     title="Hapus gambar"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -259,23 +261,23 @@ export default function InputAnalisis({
                     ) : (
                         <div className="py-8">
                             <div className="mb-4 flex justify-center">
-                                <div className={`p-4 bg-gray-800 rounded-full ${!readOnly ? 'group-hover:bg-gray-700' : ''} transition-colors`}>
-                                    <svg className="h-14 w-14 text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <div className={`p-4 bg-neutral-300 rounded-full ${!readOnly ? 'group-hover:bg-neutral-400' : ''} transition-colors`}>
+                                    <svg className="h-14 w-14 text-neutral-900" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
                                 </div>
                             </div>
                             {readOnly ? (
-                                <p className="text-sm text-gray-600 italic">Tidak ada pratinjau gambar</p>
+                                <p className="text-sm text-neutral-600 italic">Tidak ada pratinjau gambar</p>
                             ) : (
                                 <>
-                                    <p className="text-base text-gray-500 mb-2">
-                                        <span className="font-semibold text-gray-400">Klik untuk upload</span> atau drag and drop
+                                    <p className="text-base text-neutral-700 mb-2">
+                                        <span className="font-semibold text-neutral-800">Klik untuk upload</span> atau drag and drop
                                     </p>
-                                    <p className="text-sm text-gray-600">
-                                        Direkomendasikan format <strong className="text-gray-500">PNG</strong>
+                                    <p className="text-sm text-neutral-600">
+                                        Direkomendasikan format <strong className="text-neutral-500">PNG</strong>
                                     </p>
-                                    <p className="text-xs text-gray-700 mt-1">(Maksimal 5MB)</p>
+                                    <p className="text-xs text-neutral-700 mt-1">(Maksimal 5MB)</p>
                                 </>
                             )}
                         </div>
@@ -293,21 +295,23 @@ export default function InputAnalisis({
 
                 {/* Info metadata di mode readOnly */}
                 {readOnly && readOnlyData?.analysis && (
-                    <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-700 space-y-1.5">
-                        <p className="text-xs text-gray-500">
-                            <span className="text-gray-400">ID Analisis:</span>{' '}
-                            <span className="font-mono text-gray-300 break-all">{readOnlyData.analysis.id}</span>
+                    <div className="mt-4 p-3 bg-neutral-100 rounded-sm border border-neutral-900 space-y-1.5">
+                        <p className="text-xs text-neutral-500">
+                            <span className="text-neutral-600">ID Analisis:</span>{' '}
+                            <span className="font-semibold text-neutral-900 break-all">{readOnlyData.analysis.id}</span>
                         </p>
-                        <p className="text-xs text-gray-500">
-                            <span className="text-gray-400">Dibuat:</span>{' '}
-                            {new Date(readOnlyData.analysis.created_at).toLocaleString('id-ID', {
-                                dateStyle: 'medium',
-                                timeStyle: 'short',
-                            })}
+                        <p className="text-xs text-neutral-500">
+                            <span className="text-neutral-600">Dibuat:</span>{' '}
+                            <strong className="font-semibold text-neutral-900">
+                                {new Date(readOnlyData.analysis.created_at).toLocaleString('id-ID', {
+                                    dateStyle: 'medium',
+                                    timeStyle: 'short',
+                                })}
+                            </strong>
                         </p>
                         {readOnlyData.analysis.waktu_proses && (
-                            <p className="text-xs text-gray-500">
-                                <span className="text-gray-400">Waktu Proses:</span>{' '}
+                            <p className="text-xs text-neutral-500">
+                                <span className="text-neutral-400">Waktu Proses:</span>{' '}
                                 {readOnlyData.analysis.waktu_proses}
                             </p>
                         )}
@@ -316,14 +320,14 @@ export default function InputAnalisis({
 
                 {/* Info file di mode normal */}
                 {!readOnly && selectedImage && (
-                    <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-700">
-                        <p className="text-sm font-medium text-gray-200 truncate">{selectedImage.name}</p>
+                    <div className="mt-4 p-3 bg-neutral-100 rounded-sm border border-neutral-900">
+                        <p className="text-sm font-medium text-neutral-900 truncate">{selectedImage.name}</p>
                         <div className="flex gap-4 mt-1">
-                            <p className="text-xs text-gray-500">
-                                <span className="text-gray-400">Ukuran:</span> {(selectedImage.size / 1024).toFixed(2)} KB
+                            <p className="text-xs text-neutral-900">
+                                <span className="text-neutral-700">Ukuran:</span> {(selectedImage.size / 1024).toFixed(2)} KB
                             </p>
-                            <p className="text-xs text-gray-500">
-                                <span className="text-gray-400">Tipe:</span> {selectedImage.type}
+                            <p className="text-xs text-neutral-900">
+                                <span className="text-neutral-700">Tipe:</span> {selectedImage.type}
                             </p>
                         </div>
                     </div>
@@ -331,13 +335,16 @@ export default function InputAnalisis({
             </div>
 
             {/* Kanan: Konfigurasi Analisis */}
-            <div className={`bg-gray-900 rounded-md shadow-lg p-6 flex flex-col gap-5 ${readOnly ? 'opacity-60 pointer-events-none select-none' : ''}`}>
+            <div className={`bg-neutral-100 rounded-sm shadow-sm p-6 
+                border border-neutral-900 flex flex-col gap-5 
+                ${readOnly ? 'opacity-60 pointer-events-none select-none'
+                    : ''}`}>
 
                 {/* Pilih Channel */}
                 <div>
-                    <h2 className="text-base font-normal text-gray-50 mb-3">
+                    <h2 className="text-base font-normal text-neutral-900 mb-3">
                         Pilih Channel
-                        <span className="ml-2 text-xs text-gray-500">({selectedChannels.size} dipilih)</span>
+                        <span className="ml-2 text-xs text-neutral-700">({selectedChannels.size} dipilih)</span>
                     </h2>
                     <div className="grid grid-cols-3 gap-2">
                         {CHANNELS.map((ch) => {
@@ -349,10 +356,10 @@ export default function InputAnalisis({
                                     type="button"
                                     onClick={() => toggleChannel(ch)}
                                     disabled={readOnly}
-                                    className={`relative flex flex-col items-center py-3 px-2 rounded-md border-2 transition-all duration-200
+                                    className={`relative flex flex-col items-center py-3 px-2 rounded-sm border transition-all duration-200
                                         ${active
-                                            ? `${meta.bg} ${meta.border} shadow-md`
-                                            : 'border-gray-800 bg-gray-950'
+                                            ? `${meta.bg} ${meta.border} shadow-sm`
+                                            : 'border-neutral-400 bg-neutral-100'
                                         }`}
                                 >
                                     {active && (
@@ -362,8 +369,8 @@ export default function InputAnalisis({
                                             </svg>
                                         </span>
                                     )}
-                                    <span className={`text-xl font-bold font-mono ${active ? meta.color : 'text-gray-600'}`}>{ch}</span>
-                                    <span className={`text-xs mt-0.5 ${active ? 'text-gray-400' : 'text-gray-700'}`}>{meta.label}</span>
+                                    <span className={`text-xl font-bold font-mono ${active ? meta.color : 'text-neutral-700'}`}>{ch}</span>
+                                    <span className={`text-xs mt-0.5 ${active ? meta.color : 'text-neutral-700'}`}>{meta.label}</span>
                                 </button>
                             )
                         })}
@@ -372,9 +379,9 @@ export default function InputAnalisis({
 
                 {/* Pilih Teknik */}
                 <div>
-                    <h2 className="text-base font-normal text-gray-50 mb-3">
+                    <h2 className="text-base font-normal text-neutral-900 mb-3">
                         Pilih Teknik Ekstraksi
-                        <span className="ml-2 text-xs text-gray-500">({selectedTeknik.size} dipilih)</span>
+                        <span className="ml-2 text-xs text-neutral-700">({selectedTeknik.size} dipilih)</span>
                     </h2>
                     <div className="space-y-2">
                         {TEKNIK_KEYS.map((arah, idx) => {
@@ -385,14 +392,16 @@ export default function InputAnalisis({
                                     type="button"
                                     onClick={() => toggleTeknik(arah)}
                                     disabled={readOnly}
-                                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-md border-2 transition-all duration-200 text-left
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-sm 
+                                        border transition-all duration-200 text-left ease-in-out 
+                                        hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
                                         ${active
-                                            ? 'border-gray-500 bg-gray-950 shadow-md'
-                                            : 'border-gray-800 bg-gray-950'
+                                            ? 'border-neutral-700 bg-neutral-100 shadow-md'
+                                            : 'border-neutral-300 bg-neutral-100'
                                         }`}
                                 >
-                                    <span className={`shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center
-                                        ${active ? 'bg-gray-500 border-gray-500' : 'border-gray-600'}`}>
+                                    <span className={`shrink-0 w-4 h-4 rounded border flex items-center justify-center
+                                        ${active ? 'bg-neutral-900 border-neutral-900' : 'border-neutral-300'}`}>
                                         {active && (
                                             <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -400,8 +409,8 @@ export default function InputAnalisis({
                                         )}
                                     </span>
                                     <span className="flex-1">
-                                        <span className={`text-xs font-mono ${active ? 'text-gray-400' : 'text-gray-600'} mr-2`}>T{idx + 1}</span>
-                                        <span className={`text-sm ${active ? 'text-gray-200' : 'text-gray-600'}`}>{TEKNIK_LABEL[arah]}</span>
+                                        <span className={`text-xs font-mono ${active ? 'text-neutral-900' : 'text-neutral-600'} mr-2`}>T{idx + 1}</span>
+                                        <span className={`text-sm ${active ? 'text-neutral-800' : 'text-neutral-600'}`}>{TEKNIK_LABEL[arah]}</span>
                                     </span>
                                 </button>
                             )
@@ -411,7 +420,7 @@ export default function InputAnalisis({
 
                 {/* Interpretasi AI */}
                 <div>
-                    <h2 className="text-base font-normal text-gray-50 mb-3">Interpretasi dengan AI?</h2>
+                    <h2 className="text-base font-normal text-neutral-900 mb-3">Interpretasi dengan AI?</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {([true, false] as const).map((val) => {
                             const active = useAI === val
@@ -421,17 +430,19 @@ export default function InputAnalisis({
                                     type="button"
                                     onClick={() => !readOnly && setUseAI(val)}
                                     disabled={readOnly}
-                                    className={`flex items-center gap-2 px-4 py-3 rounded-md border-2 transition-all duration-200
+                                    className={`flex items-center gap-2 px-4 py-3 rounded-sm 
+                                        border transition-all duration-200 text-left ease-in-out 
+                                        hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
                                         ${active
-                                            ? 'border-gray-500 bg-gray-950 shadow-md'
-                                            : 'border-gray-800 bg-gray-950'
+                                            ? 'border-neutral-800 bg-neutral-100 shadow-md'
+                                            : 'border-neutral-400 bg-neutral-100'
                                         }`}
                                 >
                                     <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center
-                                        ${active ? 'border-gray-400' : 'border-gray-600'}`}>
-                                        {active && <span className="w-2 h-2 rounded-full bg-gray-400" />}
+                                        ${active ? 'border-neutral-900' : 'border-neutral-400'}`}>
+                                        {active && <span className="w-2 h-2 rounded-full bg-neutral-900" />}
                                     </span>
-                                    <span className={`text-sm font-medium ${active ? 'text-gray-200' : 'text-gray-600'}`}>
+                                    <span className={`text-sm font-medium ${active ? 'text-neutral-800' : 'text-neutral-600'}`}>
                                         {val ? 'Ya, pakai AI' : 'Tidak, decode saja'}
                                     </span>
                                 </button>
@@ -441,21 +452,25 @@ export default function InputAnalisis({
                 </div>
 
                 {/* Info kombinasi */}
-                <div className="px-4 py-2.5 rounded-lg bg-gray-950 border border-gray-800 flex items-center justify-between">
-                    <span className="text-xs text-gray-500">Total kombinasi yang dijalankan</span>
-                    <span className="text-sm font-mono font-bold text-gray-300">{totalKombinasi} kombinasi</span>
+                <div className="px-4 py-2.5 rounded-sm bg-neutral-100 border border-neutral-800 flex items-center justify-between">
+                    <span className="text-xs text-neutral-800">Total kombinasi yang dijalankan</span>
+                    <span className="text-sm font-mono font-bold text-neutral-950">{totalKombinasi} kombinasi</span>
                 </div>
 
                 {/* Tombol Analisa / Mode Detail */}
                 <button
                     onClick={handleAnalyze}
                     disabled={readOnly || !selectedImage || isAnalyzing}
-                    className={`w-full py-3 px-4 rounded-xl font-semibold text-white text-base transition-all duration-200 shadow-lg
+                    className={`w-full py-3 px-4 flex items-center justify-center
+                        rounded-sm font-semibold text-neutral-900 
+                        border border-neutral-900 text-base
+                        transition-all duration-200 text-left ease-in-out 
+                        hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
                         ${readOnly
-                            ? 'bg-gray-800 text-gray-500 cursor-not-allowed shadow-none'
+                            ? 'bg-neutral-100 text-neutral-900 cursor-not-allowed shadow-none'
                             : !selectedImage || isAnalyzing
-                                ? 'bg-gray-800 text-gray-600 cursor-not-allowed shadow-none'
-                                : 'bg-gray-600 hover:bg-gray-500 active:scale-95 hover:shadow-xl cursor-pointer'
+                                ? 'bg-neutral-100 text-neutral-600 cursor-not-allowed shadow-none'
+                                : 'bg-neutral-100 active:scale-95 cursor-pointer'
                         }`}
                 >
                     {readOnly ? (
