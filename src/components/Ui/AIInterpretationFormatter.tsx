@@ -1,23 +1,11 @@
 'use client'
 
-// ─── Komponen: AIInterpretationText ─────────────────────────────────────────
-// Mem-parse dan me-render teks markdown sederhana dari response AI
-// agar konsisten dengan dark theme yang sudah ada.
-//
-// Mendukung:
-//   **bold**         → <strong> dengan warna lebih terang
-//   `inline code`    → monospace highlight
-//   1. item          → ordered list (numbered)
-//   - item / * item  → unordered list
-//   ### heading      → sub-heading
-
 interface AIInterpretationTextProps {
     text: string
 }
 
-// ─── Inline parser: bold + inline code ──────────────────────────────────────
-
-function parseInline(raw: string): React.ReactNode[] {
+//  Inline parser: bold + inline code 
+export function parseInline(raw: string): React.ReactNode[] {
     // Split by **bold** and `code` tokens
     const parts = raw.split(/(\*\*[^*]+\*\*|`[^`]+`)/g)
     return parts.map((part, i) => {
@@ -32,7 +20,7 @@ function parseInline(raw: string): React.ReactNode[] {
             return (
                 <code
                     key={i}
-                    className="font-mono text-[11px] px-1.5 py-0.5 rounded bg-neutral-800 text-amber-400 border border-neutral-700"
+                    className="font-mono text-[11px] px-1.5 py-0.5 rounded bg-neutral-300 text-neutral-900 border border-neutral-300"
                 >
                     {part.slice(1, -1)}
                 </code>
@@ -42,8 +30,7 @@ function parseInline(raw: string): React.ReactNode[] {
     })
 }
 
-// ─── Block-level parser ──────────────────────────────────────────────────────
-
+//  Block-level parser 
 export function AIInterpretationText({ text }: AIInterpretationTextProps) {
     if (!text) return null
 
@@ -55,13 +42,13 @@ export function AIInterpretationText({ text }: AIInterpretationTextProps) {
         const line = lines[i]
         const trimmed = line.trim()
 
-        // ── Skip empty lines (handled as spacing between blocks) ──
+        //  Skip empty lines (handled as spacing between blocks) 
         if (trimmed === '') {
             i++
             continue
         }
 
-        // ── Heading: ### / ## / # ─────────────────────────────────
+        //  Heading: ### / ## / # 
         const headingMatch = trimmed.match(/^(#{1,3})\s+(.+)/)
         if (headingMatch) {
             nodes.push(
@@ -73,7 +60,7 @@ export function AIInterpretationText({ text }: AIInterpretationTextProps) {
             continue
         }
 
-        // ── Ordered list: "1. item" ───────────────────────────────
+        //  Ordered list: "1. item" 
         const orderedMatch = trimmed.match(/^(\d+)\.\s+(.+)/)
         if (orderedMatch) {
             const listItems: Array<{ num: string; content: string }> = []
@@ -110,7 +97,7 @@ export function AIInterpretationText({ text }: AIInterpretationTextProps) {
             continue
         }
 
-        // ── Unordered list: "- " or "* " ─────────────────────────
+        //  Unordered list: "- " or "* " 
         const unorderedMatch = trimmed.match(/^[-*]\s+(.+)/)
         if (unorderedMatch) {
             const listItems: string[] = []
@@ -144,7 +131,7 @@ export function AIInterpretationText({ text }: AIInterpretationTextProps) {
             continue
         }
 
-        // ── Paragraph biasa ──────────────────────────────────────
+        //  Paragraph biasa 
         nodes.push(
             <p key={i} className="text-[12px] text-neutral-900 leading-relaxed">
                 {parseInline(trimmed)}

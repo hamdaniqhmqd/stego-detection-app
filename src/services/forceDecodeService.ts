@@ -2,34 +2,19 @@
 
 import { supabaseServer } from '@/libs/supabase/server'
 import { forceDecodeLSB } from '@/libs/steganalysis/forceDecode'
-import type { DecodeTeknik, DecodedBitItem, DecodedRawItem } from '@/types/analysis'
-
-/**
- * PostgreSQL/Supabase JSONB tidak mendukung karakter null (\u0000) dan
- * beberapa Unicode escape sequence yang tidak valid di JSON.
- *
- * Solusi: encode string ke Base64 sebelum disimpan ke JSONB,
- * lalu decode kembali di sisi client/komponen.
- *
- * Ini memastikan semua byte 0x00–0xFF tersimpan dengan aman tanpa kehilangan data.
- */
+import type { DecodeTeknik, DecodedBitItem, DecodedRawItem } from '@/types/shared'
 
 function encodeTextForJsonb(text: string): string {
-    // Konversi string ke Buffer latin-1 (preserves 0x00–0xFF),
-    // lalu encode ke base64 agar aman untuk JSONB
     return Buffer.from(text, 'binary').toString('base64')
 }
 
 function sanitizeDecodedBit(items: DecodedBitItem[]): DecodedBitItem[] {
-    // bits hanya berisi '0' dan '1' — aman, tidak perlu encode
     return items
 }
 
 function sanitizeDecodedRaw(items: DecodedRawItem[]): DecodedRawItem[] {
     return items.map((item) => ({
         ...item,
-        // Encode text ke base64 agar aman di JSONB
-        // Flag 'base64_encoded: true' digunakan oleh client untuk decode balik
         text: encodeTextForJsonb(item.text),
         base64_encoded: true,
     }))

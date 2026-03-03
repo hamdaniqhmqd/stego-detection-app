@@ -35,3 +35,22 @@ export interface UserProfile {
     fullname?: string | null;
     photo?: string | null;
 }
+
+export interface UserInsert {
+    username: string
+    email: string
+    password: string
+    role?: UserRole
+    fullname?: string
+    photo?: string
+}
+
+export interface UserUpdate {
+    username?: string
+    email?: string
+    password?: string
+    role?: UserRole
+    fullname?: string
+    photo?: string
+    is_verified?: boolean
+}

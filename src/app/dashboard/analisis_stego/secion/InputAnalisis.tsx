@@ -1,26 +1,19 @@
+// src/app/dashboard/analisis_stego/InputAnalisis.tsx
 'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type {
-    Channel,
-    TeknikArah,
-    DecodeTeknik,
-    Analysis,
-    AnalysisResult,
-} from '@/types/analysis'
-import { TEKNIK_LABEL } from '@/types/analysis'
+import type { Analysis, AnalysisResult } from '@/types/analysis'
+import { TEKNIK_LABEL, Channel, TeknikArah, DecodeTeknik } from '@/types/shared'
 import { AuthUser } from '@/types/Users'
 import { CHANNEL_META, CHANNELS, TEKNIK_KEYS } from '@/utils/Channel'
+import { Tooltip } from '@/components/Ui/ToolTip'
+import SectionLabel from '@/components/Ui/SectionLabel'
 
-// Props
 interface InputAnalisisProps {
-    // Mode normal (halaman analisis baru)
     user?: AuthUser
     onLoading?: (loading: boolean, step: string) => void
     onResult?: (result: AnalysisResult) => void
-
-    // Mode readOnly (halaman detail — semua input disabled)
     readOnly?: boolean
     readOnlyData?: {
         analysis: Analysis
@@ -29,6 +22,15 @@ interface InputAnalisisProps {
         selectedTeknik?: Set<TeknikArah>
         useAI?: boolean
     }
+}
+
+// ── Ikon info kecil (reusable) ────────────────────────────────
+function InfoIcon() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
+            <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z" />
+        </svg>
+    )
 }
 
 export default function InputAnalisis({
@@ -40,11 +42,8 @@ export default function InputAnalisis({
 }: InputAnalisisProps) {
     const router = useRouter()
 
-    // State
-
     const [selectedImage, setSelectedImage] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string>(readOnlyData?.analysis.file_path ?? '')
-
     const [selectedChannels, setSelectedChannels] = useState<Set<Channel>>(
         readOnlyData?.selectedChannels ?? new Set(['R', 'G', 'B'])
     )
@@ -54,10 +53,9 @@ export default function InputAnalisis({
     const [useAI, setUseAI] = useState<boolean>(readOnlyData?.useAI ?? false)
     const [isAnalyzing, setIsAnalyzing] = useState(false)
 
-    // Helpers
     const toggleChannel = (ch: Channel) => {
         if (readOnly) return
-        setSelectedChannels((prev) => {
+        setSelectedChannels(prev => {
             const next = new Set(prev)
             if (next.has(ch)) {
                 if (next.size === 1) return prev
@@ -71,7 +69,7 @@ export default function InputAnalisis({
 
     const toggleTeknik = (t: TeknikArah) => {
         if (readOnly) return
-        setSelectedTeknik((prev) => {
+        setSelectedTeknik(prev => {
             const next = new Set(prev)
             if (next.has(t)) {
                 if (next.size === 1) return prev
@@ -97,7 +95,6 @@ export default function InputAnalisis({
 
     const totalKombinasi = selectedChannels.size * selectedTeknik.size
 
-    // Image handlers
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (readOnly) return
         const file = e.target.files?.[0]
@@ -134,73 +131,48 @@ export default function InputAnalisis({
         setUseAI(false)
     }
 
-    // Analyze flow
     const handleAnalyze = async () => {
         if (readOnly || !selectedImage || !user) return
-
         setIsAnalyzing(true)
         onLoading?.(true, 'Mengunggah gambar...')
-
         try {
             const kombinasi = buildKombinasi()
-
-            // 1. Upload gambar
             const fd = new FormData()
             fd.append('file', selectedImage)
             const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd })
             if (!uploadRes.ok) throw new Error(await uploadRes.text())
             const img = await uploadRes.json()
-            console.log("Image uploaded:", img)
 
-            // 2. Buat record analysis
             onLoading?.(true, 'Membuat record analisis...')
             const analysisRes = await fetch('/api/analysis', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: user.id,
-                    file_path: img.url,
-                    metode: 'force-decode',
-                    teknik: kombinasi,
-                    interpretasi_ai: useAI,
-                }),
+                body: JSON.stringify({ user_id: user.id, file_path: img.url, metode: 'force-decode', teknik: kombinasi, interpretasi_ai: useAI }),
             })
             if (!analysisRes.ok) throw new Error(await analysisRes.text())
             const analysis = await analysisRes.json()
 
-            // 3. Force decode
             onLoading?.(true, `Menjalankan force decode (${totalKombinasi} kombinasi)...`)
             const forceRes = await fetch('/api/force-decode', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    analysis_id: analysis.id,
-                    image_url: img.url,
-                    teknik: kombinasi,
-                }),
+                body: JSON.stringify({ analysis_id: analysis.id, image_url: img.url, teknik: kombinasi }),
             })
             if (!forceRes.ok) throw new Error(await forceRes.text())
             const forceDecode = await forceRes.json()
 
-            // 4. Jika useAI → kirim semua ke AI
             if (useAI && forceDecode.decoded_raw?.length) {
                 onLoading?.(true, 'AI menganalisis semua hasil...')
                 const aiRes = await fetch('/api/ai-interpretation', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        analysis_id: analysis.id,
-                        force_decode_id: forceDecode.id,
-                        selected_items: forceDecode.decoded_raw,
-                    }),
+                    body: JSON.stringify({ analysis_id: analysis.id, force_decode_id: forceDecode.id, selected_items: forceDecode.decoded_raw }),
                 })
                 if (!aiRes.ok) throw new Error(await aiRes.text())
             }
 
-            // Selesai → push ke detail page
             onLoading?.(false, '')
             router.push(`/dashboard/analisis_stego/${analysis.id}`)
-
         } catch (err: any) {
             alert(`Error: ${err.message}`)
             onLoading?.(false, '')
@@ -209,53 +181,47 @@ export default function InputAnalisis({
         }
     }
 
-    // Render
-
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-7xl mx-auto">
 
-            {/* Kiri: Upload Gambar */}
-            <div className="bg-neutral-100 rounded-md shadow-sm p-6 
-                border border-neutral-900">
-                <div className="flex items-center justify-between mb-5">
-                    <h2 className="text-base font-normal text-neutral-900">{
-                        readOnly ? 'Preview Gambar' : 'Unggah Gambar'}
+            {/* ── Kiri: Upload Gambar ── */}
+            <div className="bg-neutral-100 rounded-md shadow-sm p-6 border border-neutral-900">
+                <div className="flex items-center justify-between mb-5 gap-4">
+                    <h2 className="flex-1 flex items-center gap-2 text-sm tracking-widest uppercase font-normal text-neutral-900">
+                        {readOnly ? 'Preview Gambar' : 'Unggah Gambar'}
+                        <div className="flex-1 h-px bg-neutral-300" />
                     </h2>
                     {readOnly && (
-                        <span className="text-xs px-2 py-0.5 rounded border border-neutral-700 text-neutral-700 font-mono">
-                            readonly
-                        </span>
+                        <Tooltip text="Mode hanya lihat — konfigurasi tidak dapat diubah dari halaman ini.">
+                            <span className="text-xs px-2 py-0.5 rounded border border-neutral-700 text-neutral-700 font-mono cursor-default">
+                                readonly
+                            </span>
+                        </Tooltip>
                     )}
                 </div>
 
                 <div
                     className={`border border-dashed border-neutral-800 rounded-sm p-4 text-center transition-all duration-200 bg-neutral-100
-                        ${readOnly
-                            ? 'cursor-default'
-                            : 'hover:border-neutral-700 hover:bg-neutral-200 cursor-pointer group'
-                        }`}
+                        ${readOnly ? 'cursor-default' : 'hover:border-neutral-700 hover:bg-neutral-200 cursor-pointer group'}`}
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     onClick={() => !readOnly && document.getElementById('fileInput')?.click()}
                 >
                     {previewUrl ? (
                         <div className="relative w-full h-72">
-                            <img
-                                src={previewUrl || ''}
-                                alt="Preview"
-                                className="w-full h-full object-contain rounded-xl"
-                            />
+                            <img src={previewUrl} alt="Preview" className="w-full h-full object-contain rounded-xl" />
                             {!readOnly && (
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); handleReset() }}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 
-                                    hover:bg-red-600 transition-colors shadow-lg hover:scale-110 transform duration-200"
-                                    title="Hapus gambar"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                    </svg>
-                                </button>
+                                <Tooltip text="Hapus gambar dan reset semua konfigurasi ke default.">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleReset() }}
+                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1
+                                            hover:bg-red-600 transition-colors shadow-lg hover:scale-110 transform duration-200"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </Tooltip>
                             )}
                         </div>
                     ) : (
@@ -274,9 +240,7 @@ export default function InputAnalisis({
                                     <p className="text-base text-neutral-700 mb-2">
                                         <span className="font-semibold text-neutral-800">Klik untuk upload</span> atau drag and drop
                                     </p>
-                                    <p className="text-sm text-neutral-600">
-                                        Direkomendasikan format <strong className="text-neutral-500">PNG</strong>
-                                    </p>
+                                    <p className="text-sm text-neutral-600">Direkomendasikan format <strong className="text-neutral-500">PNG</strong></p>
                                     <p className="text-xs text-neutral-700 mt-1">(Maksimal 5MB)</p>
                                 </>
                             )}
@@ -284,16 +248,8 @@ export default function InputAnalisis({
                     )}
                 </div>
 
-                <input
-                    id="fileInput"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={readOnly}
-                    className="hidden"
-                />
+                <input id="fileInput" type="file" accept="image/*" onChange={handleImageUpload} disabled={readOnly} className="hidden" />
 
-                {/* Info metadata di mode readOnly */}
                 {readOnly && readOnlyData?.analysis && (
                     <div className="mt-4 p-3 bg-neutral-100 rounded-sm border border-neutral-900 space-y-1.5">
                         <p className="text-xs text-neutral-500">
@@ -303,10 +259,7 @@ export default function InputAnalisis({
                         <p className="text-xs text-neutral-500">
                             <span className="text-neutral-600">Dibuat:</span>{' '}
                             <strong className="font-semibold text-neutral-900">
-                                {new Date(readOnlyData.analysis.created_at).toLocaleString('id-ID', {
-                                    dateStyle: 'medium',
-                                    timeStyle: 'short',
-                                })}
+                                {new Date(readOnlyData.analysis.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
                             </strong>
                         </p>
                         {readOnlyData.analysis.waktu_proses && (
@@ -318,60 +271,62 @@ export default function InputAnalisis({
                     </div>
                 )}
 
-                {/* Info file di mode normal */}
                 {!readOnly && selectedImage && (
                     <div className="mt-4 p-3 bg-neutral-100 rounded-sm border border-neutral-900">
                         <p className="text-sm font-medium text-neutral-900 truncate">{selectedImage.name}</p>
                         <div className="flex gap-4 mt-1">
-                            <p className="text-xs text-neutral-900">
-                                <span className="text-neutral-700">Ukuran:</span> {(selectedImage.size / 1024).toFixed(2)} KB
-                            </p>
-                            <p className="text-xs text-neutral-900">
-                                <span className="text-neutral-700">Tipe:</span> {selectedImage.type}
-                            </p>
+                            <p className="text-xs text-neutral-900"><span className="text-neutral-700">Ukuran:</span> {(selectedImage.size / 1024).toFixed(2)} KB</p>
+                            <p className="text-xs text-neutral-900"><span className="text-neutral-700">Tipe:</span> {selectedImage.type}</p>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Kanan: Konfigurasi Analisis */}
-            <div className={`bg-neutral-100 rounded-sm shadow-sm p-6 
-                border border-neutral-900 flex flex-col gap-5 
-                ${readOnly ? 'opacity-60 pointer-events-none select-none'
-                    : ''}`}>
+            {/* ── Kanan: Konfigurasi ── */}
+            <div className={`bg-neutral-100 rounded-sm shadow-sm p-6 border border-neutral-900 flex flex-col gap-5
+                ${readOnly ? 'opacity-60 pointer-events-none select-none' : ''}`}>
 
                 {/* Pilih Channel */}
                 <div>
-                    <h2 className="text-base font-normal text-neutral-900 mb-3">
-                        Pilih Channel
-                        <span className="ml-2 text-xs text-neutral-700">({selectedChannels.size} dipilih)</span>
-                    </h2>
+                    <div className="flex items-center gap-1.5 mb-3">
+                        <div className="flex-1 flex items-center gap-1">
+                            <h2 className="text-sm tracking-widest uppercase font-normal text-neutral-900">
+                                Pilih Channel
+                            </h2>
+                            <span className="text-xs text-neutral-700">({selectedChannels.size} dipilih)</span>
+                            <Tooltip text="Channel warna yang akan diekstrak bit LSB-nya. R = Red, G = Green, B = Blue. Lebih banyak channel = lebih banyak kombinasi yang dianalisis.">
+                                <span className="text-neutral-400 cursor-default"><InfoIcon /></span>
+                            </Tooltip>
+                            <div className="flex-1 h-px bg-neutral-300" />
+                        </div>
+                    </div>
                     <div className="grid grid-cols-3 gap-2">
                         {CHANNELS.map((ch) => {
                             const meta = CHANNEL_META[ch]
                             const active = selectedChannels.has(ch)
                             return (
-                                <button
+                                <Tooltip
                                     key={ch}
-                                    type="button"
-                                    onClick={() => toggleChannel(ch)}
-                                    disabled={readOnly}
-                                    className={`relative flex flex-col items-center py-3 px-2 rounded-sm border transition-all duration-200
-                                        ${active
-                                            ? `${meta.bg} ${meta.border} shadow-sm`
-                                            : 'border-neutral-400 bg-neutral-100'
-                                        }`}
+                                    text={`Channel ${meta.label} (${ch}) — ${active ? 'aktif, klik untuk menonaktifkan.' : 'tidak aktif, klik untuk mengaktifkan.'} Minimal 1 channel harus dipilih.`}
                                 >
-                                    {active && (
-                                        <span className={`absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center ${meta.bg} ${meta.border} border`}>
-                                            <svg className={`w-2.5 h-2.5 ${meta.color}`} fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                            </svg>
-                                        </span>
-                                    )}
-                                    <span className={`text-xl font-bold font-mono ${active ? meta.color : 'text-neutral-700'}`}>{ch}</span>
-                                    <span className={`text-xs mt-0.5 ${active ? meta.color : 'text-neutral-700'}`}>{meta.label}</span>
-                                </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleChannel(ch)}
+                                        disabled={readOnly}
+                                        className={`w-full relative flex flex-col items-center py-3 px-2 rounded-sm border transition-all duration-200
+                                            ${active ? `${meta.bg} ${meta.border} shadow-sm` : 'border-neutral-400 bg-neutral-100'}`}
+                                    >
+                                        {active && (
+                                            <span className={`absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center ${meta.bg} ${meta.border} border`}>
+                                                <svg className={`w-2.5 h-2.5 ${meta.color}`} fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                </svg>
+                                            </span>
+                                        )}
+                                        <span className={`text-xl font-bold font-mono ${active ? meta.color : 'text-neutral-700'}`}>{ch}</span>
+                                        <span className={`text-xs mt-0.5 ${active ? meta.color : 'text-neutral-700'}`}>{meta.label}</span>
+                                    </button>
+                                </Tooltip>
                             )
                         })}
                     </div>
@@ -379,40 +334,49 @@ export default function InputAnalisis({
 
                 {/* Pilih Teknik */}
                 <div>
-                    <h2 className="text-base font-normal text-neutral-900 mb-3">
-                        Pilih Teknik Ekstraksi
-                        <span className="ml-2 text-xs text-neutral-700">({selectedTeknik.size} dipilih)</span>
-                    </h2>
-                    <div className="space-y-2">
+                    <div className="flex items-center gap-1.5 mb-3">
+                        <div className="flex-1 flex items-center gap-1">
+                            <h2 className="text-sm tracking-widest uppercase font-normal text-neutral-900">
+                                Pilih Teknik Ekstraksi
+                            </h2>
+                            <span className="text-xs text-neutral-700">({selectedTeknik.size} dipilih)</span>
+                            <Tooltip text="Teknik menentukan urutan baca piksel saat mengekstrak bit LSB. Setiap teknik menghasilkan bit yang berbeda dari gambar yang sama. Lebih banyak teknik = lebih lama prosesnya.">
+                                <span className="text-neutral-400 cursor-default"><InfoIcon /></span>
+                            </Tooltip>
+                            <div className="flex-1 h-px bg-neutral-300" />
+                        </div>
+                    </div>
+                    <div className="space-y-2 grid grid-cols-1 gap-2">
                         {TEKNIK_KEYS.map((arah, idx) => {
                             const active = selectedTeknik.has(arah)
                             return (
-                                <button
+                                <Tooltip
                                     key={arah}
-                                    type="button"
-                                    onClick={() => toggleTeknik(arah)}
-                                    disabled={readOnly}
-                                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-sm 
-                                        border transition-all duration-200 text-left ease-in-out 
-                                        hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
-                                        ${active
-                                            ? 'border-neutral-700 bg-neutral-100 shadow-md'
-                                            : 'border-neutral-300 bg-neutral-100'
-                                        }`}
+                                    text={`${TEKNIK_LABEL[arah]} — membaca piksel gambar dengan pola ${TEKNIK_LABEL[arah].toLowerCase()} untuk mengekstrak bit LSB. ${active ? 'Aktif.' : 'Tidak aktif.'}`}
                                 >
-                                    <span className={`shrink-0 w-4 h-4 rounded border flex items-center justify-center
-                                        ${active ? 'bg-neutral-900 border-neutral-900' : 'border-neutral-300'}`}>
-                                        {active && (
-                                            <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                            </svg>
-                                        )}
-                                    </span>
-                                    <span className="flex-1">
-                                        <span className={`text-xs font-mono ${active ? 'text-neutral-900' : 'text-neutral-600'} mr-2`}>T{idx + 1}</span>
-                                        <span className={`text-sm ${active ? 'text-neutral-800' : 'text-neutral-600'}`}>{TEKNIK_LABEL[arah]}</span>
-                                    </span>
-                                </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleTeknik(arah)}
+                                        disabled={readOnly}
+                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-sm
+                                            border transition-all duration-200 text-left ease-in-out
+                                            hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
+                                            ${active ? 'border-neutral-700 bg-neutral-100 shadow-md' : 'border-neutral-300 bg-neutral-100'}`}
+                                    >
+                                        <span className={`shrink-0 w-4 h-4 rounded border flex items-center justify-center
+                                            ${active ? 'bg-neutral-900 border-neutral-900' : 'border-neutral-300'}`}>
+                                            {active && (
+                                                <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                </svg>
+                                            )}
+                                        </span>
+                                        <span className="flex-1">
+                                            <span className={`text-xs font-mono ${active ? 'text-neutral-900' : 'text-neutral-600'} mr-2`}>T{idx + 1}</span>
+                                            <span className={`text-sm ${active ? 'text-neutral-800' : 'text-neutral-600'}`}>{TEKNIK_LABEL[arah]}</span>
+                                        </span>
+                                    </button>
+                                </Tooltip>
                             )
                         })}
                     </div>
@@ -420,78 +384,97 @@ export default function InputAnalisis({
 
                 {/* Interpretasi AI */}
                 <div>
-                    <h2 className="text-base font-normal text-neutral-900 mb-3">Interpretasi dengan AI?</h2>
+                    <div className="flex items-center gap-1.5 mb-3">
+                        <h2 className="text-sm font-normal text-neutral-900">Interpretasi dengan AI?</h2>
+                        <Tooltip text="Jika diaktifkan, semua hasil ekstraksi akan langsung dikirim ke AI untuk dianalisis — mendeteksi pesan tersembunyi dan menilai tingkat ancaman. Membutuhkan waktu lebih lama.">
+                            <span className="text-neutral-400 cursor-default"><InfoIcon /></span>
+                        </Tooltip>
+                        <div className="flex-1 h-px bg-neutral-300" />
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {([true, false] as const).map((val) => {
                             const active = useAI === val
                             return (
-                                <button
+                                <Tooltip
                                     key={String(val)}
-                                    type="button"
-                                    onClick={() => !readOnly && setUseAI(val)}
-                                    disabled={readOnly}
-                                    className={`flex items-center gap-2 px-4 py-3 rounded-sm 
-                                        border transition-all duration-200 text-left ease-in-out 
-                                        hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
-                                        ${active
-                                            ? 'border-neutral-800 bg-neutral-100 shadow-md'
-                                            : 'border-neutral-400 bg-neutral-100'
-                                        }`}
+                                    text={val
+                                        ? 'AI menganalisis semua hasil secara otomatis setelah ekstraksi. Lebih lambat tapi langsung dapat hasil penilaian ancaman.'
+                                        : 'Hanya ekstraksi LSB tanpa AI. Kamu tetap bisa meminta interpretasi AI secara manual setelah hasil tampil.'
+                                    }
                                 >
-                                    <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center
-                                        ${active ? 'border-neutral-900' : 'border-neutral-400'}`}>
-                                        {active && <span className="w-2 h-2 rounded-full bg-neutral-900" />}
-                                    </span>
-                                    <span className={`text-sm font-medium ${active ? 'text-neutral-800' : 'text-neutral-600'}`}>
-                                        {val ? 'Ya, pakai AI' : 'Tidak, decode saja'}
-                                    </span>
-                                </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => !readOnly && setUseAI(val)}
+                                        disabled={readOnly}
+                                        className={`w-full flex items-center gap-2 px-4 py-3 rounded-sm
+                                            border transition-all duration-200 text-left ease-in-out
+                                            hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
+                                            ${active ? 'border-neutral-800 bg-neutral-100 shadow-md' : 'border-neutral-400 bg-neutral-100'}`}
+                                    >
+                                        <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center
+                                            ${active ? 'border-neutral-900' : 'border-neutral-400'}`}>
+                                            {active && <span className="w-2 h-2 rounded-full bg-neutral-900" />}
+                                        </span>
+                                        <span className={`text-sm font-medium ${active ? 'text-neutral-800' : 'text-neutral-600'}`}>
+                                            {val ? 'Ya, pakai AI' : 'Tidak, decode saja'}
+                                        </span>
+                                    </button>
+                                </Tooltip>
                             )
                         })}
                     </div>
                 </div>
 
                 {/* Info kombinasi */}
-                <div className="px-4 py-2.5 rounded-sm bg-neutral-100 border border-neutral-800 flex items-center justify-between">
-                    <span className="text-xs text-neutral-800">Total kombinasi yang dijalankan</span>
-                    <span className="text-sm font-mono font-bold text-neutral-950">{totalKombinasi} kombinasi</span>
-                </div>
+                <Tooltip text={`${selectedChannels.size} channel × ${selectedTeknik.size} teknik = ${totalKombinasi} kombinasi yang akan diekstrak dan dianalisis. Semakin banyak kombinasi, semakin lama prosesnya.`}>
+                    <div className="px-4 py-2.5 rounded-sm bg-neutral-100 border border-neutral-800 flex items-center justify-between cursor-default">
+                        <span className="text-xs text-neutral-800">Total kombinasi yang dijalankan</span>
+                        <span className="text-sm font-mono font-bold text-neutral-950">{totalKombinasi} kombinasi</span>
+                    </div>
+                </Tooltip>
 
-                {/* Tombol Analisa / Mode Detail */}
-                <button
-                    onClick={handleAnalyze}
-                    disabled={readOnly || !selectedImage || isAnalyzing}
-                    className={`w-full py-3 px-4 flex items-center justify-center
-                        rounded-sm font-semibold text-neutral-900 
-                        border border-neutral-900 text-base
-                        transition-all duration-200 text-left ease-in-out 
-                        hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
-                        ${readOnly
-                            ? 'bg-neutral-100 text-neutral-900 cursor-not-allowed shadow-none'
-                            : !selectedImage || isAnalyzing
-                                ? 'bg-neutral-100 text-neutral-600 cursor-not-allowed shadow-none'
-                                : 'bg-neutral-100 active:scale-95 cursor-pointer'
-                        }`}
-                >
-                    {readOnly ? (
-                        <span className="flex items-center justify-center gap-2">
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            Mode Lihat Detail
-                        </span>
-                    ) : isAnalyzing ? (
-                        <span className="flex items-center justify-center gap-2">
-                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                            </svg>
-                            Menganalisis...
-                        </span>
-                    ) : (
-                        'Analisa Gambar'
-                    )}
-                </button>
+                {/* Tombol Analisa */}
+                <Tooltip text={
+                    readOnly ? 'Mode lihat detail — analisis tidak dapat dijalankan ulang dari sini.'
+                        : !selectedImage ? 'Upload gambar terlebih dahulu sebelum menjalankan analisis.'
+                            : isAnalyzing ? 'Proses analisis sedang berjalan...'
+                                : `Jalankan force-decode pada ${totalKombinasi} kombinasi${useAI ? ', lalu interpretasi AI otomatis.' : '.'}`
+                }>
+                    <button
+                        onClick={handleAnalyze}
+                        disabled={readOnly || !selectedImage || isAnalyzing}
+                        className={`w-full py-3 px-4 flex items-center justify-center
+                            rounded-sm font-semibold text-neutral-900
+                            border border-neutral-900 text-base
+                            transition-all duration-200 ease-in-out
+                            hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
+                            ${readOnly
+                                ? 'bg-neutral-100 text-neutral-900 cursor-not-allowed shadow-none'
+                                : !selectedImage || isAnalyzing
+                                    ? 'bg-neutral-100 text-neutral-600 cursor-not-allowed shadow-none'
+                                    : 'bg-neutral-100 active:scale-95 cursor-pointer'
+                            }`}
+                    >
+                        {readOnly ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                Mode Lihat Detail
+                            </span>
+                        ) : isAnalyzing ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                </svg>
+                                Menganalisis...
+                            </span>
+                        ) : (
+                            'Analisa Gambar'
+                        )}
+                    </button>
+                </Tooltip>
             </div>
         </div>
     )

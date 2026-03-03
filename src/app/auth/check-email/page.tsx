@@ -15,7 +15,6 @@ export default function CheckEmail() {
             }>
                 <CheckEmailContent />
             </Suspense>
-            );
 
         </MainLayouts>
     )

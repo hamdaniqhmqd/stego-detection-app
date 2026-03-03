@@ -23,6 +23,7 @@ export default function SidebarLayout({
 }>) {
     const { user, logout } = useAuth();
     const router = useRouter();
+    const isAdmin = user?.role === 'superadmin';
 
     const navigation = useMemo(() => {
         if (user?.role === 'superadmin') return navigationSuperadmin;
@@ -78,7 +79,7 @@ export default function SidebarLayout({
                 id="sidebar-multi-level-sidebar"
                 className={`hidden md:flex md:flex-col
                     ${!isDesktopSidebarOpen && 'lg:w-60 '}
-                    h-full transition-all duration-300 bg-neutral-100`}
+                    h-full transition-all duration-300 bg-neutral-50`}
                 aria-label="Sidebar"
             >
                 {/* Header */}
@@ -92,7 +93,7 @@ export default function SidebarLayout({
                     <button
                         type="button"
                         onClick={onToggleDesktopSidebar}
-                        className={`hidden md:block p-1 bg-neutral-100 rounded-sm border border-neutral-700 
+                        className={`hidden md:block p-1 bg-neutral-50 rounded-sm border border-neutral-700 
                             text-neutral-950 transition-all duration-300 ease-in-out
                             ${isDesktopSidebarOpen ? 'rotate-180 mx-auto hover:-translate-y-0.5 hover:shadow-[5px_-5px_0_rgba(26,26,46,1)]'
                                 : 'hover:-translate-y-0.5 hover:shadow-[-5px_5px_0_rgba(26,26,46,1)]'}`}
@@ -103,46 +104,61 @@ export default function SidebarLayout({
                     </button>
                 </div>
 
-                {/* Navigation Menu */}
-                <div className={`${isDesktopSidebarOpen ? 'flex-1' : 'shrink-0'} min-h-0 overflow-y-auto scrollbar_y_custom px-4`}>
-                    {!isDesktopSidebarOpen && (
-                        <p className="text-neutral-700 hidden md:block text-xs mb-2 font-normal line-clamp-1 text-nowrap">Menu</p>
-                    )}
-                    <ul className="font-medium space-y-1">
-                        <MenuNavigation items={navigation} isCollapsed={true} className="sm:block md:hidden" />
-                        <div className="hidden md:block">
-                            <MenuNavigation items={navigation} isCollapsed={isDesktopSidebarOpen} />
-                        </div>
-                    </ul>
-                </div>
-
-                {/* Riwayat Analisis */}
-                {!isDesktopSidebarOpen && (
-                    <div className={`flex-1 min-h-0`}>
-
-                        {/* Header section riwayat — hanya tampil di desktop expanded */}
-                        <p className="text-neutral-700 hidden md:block text-xs font-normal line-clamp-1 text-nowrap px-4">
-                            Riwayat Analisis
-                        </p>
-
-                        <div className="overflow-y-auto scrollbar_y_custom h-full px-4 pt-2">
-                            {/* Desktop expanded — full list */}
-                            <div className="sm:block h-full">
-                                <RiwayatAnalisisSidebar
-                                    userId={user?.id}
-                                    isCollapsed={isDesktopSidebarOpen}
-                                />
+                {isAdmin && (
+                    <div className={`flex-1 min-h-0 overflow-y-auto scrollbar_y_custom px-4`}>
+                        <ul className="font-medium space-y-1">
+                            <MenuNavigation items={navigation} isCollapsed={true} className="sm:block md:hidden" />
+                            <div className="hidden md:block">
+                                <MenuNavigation items={navigation} isCollapsed={isDesktopSidebarOpen} />
                             </div>
+                        </ul>
+                    </div>
+                )}
+
+                {!isAdmin && (
+                    <div className="h-full overflow-y-auto scrollbar_y_custom pb-4">
+                        {/* Navigation Menu */}
+                        <div className={`${isDesktopSidebarOpen ? 'flex-1' : 'shrink-0'} min-h-0 overflow-y-auto scrollbar_y_custom px-4`}>
+                            {!isDesktopSidebarOpen && (
+                                <p className="text-neutral-700 hidden md:block text-xs mb-2 font-normal line-clamp-1 text-nowrap">Menu</p>
+                            )}
+                            <ul className="font-medium space-y-1">
+                                <MenuNavigation items={navigation} isCollapsed={true} className="sm:block md:hidden" />
+                                <div className="hidden md:block">
+                                    <MenuNavigation items={navigation} isCollapsed={isDesktopSidebarOpen} />
+                                </div>
+                            </ul>
                         </div>
+
+                        {/* Riwayat Analisis */}
+                        {!isDesktopSidebarOpen && (
+                            <div className={`flex-1 min-h-0`}>
+
+                                {/* Header section riwayat — hanya tampil di desktop expanded */}
+                                <p className="text-neutral-700 hidden md:block text-xs font-normal line-clamp-1 text-nowrap px-4">
+                                    Riwayat Analisis
+                                </p>
+
+                                <div className="overflow-y-auto scrollbar_y_custom h-full px-4 pt-4 pb-6">
+                                    {/* Desktop expanded — full list */}
+                                    <div className="sm:block h-full">
+                                        <RiwayatAnalisisSidebar
+                                            userId={user?.id}
+                                            isCollapsed={isDesktopSidebarOpen}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
                 {/* User Profile & Logout */}
-                <div className="px-3 pt-3 pb-6">
+                <div className="px-3 pt-3 pb-6 bg-neutral-50">
                     {/* Desktop */}
                     <div className={`hidden lg:flex items-center gap-3 ${isDesktopSidebarOpen ? 'flex-col' : 'justify-between'}`}>
                         {!isDesktopSidebarOpen && (
-                            <Link href="/dashboard/profile" className="flex items-center gap-2 min-w-0 flex-1">
+                            <Link href={`/${isAdmin ? 'admin' : 'dashboard'}/profile`} className="flex items-center gap-2 min-w-0 flex-1">
                                 <img
                                     src={user?.photo || `https://ui-avatars.com/api/?name=${user?.username || ''}&background=random&color=fff`}
                                     alt="Avatar"
@@ -155,7 +171,7 @@ export default function SidebarLayout({
                             </Link>
                         )}
                         {isDesktopSidebarOpen && (
-                            <Link href="/dashboard/profile" className="flex items-center px-2 py-2 gap-2 bg-neutral-100 border border-neutral-700 rounded-sm
+                            <Link href={`/${isAdmin ? 'admin' : 'dashboard'}/profile`} className="flex items-center px-2 py-2 gap-2 bg-neutral-50 border border-neutral-700 rounded-sm
                             hover:shadow-[-5px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5 transition-all duration-300 ease-in-out">
                                 <img
                                     src={user?.photo || `https://ui-avatars.com/api/?name=${user?.username || ''}&background=random&color=fff`}
@@ -168,7 +184,7 @@ export default function SidebarLayout({
                             <button
                                 onClick={handleLogout}
                                 className="flex items-center justify-center p-2 rounded-sm 
-                                    bg-neutral-100 border border-neutral-700
+                                    bg-neutral-50 border border-neutral-700
                                     text-neutral-900
                                     transition-all duration-300 ease-in-out 
                                     hover:-translate-y-0.5 hover:shadow-[-5px_5px_0_rgba(26,26,46,1)]
@@ -185,7 +201,7 @@ export default function SidebarLayout({
 
                     {/* Tablet */}
                     <div className={`lg:hidden flex items-center gap-2 ${isDesktopSidebarOpen ? 'flex-col' : 'justify-between'}`}>
-                        <Link href="/dashboard/profile" className='flex items-center gap-2'>
+                        <Link href={`/${isAdmin ? 'admin' : 'dashboard'}/profile`} className='flex items-center gap-2'>
                             <img
                                 src={user?.photo || `https://ui-avatars.com/api/?name=${user?.username}&background=random&color=fff`}
                                 alt="Avatar"
@@ -227,14 +243,14 @@ export default function SidebarLayout({
                 }
                 aria-label="Mobile Sidebar"
             >
-                <div className="flex flex-col h-full bg-neutral-100 shadow-2xl border-r border-neutral-700">
+                <div className="flex flex-col h-full bg-neutral-50 shadow-2xl border-r border-neutral-700">
                     {/* Mobile Header */}
                     <div className="px-4 py-3 flex items-center justify-between border-b border-neutral-900">
                         <h2 className="text-xl font-bold text-neutral-950">Stego Detection</h2>
                         <button
                             type="button"
                             onClick={onCloseMobileSidebar}
-                            className="p-2 rounded-lg bg-neutral-100 border border-neutral-900 text-neutral-800 hover:text-white
+                            className="p-2 rounded-lg bg-neutral-50 border border-neutral-900 text-neutral-800 hover:text-white
                             shadow-[-5px_5px_0_rgba(26,26,46,1)] -translate-y-0.5
                             "
                             aria-label="Close sidebar"
@@ -245,7 +261,7 @@ export default function SidebarLayout({
                         </button>
                     </div>
 
-                    <div className="h-full overflow-y-auto scrollbar_y_custom">
+                    <div className="h-full overflow-y-auto scrollbar_y_custom pb-4">
                         {/* Mobile Nav */}
                         <div className="shrink-0 px-4 py-3">
                             <p className="text-neutral-700 text-sm mb-2 font-normal">Menu</p>
@@ -265,8 +281,8 @@ export default function SidebarLayout({
                     </div>
 
                     {/* Mobile User */}
-                    <div className="px-4 py-2 flex items-center justify-between border-t border-neutral-900">
-                        <Link href={'/dashboard/profile'} className="flex items-center gap-3">
+                    <div className="px-4 py-2 flex items-center justify-between">
+                        <Link href={`/${isAdmin ? 'admin' : 'dashboard'}/profile`} className="flex items-center gap-3">
                             <img
                                 src={user?.photo || `https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=random&color=fff`}
                                 alt="Avatar"
@@ -279,7 +295,7 @@ export default function SidebarLayout({
                         </Link>
                         <button
                             onClick={handleLogout}
-                            className="flex items-center justify-center gap-2 p-2 rounded-lg bg-neutral-100 text-neutral-900 hover:text-white
+                            className="flex items-center justify-center gap-2 p-2 rounded-lg bg-neutral-50 text-neutral-900 hover:text-white
                             border border-neutral-700
                             shadow-[-5px_5px_0_rgba(26,26,46,1)] -translate-y-0.5 transition-colors duration-300"
                         >

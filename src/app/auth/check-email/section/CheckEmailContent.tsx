@@ -6,8 +6,8 @@ export default function CheckEmailContent() {
     const email = searchParams.get('email');
 
     return (
-        <section className="lg:py-20 sm:py-14 py-10 container mx-auto">
-            <div className="flex items-center justify-center">
+        <section className="container mx-auto min-h-screen flex items-center justify-center">
+            <div className="lg:py-20 py-14">
                 <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="w-full flex flex-col items-center">
                         {/* Email Icon */}
@@ -28,27 +28,27 @@ export default function CheckEmailContent() {
                         </div>
 
                         {/* Title */}
-                        <h2 className="text-3xl font-bold text-gray-900 mb-1">
+                        <h2 className="text-3xl font-bold text-neutral-900 mb-1">
                             Cek Email Anda
                         </h2>
 
                         {/* Description */}
-                        <p className="text-gray-600 mb-4">
+                        <p className="text-neutral-600 mb-4">
                             Kami telah mengirimkan link verifikasi ke:
                         </p>
 
                         {email && (
-                            <p className="text-lg font-semibold text-gray-900 mb-6 py-4 px-6 bg-gray-100 rounded">
+                            <p className="text-lg font-semibold text-neutral-900 mb-6 py-4 px-6 bg-neutral-100 rounded">
                                 {email}
                             </p>
                         )}
                     </div>
 
-                    <div className="w-full">
+                    <div className="w-full md:w-4/5">
                         {/* Instructions */}
-                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-3 text-left">
-                            <h3 className="font-semibold text-gray-900 mb-3">Langkah selanjutnya:</h3>
-                            <ol className="space-y-2 text-sm text-gray-600">
+                        <div className="bg-neutral-50 border border-neutral-400 rounded-sm p-6 mb-3 text-left">
+                            <h3 className="font-semibold text-neutral-900 mb-3">Langkah selanjutnya:</h3>
+                            <ol className="space-y-2 text-sm text-neutral-600">
                                 <li className="flex items-start">
                                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs font-semibold mr-3 mt-0.5">
                                         1
@@ -71,7 +71,7 @@ export default function CheckEmailContent() {
                         </div>
 
                         {/* Tips */}
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-sm p-4 mb-6">
                             <p className="text-sm text-yellow-800">
                                 <strong>💡 Tips:</strong> Jika tidak menemukan email, periksa folder spam/junk Anda.
                                 Link verifikasi berlaku selama 24 jam.
@@ -82,14 +82,14 @@ export default function CheckEmailContent() {
                         <div className="flex items-center gap-4">
                             <Link
                                 href="/auth/resend-verification"
-                                className="w-full inline-flex justify-center items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+                                className="w-full inline-flex justify-center items-center px-6 py-3 border border-neutral-300 text-base font-medium rounded-sm text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500 transition-colors"
                             >
                                 Kirim Ulang Email
                             </Link>
 
                             <Link
                                 href="/auth/login"
-                                className="w-full inline-flex justify-center items-center px-6 py-3 text-base font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                                className="w-full inline-flex justify-center items-center px-6 py-3 text-base font-medium text-neutral-600 hover:text-neutral-800 transition-colors"
                             >
                                 Kembali ke Login
                             </Link>

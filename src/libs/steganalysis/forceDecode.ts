@@ -7,7 +7,7 @@ import type {
     DecodeTeknik,
     DecodedBitItem,
     DecodedRawItem,
-} from '@/types/analysis'
+} from '@/types/shared'
 
 type PixelCoord = { x: number; y: number }
 

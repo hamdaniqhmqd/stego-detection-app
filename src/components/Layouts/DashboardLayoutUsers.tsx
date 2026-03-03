@@ -4,6 +4,7 @@ import { useState } from 'react';
 import SidebarLayout from './Sidebar';
 import { useAuth } from '@/provider/AuthProvider';
 import Link from 'next/link';
+import ProtectedRoute from './ProtectedRoute';
 
 export default function DashboardLayoutUsers({ children, className }: Readonly<{ children: React.ReactNode; className?: string }>) {
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -23,56 +24,58 @@ export default function DashboardLayoutUsers({ children, className }: Readonly<{
     };
 
     return (
-        <main className={`bg-neutral-100 h-screen flex flex-col w-full overflow-hidden ${className}`}>
-            {/* Header untuk Mobile dan Tablet */}
-            <header className="md:hidden bg-neutral-100 border-b border-neutral-700 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
-                <div className="flex items-center gap-3">
-                    {/* Toggle Button */}
-                    <button
-                        onClick={toggleMobileSidebar}
-                        className="p-2 rounded-md bg-neutral-100 hover:bg-neutral-700 text-neutral-900
+        <ProtectedRoute allowedRoles={['pengguna']}>
+            <main className={`bg-neutral-50 h-screen flex flex-col w-full overflow-hidden ${className}`}>
+                {/* Header untuk Mobile dan Tablet */}
+                <header className="md:hidden bg-neutral-50 border-b border-neutral-700 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+                    <div className="flex items-center gap-3">
+                        {/* Toggle Button */}
+                        <button
+                            onClick={toggleMobileSidebar}
+                            className="p-2 rounded-md bg-neutral-50 hover:bg-neutral-700 text-neutral-900
                         transition duration-300 ease-in-out border border-neutral-700
                         hover:shadow-[-5px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5"
-                        aria-label="Toggle sidebar"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
+                            aria-label="Toggle sidebar"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
 
-                    {/* Logo/Title */}
-                    <h1 className="text-xl font-bold text-neutral-900">Deteksi Stego</h1>
-                </div>
-
-                {/* User Info - Mobile */}
-                <Link href={'/dashboard/profile'} className="flex items-center gap-2">
-                    <img
-                        src={user?.photo || `https://ui-avatars.com/api/?name=${user?.username || ''}&background=random&color=fff`}
-                        alt="User avatar"
-                        className="w-9 h-9 rounded-full object-cover border-2 border-neutral-700"
-                    />
-                    <div className="hidden sm:block">
-                        <p className="text-sm font-semibold text-white">{user?.username || ''}</p>
-                        <p className="text-xs text-neutral-400">{user?.email || ''}</p>
+                        {/* Logo/Title */}
+                        <h1 className="text-xl font-bold text-neutral-900">Deteksi Stego</h1>
                     </div>
-                </Link>
-            </header>
 
-            {/* Main Content Area */}
-            <div className="flex flex-1 w-full overflow-hidden">
-                {/* Sidebar - Hidden di mobile, icon-only di tablet, full di desktop */}
-                <SidebarLayout
-                    isMobileSidebarOpen={isMobileSidebarOpen}
-                    onCloseMobileSidebar={closeMobileSidebar}
-                    onToggleDesktopSidebar={toggleDesktopSidebar}
-                    isDesktopSidebarOpen={isDesktopSidebarOpen}
-                />
+                    {/* User Info - Mobile */}
+                    <Link href={'/dashboard/profile'} className="flex items-center gap-2">
+                        <img
+                            src={user?.photo || `https://ui-avatars.com/api/?name=${user?.username || ''}&background=random&color=fff`}
+                            alt="User avatar"
+                            className="w-9 h-9 rounded-full object-cover border-2 border-neutral-700"
+                        />
+                        <div className="hidden sm:block">
+                            <p className="text-sm font-semibold text-white">{user?.username || ''}</p>
+                            <p className="text-xs text-neutral-400">{user?.email || ''}</p>
+                        </div>
+                    </Link>
+                </header>
 
-                {/* Content Area */}
-                <div className="relative p-4 md:p-6 lg:p-8 pb-8 md:pb-10 lg:pb-12 flex flex-col gap-3 md:gap-6 flex-1 overflow-y-auto scrollbar_y_custom bg-neutral-100">
-                    {children}
+                {/* Main Content Area */}
+                <div className="flex flex-1 w-full overflow-hidden">
+                    {/* Sidebar - Hidden di mobile, icon-only di tablet, full di desktop */}
+                    <SidebarLayout
+                        isMobileSidebarOpen={isMobileSidebarOpen}
+                        onCloseMobileSidebar={closeMobileSidebar}
+                        onToggleDesktopSidebar={toggleDesktopSidebar}
+                        isDesktopSidebarOpen={isDesktopSidebarOpen}
+                    />
+
+                    {/* Content Area */}
+                    <div className="relative p-4 md:p-6 lg:p-8 pb-8 md:pb-10 lg:pb-12 flex flex-col gap-3 md:gap-6 flex-1 overflow-y-auto scrollbar_y_custom bg-neutral-50">
+                        {children}
+                    </div>
                 </div>
-            </div>
-        </main>
+            </main>
+        </ProtectedRoute>
     );
 }

@@ -11,8 +11,8 @@ export function RiwayatItemRow({ item, isActive }: { item: RiwayatItem; isActive
                 href={`/dashboard/analisis_stego/${item.id}`}
                 className={`flex flex-col px-3.5 py-2.5 rounded-sm transition-all duration-300 ease-in-out
                 border border-neutral-900
-                ${isActive ? 'bg-neutral-200 hover:-translate-y-0.5 hover:shadow-[-5px_5px_0_rgba(26,26,46,1)]'
-                        : 'bg-neutral-100 hover:-translate-y-0.5 hover:shadow-[-5px_5px_0_rgba(26,26,46,1)]'}`}
+                ${isActive ? 'bg-neutral-100 -translate-y-0.5 shadow-[-5px_5px_0_rgba(26,26,46,1)]'
+                        : 'bg-neutral-50 hover:-translate-y-0.5 hover:shadow-[-5px_5px_0_rgba(26,26,46,1)]'}`}
             >
                 <span className="text-xs font-medium line-clamp-1 text-nowrap text-neutral-900">
                     {formatDateTime(item.created_at)}
