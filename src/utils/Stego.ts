@@ -1,6 +1,6 @@
 // src/utils/Stego.ts
 
-import { Channel } from "@/types/analysis";
+import { Channel } from "@/types/shared";
 
 export type Mode = 'encode' | 'decode';
 
@@ -11,6 +11,9 @@ export interface StegoConfig {
 }
 
 export const DEFAULT_MARKER = '##END##';
+
+// Batas maksimal karakter pesan (harus konsisten antara encode & decode)
+export const MAX_CHARS = 100_000;
 
 // Traversal modes
 export type TraversalMode =
@@ -102,6 +105,18 @@ export function generateCoordinates(width: number, height: number, mode: Travers
 // LSB Encode
 export async function encodeLSB(imageFile: File, message: string, config: StegoConfig): Promise<string> {
     return new Promise((resolve, reject) => {
+        const endMarker = config.marker || DEFAULT_MARKER;
+        const fullMessage = message + endMarker;
+
+        // Validasi 1: Panjang pesan tidak boleh melebihi MAX_CHARS
+        if (message.length > MAX_CHARS) {
+            reject(new Error(
+                `Pesan terlalu panjang! Maksimal ${MAX_CHARS.toLocaleString()} karakter, ` +
+                `pesan saat ini: ${message.length.toLocaleString()} karakter.`
+            ));
+            return;
+        }
+
         const img = new Image();
         const url = URL.createObjectURL(imageFile);
         img.onload = () => {
@@ -114,29 +129,32 @@ export async function encodeLSB(imageFile: File, message: string, config: StegoC
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
 
-            const endMarker = config.marker || DEFAULT_MARKER;
-            const fullMessage = message + endMarker;
             const bits: number[] = [];
-            for (const char of fullMessage) {
-                const code = char.charCodeAt(0);
+            for (let i = 0; i < fullMessage.length; i++) {
+                const code = fullMessage.charCodeAt(i);
                 for (let b = 7; b >= 0; b--) bits.push((code >> b) & 1);
             }
 
             const coords = generateCoordinates(canvas.width, canvas.height, config.traversal);
-            const channelMap = { R: 0, G: 1, B: 2 };
+            const channelMap: Record<Channel, number> = { R: 0, G: 1, B: 2 };
 
-            const capacity = coords.length * config.channels.length;
-            if (bits.length > capacity) {
-                reject(new Error(`Pesan terlalu panjang! Kapasitas: ${Math.floor(capacity / 8)} karakter`));
+            // Validasi 2: Kapasitas gambar (bits) harus cukup untuk menampung pesan + marker
+            const capacityBits = coords.length * config.channels.length;
+            if (bits.length > capacityBits) {
+                reject(new Error(
+                    `Kapasitas gambar tidak cukup! ` +
+                    `Kapasitas: ${Math.floor(capacityBits / 8).toLocaleString()} karakter, ` +
+                    `pesan + marker: ${Math.ceil(bits.length / 8).toLocaleString()} karakter.`
+                ));
                 return;
             }
 
             let bitIdx = 0;
+            outer:
             for (const [x, y] of coords) {
-                if (bitIdx >= bits.length) break;
                 const pixelIdx = (y * canvas.width + x) * 4;
                 for (const ch of config.channels) {
-                    if (bitIdx >= bits.length) break;
+                    if (bitIdx >= bits.length) break outer;
                     const offset = channelMap[ch];
                     data[pixelIdx + offset] = (data[pixelIdx + offset] & ~1) | bits[bitIdx++];
                 }
@@ -146,7 +164,7 @@ export async function encodeLSB(imageFile: File, message: string, config: StegoC
             URL.revokeObjectURL(url);
             resolve(canvas.toDataURL('image/png'));
         };
-        img.onerror = () => reject(new Error('Gagal memuat gambar'));
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Gagal memuat gambar')); };
         img.src = url;
     });
 }
@@ -165,11 +183,13 @@ export async function decodeLSB(imageFile: File, config: StegoConfig): Promise<s
 
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
-            const channelMap = { R: 0, G: 1, B: 2 };
+            const channelMap: Record<Channel, number> = { R: 0, G: 1, B: 2 };
 
             const endMarker = config.marker || DEFAULT_MARKER;
             const coords = generateCoordinates(canvas.width, canvas.height, config.traversal);
-            let bits = '';
+
+            let bitBuffer = 0;
+            let bitCount = 0;
             let result = '';
 
             outer:
@@ -177,13 +197,30 @@ export async function decodeLSB(imageFile: File, config: StegoConfig): Promise<s
                 const pixelIdx = (y * canvas.width + x) * 4;
                 for (const ch of config.channels) {
                     const offset = channelMap[ch];
-                    bits += (data[pixelIdx + offset] & 1).toString();
-                    if (bits.length % 8 === 0) {
-                        const charCode = parseInt(bits.slice(-8), 2);
-                        result += String.fromCharCode(charCode);
-                        if (result.includes(endMarker)) {
+
+                    bitBuffer = (bitBuffer << 1) | (data[pixelIdx + offset] & 1);
+                    bitCount++;
+
+                    if (bitCount === 8) {
+                        result += String.fromCharCode(bitBuffer & 0xFF);
+                        bitBuffer = 0;
+                        bitCount = 0;
+
+                        // Cek marker hanya di akhir string (efisien)
+                        const checkFrom = Math.max(0, result.length - endMarker.length - 10);
+                        if (result.indexOf(endMarker, checkFrom) !== -1) {
                             URL.revokeObjectURL(url);
                             resolve(result.split(endMarker)[0]);
+                            break outer;
+                        }
+
+                        // Batas keamanan: konsisten dengan MAX_CHARS di encode
+                        if (result.length > MAX_CHARS) {
+                            URL.revokeObjectURL(url);
+                            reject(new Error(
+                                `Pesan tidak ditemukan (melebihi batas pencarian ${MAX_CHARS.toLocaleString()} karakter). ` +
+                                `Pastikan kanal, traversal, dan marker sudah benar.`
+                            ));
                             break outer;
                         }
                     }
@@ -193,7 +230,7 @@ export async function decodeLSB(imageFile: File, config: StegoConfig): Promise<s
             URL.revokeObjectURL(url);
             reject(new Error('Pesan tidak ditemukan atau konfigurasi tidak cocok'));
         };
-        img.onerror = () => reject(new Error('Gagal memuat gambar'));
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Gagal memuat gambar')); };
         img.src = url;
     });
 }

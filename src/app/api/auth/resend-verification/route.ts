@@ -112,21 +112,6 @@ export async function POST(request: NextRequest) {
             verificationToken
         );
 
-        // Log email attempt
-        try {
-            await supabase.from('email_logs').insert({
-                user_id: user.id,
-                email: user.email,
-                type: 'verification_resend',
-                status: emailResult.success ? 'sent' : 'failed',
-                message_id: emailResult.messageId,
-                error_message: emailResult.error,
-                created_at: nowWIB.toISOString(),
-            });
-        } catch (logError) {
-            console.error('Failed to log email:', logError);
-        }
-
         if (!emailResult.success) {
             return NextResponse.json(
                 {

@@ -10,9 +10,8 @@ export async function GET(
     try {
         // ✅ unwrap params (WAJIB di Next 16)
         const { id } = await context.params
-        console.log('id:', id)
+        // console.log('id:', id)
 
-        // 1️⃣ Fetch record analysis
         const { data: analysis, error: analysisError } = await supabaseServer
             .from('analysis')
             .select('*')
@@ -27,7 +26,6 @@ export async function GET(
             )
         }
 
-        // 2️⃣ Fetch force decode
         const { data: forceDecode, error: forceError } = await supabaseServer
             .from('analysis_forcedecode')
             .select('*')
@@ -38,7 +36,6 @@ export async function GET(
 
         if (forceError) throw forceError
 
-        // 3️⃣ Fetch AI interpretation (optional)
         let aiInterpretasi = undefined
 
         if (forceDecode) {

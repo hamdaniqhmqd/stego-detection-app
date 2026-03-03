@@ -24,8 +24,8 @@ export
                             href={menu.href ?? '#'}
                             className={`flex items-center ${isCollapsed ? 'justify-center px-3.5 py-3' : 'px-3.5 py-3'} rounded-sm group border border-neutral-700 transition-all duration-300 ease-in-out
                                 ${isDirectActive
-                                    ? 'text-neutral-900 bg-neutral-200 hover:-translate-y-0.5 hover:shadow-[-5px_5px_0_rgba(26,26,46,1)]'
-                                    : 'text-neutral-800 hover:text-neutral-900 hover:-translate-y-0.5 hover:shadow-[-5px_5px_0_rgba(26,26,46,1)]'
+                                    ? 'text-neutral-900 bg-neutral-50 -translate-y-0.5 shadow-[-5px_6px_0_rgba(26,26,46,1)]'
+                                    : 'text-neutral-800 hover:text-neutral-900 hover:-translate-y-0.5 hover:shadow-[-5px_6px_0_rgba(26,26,46,1)]'
                                 }`}
                         >
                             <span className={`${isCollapsed ? '' : 'shrink-0'}`}>

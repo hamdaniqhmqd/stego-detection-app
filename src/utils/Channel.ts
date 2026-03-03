@@ -1,6 +1,7 @@
 // src/utils/Channel.ts
 
-import { Channel, TEKNIK_LABEL, TeknikArah } from "@/types/analysis";
+import { StatusAncaman } from "@/hooks/useInterpretasiAI";
+import { Channel, TEKNIK_LABEL, TeknikArah } from "@/types/shared";
 
 export const CH_STYLE: Record<
     Channel,
@@ -45,3 +46,21 @@ export const CHANNEL_META: Record<Channel, { color: string; bg: string; border: 
 }
 
 export const TEKNIK_KEYS = Object.keys(TEKNIK_LABEL) as TeknikArah[]
+
+export const CHANNEL_COLOR: Record<string, string> = {
+    R: 'bg-red-50 text-red-700 border-red-200',
+    G: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    B: 'bg-blue-50 text-blue-700 border-blue-200',
+}
+
+export const STATUS_COLOR: Record<StatusAncaman, string> = {
+    Aman: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    Mencurigakan: 'bg-amber-50 text-amber-700 border-amber-200',
+    Berbahaya: 'bg-red-50 text-red-700 border-red-200',
+}
+
+export const STATUS_DOT: Record<StatusAncaman, string> = {
+    Aman: 'bg-emerald-500',
+    Mencurigakan: 'bg-amber-500',
+    Berbahaya: 'bg-red-500',
+}

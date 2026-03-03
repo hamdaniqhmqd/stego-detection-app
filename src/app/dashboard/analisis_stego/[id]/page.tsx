@@ -2,16 +2,16 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import DashboardLayoutUsers from '@/components/Layouts/DashboardLayoutUsers'
-import { useAnalisisDetail } from '@/hooks/useAnalisisDetail'
-import type { Channel, TeknikArah } from '@/types/analysis'
 import InputAnalisis from '../secion/InputAnalisis'
 import HasilAnalisis from '../secion/HasilAnalisis'
+import { Channel, TeknikArah } from '@/types/shared'
+import { useAnalysisDetail } from '@/hooks/useAnalisisDetail'
 
 export default function DetilAnalisisStegoPage() {
     const { id } = useParams();
     // console.log('id:', id)
     const router = useRouter()
-    const { data, isLoading, error } = useAnalisisDetail(id as string)
+    const { result: data, refresh, isLoading, error } = useAnalysisDetail(id as string)
 
     // Derive readOnlyData dari data yang di-fetch
     const readOnlyData = data
