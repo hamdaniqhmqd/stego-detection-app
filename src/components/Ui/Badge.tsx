@@ -1,22 +1,10 @@
 // components/Ui/Badge.tsx
 'use client'
 
+import { StatusAncaman } from "@/types/aiInterpretasi"
 import { Channel } from "@/types/shared"
 import { UserRole } from "@/types/Users"
-
-export type StatusAncaman = 'Aman' | 'Mencurigakan' | 'Berbahaya'
-
-export const STATUS_COLOR: Record<StatusAncaman, string> = {
-    Aman: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    Mencurigakan: 'bg-amber-50 text-amber-700 border-amber-200',
-    Berbahaya: 'bg-red-50 text-red-700 border-red-200',
-}
-
-export const STATUS_DOT: Record<StatusAncaman, string> = {
-    Aman: 'bg-emerald-500',
-    Mencurigakan: 'bg-amber-500',
-    Berbahaya: 'bg-red-500',
-}
+import { STATUS_COLOR, STATUS_DOT } from "@/utils/Channel"
 
 interface BadgeProps {
     status: StatusAncaman

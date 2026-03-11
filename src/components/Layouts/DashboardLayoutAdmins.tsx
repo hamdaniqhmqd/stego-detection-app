@@ -25,7 +25,7 @@ export default function DashboardLayoutAdmins({ children, className }: Readonly<
 
     return (
         <ProtectedRoute allowedRoles={['superadmin']}>
-            <main className={`bg-neutral-50 h-screen flex flex-col w-full overflow-hidden ${className}`}>
+            <main className={`bg-neutral-50 h-screen flex flex-col w-full overflow-hidden font-mono ${className}`}>
                 {/* Header untuk Mobile dan Tablet */}
                 <header className="md:hidden bg-neutral-50 border-b border-neutral-700 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
                     <div className="flex items-center gap-3">

@@ -6,33 +6,18 @@ import { useRouter } from 'next/navigation'
 import DashboardLayoutAdmins from '@/components/Layouts/DashboardLayoutAdmins'
 import { useAnalysisDetail } from '@/hooks/useAnalisisDetail'
 import HasilAnalisisAdmin from '@/components/Section/HasilAnalisisAdmin'
-import { fmtDate, StatusBadge } from '@/components/Modal/DetailModals'
+import { fmtDate, Section, StatusBadge } from '@/components/Modal/DetailModals'
 import { CHANNEL_COLOR, STATUS_COLOR, STATUS_DOT, CH_STYLE } from '@/utils/Channel'
 import { TEKNIK_LABEL, type TeknikArah } from '@/types/shared'
 import {
     buildTeknikStatusMap,
     makeTeknikKey,
-    summarizeInterpretasi,
     type StatusAncaman,
     type TeknikStatusMap,
 } from '@/hooks/useInterpretasiAI'
 import type { User } from '@/types/Users'
 import supabaseAnonKey from '@/libs/supabase/anon_key'
 import { useEffect, useState } from 'react'
-
-// Helpers 
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-    return (
-        <div className="space-y-3">
-            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-widest
-                pb-2 border-b border-neutral-200">
-                {title}
-            </h3>
-            {children}
-        </div>
-    )
-}
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
     return (
@@ -41,10 +26,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
             <div className="text-sm text-neutral-800">{children}</div>
         </div>
     )
-}
-
-function FieldGrid({ children }: { children: React.ReactNode }) {
-    return <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">{children}</div>
 }
 
 // Skeleton 
@@ -327,7 +308,7 @@ export default function AnalisisDetailPage({ params }: PageProps) {
                         <div className="space-y-5">
                             {/* Info analisis */}
                             <Section title="Info Analisis">
-                                <FieldGrid>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                     <Field label="Metode">
                                         <span className="px-2 py-0.5 bg-neutral-100 text-neutral-700
                                         rounded font-mono text-xs inline-block">
@@ -345,13 +326,13 @@ export default function AnalisisDetailPage({ params }: PageProps) {
                                             <span className="text-red-600 text-xs">{fmtDate(analysis.deleted_at)}</span>
                                         </Field>
                                     )}
-                                </FieldGrid>
+                                </div>
                             </Section>
 
                             {/* Force decode meta */}
                             {forceDecode ? (
                                 <Section title="Force Decode">
-                                    <FieldGrid>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                         <Field label="Durasi">
                                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1
                                             rounded-sm border border-neutral-200 bg-neutral-50
@@ -371,7 +352,7 @@ export default function AnalisisDetailPage({ params }: PageProps) {
                                         <Field label="Dijalankan">
                                             <span className="text-xs">{fmtDate(forceDecode.created_at)}</span>
                                         </Field>
-                                    </FieldGrid>
+                                    </div>
                                 </Section>
                             ) : (
                                 <div className="px-4 py-3 rounded-xl bg-neutral-50 border border-dashed

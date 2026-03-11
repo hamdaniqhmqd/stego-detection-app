@@ -271,13 +271,15 @@ export default function SidebarLayout({
                         </div>
 
                         {/* Mobile Riwayat */}
-                        <div className="flex-1 min-h-0 px-4 py-3">
-                            <p className="text-neutral-700 text-sm mb-2 font-normal">Riwayat Analisis</p>
-                            <RiwayatAnalisisSidebar
-                                userId={user?.id}
-                                isCollapsed={false}
-                            />
-                        </div>
+                        {!isAdmin && (
+                            <div className="flex-1 min-h-0 px-4 py-3">
+                                <p className="text-neutral-700 text-sm mb-2 font-normal">Riwayat Analisis</p>
+                                <RiwayatAnalisisSidebar
+                                    userId={user?.id}
+                                    isCollapsed={false}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {/* Mobile User */}

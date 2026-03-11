@@ -2,7 +2,7 @@
 'use client'
 
 import DashboardLayoutAdmins from '@/components/Layouts/DashboardLayoutAdmins'
-import { SectionInterpretasiAI } from './section/SectionInterpretasiAI'
+import { SectionInterpretasiAI } from '../../../components/Section/SectionInterpretasiAI'
 import { useRouter } from 'next/navigation'
 import { useInterpretasiAI } from '@/hooks/useInterpretasiAI'
 

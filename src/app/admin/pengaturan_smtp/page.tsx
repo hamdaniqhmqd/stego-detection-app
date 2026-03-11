@@ -3,19 +3,8 @@
 
 import DashboardLayoutAdmins from '@/components/Layouts/DashboardLayoutAdmins'
 import { SectionEmailConfig } from '@/components/Section/SectionEmailConfig'
-import { useEmailConfig } from '@/hooks/useEmailConfig'
 
 export default function EmailConfigPage() {
-    const {
-        configs,
-        isLoading,
-        error,
-        createConfig,
-        updateConfig,
-        deleteConfig,
-        toggleActive,
-    } = useEmailConfig()
-
     return (
         <DashboardLayoutAdmins>
             <div className="w-full min-h-screen bg-neutral-50">
@@ -26,15 +15,8 @@ export default function EmailConfigPage() {
                         <div className="flex-1 h-px bg-neutral-300" />
                     </div>
 
-                    <SectionEmailConfig
-                        configs={configs}
-                        isLoading={isLoading}
-                        error={error}
-                        onCreate={createConfig}
-                        onUpdate={updateConfig}
-                        onDelete={deleteConfig}
-                        onToggleActive={toggleActive}
-                    />
+                    {/* Hook dipakai langsung di dalam komponen */}
+                    <SectionEmailConfig />
 
                 </div>
             </div>

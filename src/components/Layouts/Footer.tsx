@@ -5,7 +5,7 @@ import React from 'react';
 
 const Footer: React.FC = () => {
     return (
-        <footer className="bg-black">
+        <footer className="bg-black font-mono">
             <div className="mx-auto w-full p-4 py-6 lg:py-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                     {/* Brand */}
@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
                     <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="w-full flex flex-col">
                             <h2 className="text-lg text-gray-50 mb-1 font-semibold">Menu</h2>
-                            <div className="flex items-center flex-wrap gap-2 text-sm">
+                            <div className="flex flex-col gap-2 text-sm">
                                 <Link href={'/dashboard/buat_stego'}
                                     className={`relative flex items-center text-gray-500 hover:text-gray-300 hover:underline text-nowrap`}>
                                     Buat Stego
@@ -42,7 +42,7 @@ const Footer: React.FC = () => {
 
                         <div className="w-full flex flex-col">
                             <h2 className="text-lg text-gray-50 mb-1 font-semibold">Autentikasi</h2>
-                            <div className="flex items-center flex-wrap gap-2 text-sm">
+                            <div className="flex flex-col gap-2 text-sm">
                                 <Link href={'/auth/login'}
                                     className={`relative flex items-center text-gray-500 hover:text-gray-300 hover:underline text-nowrap`}>
                                     Masuk

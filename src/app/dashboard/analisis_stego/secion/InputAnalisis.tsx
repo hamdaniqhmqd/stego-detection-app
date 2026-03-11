@@ -8,7 +8,7 @@ import { TEKNIK_LABEL, Channel, TeknikArah, DecodeTeknik } from '@/types/shared'
 import { AuthUser } from '@/types/Users'
 import { CHANNEL_META, CHANNELS, TEKNIK_KEYS } from '@/utils/Channel'
 import { Tooltip } from '@/components/Ui/ToolTip'
-import SectionLabel from '@/components/Ui/SectionLabel'
+import { InfoIcon } from '@/utils/Icons'
 
 interface InputAnalisisProps {
     user?: AuthUser
@@ -22,15 +22,6 @@ interface InputAnalisisProps {
         selectedTeknik?: Set<TeknikArah>
         useAI?: boolean
     }
-}
-
-// ── Ikon info kecil (reusable) ────────────────────────────────
-function InfoIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
-            <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z" />
-        </svg>
-    )
 }
 
 export default function InputAnalisis({
@@ -184,118 +175,122 @@ export default function InputAnalisis({
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-7xl mx-auto">
 
-            {/* ── Kiri: Upload Gambar ── */}
-            <div className="bg-neutral-100 rounded-md shadow-sm p-6 border border-neutral-900">
-                <div className="flex items-center justify-between mb-5 gap-4">
-                    <h2 className="flex-1 flex items-center gap-2 text-sm tracking-widest uppercase font-normal text-neutral-900">
-                        {readOnly ? 'Preview Gambar' : 'Unggah Gambar'}
-                        <div className="flex-1 h-px bg-neutral-300" />
-                    </h2>
-                    {readOnly && (
-                        <Tooltip text="Mode hanya lihat — konfigurasi tidak dapat diubah dari halaman ini.">
-                            <span className="text-xs px-2 py-0.5 rounded border border-neutral-700 text-neutral-700 font-mono cursor-default">
-                                readonly
-                            </span>
-                        </Tooltip>
-                    )}
-                </div>
+            {/*  Kiri: Upload Gambar  */}
+            <div className="bg-neutral-100 rounded-md shadow-sm p-6 border border-neutral-900 flex flex-col gap-5">
 
-                <div
-                    className={`border border-dashed border-neutral-800 rounded-sm p-4 text-center transition-all duration-200 bg-neutral-100
-                        ${readOnly ? 'cursor-default' : 'hover:border-neutral-700 hover:bg-neutral-200 cursor-pointer group'}`}
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
-                    onClick={() => !readOnly && document.getElementById('fileInput')?.click()}
-                >
-                    {previewUrl ? (
-                        <div className="relative w-full h-72">
-                            <img src={previewUrl} alt="Preview" className="w-full h-full object-contain rounded-xl" />
+                {/* Upload Gambar */}
+                <div className="">
+                    <div className="flex items-center justify-between mb-5 gap-4">
+                        <h2 className="flex-1 flex items-center gap-2 text-sm tracking-widest uppercase font-semibold text-neutral-900">
+                            {readOnly ? 'Preview Gambar' : 'Unggah Gambar'}
                             {!readOnly && (
-                                <Tooltip text="Hapus gambar dan reset semua konfigurasi ke default.">
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleReset() }}
-                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1
-                                            hover:bg-red-600 transition-colors shadow-lg hover:scale-110 transform duration-200"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                        </svg>
-                                    </button>
+                                <Tooltip text="Masukkan gambar yang akan dianalisis untuk mendeteksi kemungkinan adanya pesan tersembunyi menggunakan teknik LSB.">
+                                    <span className="text-neutral-700 cursor-default"><InfoIcon /></span>
                                 </Tooltip>
                             )}
-                        </div>
-                    ) : (
-                        <div className="py-8">
-                            <div className="mb-4 flex justify-center">
-                                <div className={`p-4 bg-neutral-300 rounded-full ${!readOnly ? 'group-hover:bg-neutral-400' : ''} transition-colors`}>
-                                    <svg className="h-14 w-14 text-neutral-900" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </div>
+                            <div className="flex-1 h-px bg-neutral-300" />
+                        </h2>
+                        {readOnly && (
+                            <Tooltip text="Mode hanya lihat — konfigurasi tidak dapat diubah dari halaman ini.">
+                                <span className="text-xs px-2 py-0.5 rounded border border-neutral-700 text-neutral-700 font-mono cursor-default">
+                                    readonly
+                                </span>
+                            </Tooltip>
+                        )}
+                    </div>
+
+                    <div
+                        className={`border border-dashed border-neutral-800 rounded-sm p-4 text-center transition-all duration-200 bg-neutral-100
+                        ${readOnly ? 'cursor-default' : 'hover:border-neutral-700 hover:bg-neutral-200 cursor-pointer group'}`}
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
+                        onClick={() => !readOnly && document.getElementById('fileInput')?.click()}
+                    >
+                        {previewUrl ? (
+                            <div className="relative w-full h-72">
+                                <img src={previewUrl} alt="Preview" className="w-full h-full object-contain rounded-xl" />
+                                {!readOnly && (
+                                    <Tooltip text="Hapus gambar dan reset semua konfigurasi ke default.">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleReset() }}
+                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1
+                                            hover:bg-red-600 transition-colors shadow-lg hover:scale-110 transform duration-200"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </Tooltip>
+                                )}
                             </div>
-                            {readOnly ? (
-                                <p className="text-sm text-neutral-600 italic">Tidak ada pratinjau gambar</p>
-                            ) : (
-                                <>
-                                    <p className="text-base text-neutral-700 mb-2">
-                                        <span className="font-semibold text-neutral-800">Klik untuk upload</span> atau drag and drop
-                                    </p>
-                                    <p className="text-sm text-neutral-600">Direkomendasikan format <strong className="text-neutral-500">PNG</strong></p>
-                                    <p className="text-xs text-neutral-700 mt-1">(Maksimal 5MB)</p>
-                                </>
+                        ) : (
+                            <div className="py-8">
+                                <div className="mb-4 flex justify-center">
+                                    <div className={`p-4 bg-neutral-300 rounded-full ${!readOnly ? 'group-hover:bg-neutral-400' : ''} transition-colors`}>
+                                        <svg className="h-14 w-14 text-neutral-900" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                {readOnly ? (
+                                    <p className="text-sm text-neutral-600 italic">Tidak ada pratinjau gambar</p>
+                                ) : (
+                                    <>
+                                        <p className="text-base text-neutral-700 mb-2">
+                                            <span className="font-semibold text-neutral-800">Klik untuk upload</span> atau drag and drop
+                                        </p>
+                                        <p className="text-sm text-neutral-600">Direkomendasikan format <strong className="text-neutral-500">PNG</strong></p>
+                                        <p className="text-xs text-neutral-700 mt-1">(Maksimal 5MB)</p>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <input id="fileInput" type="file" accept="image/*" onChange={handleImageUpload} disabled={readOnly} className="hidden" />
+
+                    {readOnly && readOnlyData?.analysis && (
+                        <div className="mt-4 space-y-1.5">
+                            <p className="text-xs text-neutral-500">
+                                <span className="text-neutral-600">ID Analisis:</span>{' '}
+                                <span className="font-semibold text-neutral-900 break-all">{readOnlyData.analysis.id}</span>
+                            </p>
+                            <p className="text-xs text-neutral-500">
+                                <span className="text-neutral-600">Dibuat:</span>{' '}
+                                <strong className="font-semibold text-neutral-900">
+                                    {new Date(readOnlyData.analysis.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
+                                </strong>
+                            </p>
+                            {readOnlyData.analysis.waktu_proses && (
+                                <p className="text-xs text-neutral-500">
+                                    <span className="text-neutral-400">Waktu Proses:</span>{' '}
+                                    {readOnlyData.analysis.waktu_proses}
+                                </p>
                             )}
+                        </div>
+                    )}
+
+                    {!readOnly && selectedImage && (
+                        <div className="mt-4 p-3 bg-neutral-100 rounded-sm border border-neutral-900">
+                            <p className="text-sm font-medium text-neutral-900 truncate">{selectedImage.name}</p>
+                            <div className="flex gap-4 mt-1">
+                                <p className="text-xs text-neutral-900"><span className="text-neutral-700">Ukuran:</span> {(selectedImage.size / 1024).toFixed(2)} KB</p>
+                                <p className="text-xs text-neutral-900"><span className="text-neutral-700">Tipe:</span> {selectedImage.type}</p>
+                            </div>
                         </div>
                     )}
                 </div>
 
-                <input id="fileInput" type="file" accept="image/*" onChange={handleImageUpload} disabled={readOnly} className="hidden" />
-
-                {readOnly && readOnlyData?.analysis && (
-                    <div className="mt-4 p-3 bg-neutral-100 rounded-sm border border-neutral-900 space-y-1.5">
-                        <p className="text-xs text-neutral-500">
-                            <span className="text-neutral-600">ID Analisis:</span>{' '}
-                            <span className="font-semibold text-neutral-900 break-all">{readOnlyData.analysis.id}</span>
-                        </p>
-                        <p className="text-xs text-neutral-500">
-                            <span className="text-neutral-600">Dibuat:</span>{' '}
-                            <strong className="font-semibold text-neutral-900">
-                                {new Date(readOnlyData.analysis.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
-                            </strong>
-                        </p>
-                        {readOnlyData.analysis.waktu_proses && (
-                            <p className="text-xs text-neutral-500">
-                                <span className="text-neutral-400">Waktu Proses:</span>{' '}
-                                {readOnlyData.analysis.waktu_proses}
-                            </p>
-                        )}
-                    </div>
-                )}
-
-                {!readOnly && selectedImage && (
-                    <div className="mt-4 p-3 bg-neutral-100 rounded-sm border border-neutral-900">
-                        <p className="text-sm font-medium text-neutral-900 truncate">{selectedImage.name}</p>
-                        <div className="flex gap-4 mt-1">
-                            <p className="text-xs text-neutral-900"><span className="text-neutral-700">Ukuran:</span> {(selectedImage.size / 1024).toFixed(2)} KB</p>
-                            <p className="text-xs text-neutral-900"><span className="text-neutral-700">Tipe:</span> {selectedImage.type}</p>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* ── Kanan: Konfigurasi ── */}
-            <div className={`bg-neutral-100 rounded-sm shadow-sm p-6 border border-neutral-900 flex flex-col gap-5
-                ${readOnly ? 'opacity-60 pointer-events-none select-none' : ''}`}>
-
                 {/* Pilih Channel */}
-                <div>
+                <div className={`${readOnly ? 'opacity-80' : ''}`}>
                     <div className="flex items-center gap-1.5 mb-3">
                         <div className="flex-1 flex items-center gap-1">
-                            <h2 className="text-sm tracking-widest uppercase font-normal text-neutral-900">
+                            <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
                                 Pilih Channel
                             </h2>
                             <span className="text-xs text-neutral-700">({selectedChannels.size} dipilih)</span>
                             <Tooltip text="Channel warna yang akan diekstrak bit LSB-nya. R = Red, G = Green, B = Blue. Lebih banyak channel = lebih banyak kombinasi yang dianalisis.">
-                                <span className="text-neutral-400 cursor-default"><InfoIcon /></span>
+                                <span className="text-neutral-700 cursor-default"><InfoIcon /></span>
                             </Tooltip>
                             <div className="flex-1 h-px bg-neutral-300" />
                         </div>
@@ -331,17 +326,22 @@ export default function InputAnalisis({
                         })}
                     </div>
                 </div>
+            </div>
+
+            {/*  Kanan: Konfigurasi  */}
+            <div className={`bg-neutral-100 rounded-sm shadow-sm p-6 border border-neutral-900 flex flex-col gap-5
+                ${readOnly ? 'opacity-80' : ''}`}>
 
                 {/* Pilih Teknik */}
                 <div>
                     <div className="flex items-center gap-1.5 mb-3">
                         <div className="flex-1 flex items-center gap-1">
-                            <h2 className="text-sm tracking-widest uppercase font-normal text-neutral-900">
+                            <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
                                 Pilih Teknik Ekstraksi
                             </h2>
                             <span className="text-xs text-neutral-700">({selectedTeknik.size} dipilih)</span>
                             <Tooltip text="Teknik menentukan urutan baca piksel saat mengekstrak bit LSB. Setiap teknik menghasilkan bit yang berbeda dari gambar yang sama. Lebih banyak teknik = lebih lama prosesnya.">
-                                <span className="text-neutral-400 cursor-default"><InfoIcon /></span>
+                                <span className="text-neutral-700 cursor-default"><InfoIcon /></span>
                             </Tooltip>
                             <div className="flex-1 h-px bg-neutral-300" />
                         </div>
@@ -360,8 +360,9 @@ export default function InputAnalisis({
                                         disabled={readOnly}
                                         className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-sm
                                             border transition-all duration-200 text-left ease-in-out
-                                            hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
-                                            ${active ? 'border-neutral-700 bg-neutral-100 shadow-md' : 'border-neutral-300 bg-neutral-100'}`}
+                                            ${active ?
+                                                'border-neutral-700 bg-neutral-100 shadow-[-4px_5px_0_rgba(26,26,46,1)] -translate-y-0.5'
+                                                : 'border-neutral-300 bg-neutral-100 hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5'}`}
                                     >
                                         <span className={`shrink-0 w-4 h-4 rounded border flex items-center justify-center
                                             ${active ? 'bg-neutral-900 border-neutral-900' : 'border-neutral-300'}`}>
@@ -385,9 +386,9 @@ export default function InputAnalisis({
                 {/* Interpretasi AI */}
                 <div>
                     <div className="flex items-center gap-1.5 mb-3">
-                        <h2 className="text-sm font-normal text-neutral-900">Interpretasi dengan AI?</h2>
+                        <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">Interpretasi dengan AI?</h2>
                         <Tooltip text="Jika diaktifkan, semua hasil ekstraksi akan langsung dikirim ke AI untuk dianalisis — mendeteksi pesan tersembunyi dan menilai tingkat ancaman. Membutuhkan waktu lebih lama.">
-                            <span className="text-neutral-400 cursor-default"><InfoIcon /></span>
+                            <span className="text-neutral-700 cursor-default"><InfoIcon /></span>
                         </Tooltip>
                         <div className="flex-1 h-px bg-neutral-300" />
                     </div>
@@ -408,8 +409,9 @@ export default function InputAnalisis({
                                         disabled={readOnly}
                                         className={`w-full flex items-center gap-2 px-4 py-3 rounded-sm
                                             border transition-all duration-200 text-left ease-in-out
-                                            hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
-                                            ${active ? 'border-neutral-800 bg-neutral-100 shadow-md' : 'border-neutral-400 bg-neutral-100'}`}
+                                            ${active ?
+                                                'border-neutral-800 bg-neutral-100 shadow-[-4px_5px_0_rgba(26,26,46,1)] -translate-y-0.5'
+                                                : 'border-neutral-400 bg-neutral-100 hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5'}`}
                                     >
                                         <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center
                                             ${active ? 'border-neutral-900' : 'border-neutral-400'}`}>

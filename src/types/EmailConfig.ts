@@ -13,8 +13,9 @@ export interface EmailConfig {
     is_active: boolean
     created_at: string
     updated_at: string
+    deleted_at: string | null
 }
 
-export type CreateEmailConfigPayload = Omit<EmailConfig, 'id' | 'created_at' | 'updated_at'>
+export type CreateEmailConfigPayload = Omit<EmailConfig, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>
 
 export type UpdateEmailConfigPayload = Partial<CreateEmailConfigPayload>

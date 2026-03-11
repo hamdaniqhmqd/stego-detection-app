@@ -23,16 +23,14 @@ export function Tooltip({ text, children }: { text: string; children: React.Reac
             {pos && typeof document !== 'undefined' && createPortal(
                 <span
                     style={{
-                        position: 'fixed',
                         left: pos.x,
                         top: pos.y - 8,
-                        transform: 'translate(-50%, -100%)',
                         zIndex: 9999,
                         pointerEvents: 'none',
                     }}
-                    className="px-2 py-1 max-w-64 rounded-sm bg-neutral-900 text-white text-xs font-medium shadow-lg">
+                    className="fixed -translate-x-1/2 -translate-y-full px-2 py-1 max-w-64 
+                    rounded-sm bg-red-50 text-red-600 text-xs font-medium shadow-lg border border-red-300">
                     {text}
-                    <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-neutral-900" />
                 </span>,
                 document.body
             )}

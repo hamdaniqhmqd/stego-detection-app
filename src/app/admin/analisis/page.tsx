@@ -2,24 +2,11 @@
 'use client'
 
 import DashboardLayoutAdmins from '@/components/Layouts/DashboardLayoutAdmins'
-import { SectionAnalisis } from './section/SectionAnalisis'
+import { SectionAnalisis } from '../../../components/Section/SectionAnalisis'
 import { useRouter } from 'next/navigation'
 import { useAnalysis } from '@/hooks/useAnalysis'
 
 export default function AnalisisPage() {
-    const router = useRouter()
-
-    const {
-        items: analysis,
-        isLoading: analysisLoading,
-        isLoadingMore: analysisLoadingMore,
-        hasMore: analysisHasMore,
-        loadMore: analysisLoadMore,
-        softDelete: analysisSoftDelete,
-        restore: analysisRestore,
-        hardDelete: analysisHardDelete,
-    } = useAnalysis()
-
     return (
         <DashboardLayoutAdmins>
             <div className="w-full min-h-screen bg-neutral-50">
@@ -30,17 +17,7 @@ export default function AnalisisPage() {
                         <div className="flex-1 h-px bg-neutral-300" />
                     </div>
 
-                    <SectionAnalisis
-                        items={analysis}
-                        isLoading={analysisLoading}
-                        hasMore={analysisHasMore}
-                        isLoadingMore={analysisLoadingMore}
-                        onLoadMore={analysisLoadMore}
-                        onSoftDelete={analysisSoftDelete}
-                        onRestore={analysisRestore}
-                        onHardDelete={analysisHardDelete}
-                        onDetail={(item) => router.push(`/admin/analisis/${item.id}`)}
-                    />
+                    <SectionAnalisis />
 
                 </div>
             </div>

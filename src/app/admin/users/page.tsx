@@ -1,22 +1,12 @@
-// app/admin/page.tsx
-
 'use client'
 
 import DashboardLayoutAdmins from '@/components/Layouts/DashboardLayoutAdmins'
-import { useUsers } from '@/hooks/useUsers'
-import { SectionPengguna } from './section/SectionPengguna'
+import { SectionPengguna } from '../../../components/Section/SectionPengguna'
 import { useState } from 'react'
 import { ModalDetailUser } from '@/components/Modal/DetailModals'
 import { User } from '@/types/Users'
 
-export default function DashboardAdminPage() {
-    const {
-        items: users, total: usersTotal,
-        isLoading: usersLoading, isLoadingMore: usersLoadingMore, hasMore: usersHasMore,
-        loadMore: usersLoadMore,
-        softDelete: userSoftDelete, restore: userRestore, hardDelete: userHardDelete,
-    } = useUsers()
-
+export default function UserAdminPage() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
     return (
@@ -29,20 +19,10 @@ export default function DashboardAdminPage() {
                         <div className="flex-1 h-px bg-neutral-300" />
                     </div>
 
-                    <SectionPengguna
-                        items={users}
-                        isLoading={usersLoading}
-                        hasMore={usersHasMore}
-                        isLoadingMore={usersLoadingMore}
-                        onLoadMore={usersLoadMore}
-                        onSoftDelete={userSoftDelete}
-                        onRestore={userRestore}
-                        onHardDelete={userHardDelete}
-                        onDetail={(user) => setSelectedUser(user as unknown as User)}
-                    />
+                    <SectionPengguna onDetail={setSelectedUser} />
 
                     <ModalDetailUser
-                        user={selectedUser as unknown as User}
+                        user={selectedUser}
                         open={!!selectedUser}
                         onClose={() => setSelectedUser(null)}
                     />
