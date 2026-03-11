@@ -1,4 +1,4 @@
-// app/admin/analisis/page.tsx
+// app/admin/interpretasi/page.tsx
 'use client'
 
 import DashboardLayoutAdmins from '@/components/Layouts/DashboardLayoutAdmins'
