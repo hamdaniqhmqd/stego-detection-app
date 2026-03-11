@@ -83,6 +83,13 @@ export const fmtDayMonth = (d: string) =>
 export const fmtMonth = (d: string) =>
     new Date(d).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })
 
+export const fmtDate = (d?: string) => d
+    ? new Date(d).toLocaleDateString('id-ID', {
+        day: '2-digit', month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+    })
+    : '—'
+
 export function fmtTokens(n: number): string {
     if (n >= 1000) return `${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}k`
     return String(n)

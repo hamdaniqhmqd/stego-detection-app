@@ -4,12 +4,12 @@
 
 import React, { useState } from 'react'
 import { StatCard } from '@/components/Card/StatCard'
-import type { StatusAncaman } from '@/components/Ui/Badge'
 import type { AnalysisInterpretasiAI } from '@/types/analysis'
 import type { AnalysisListItem } from '@/hooks/useAnalysis'
 import type { User } from '@/types/Users'
 import { ChartDashboard } from '@/components/Chart/ChartDashboard'
 import { Tooltip } from '@/components/Ui/ToolTip'
+import { StatusAncaman } from '@/types/aiInterpretasi'
 
 interface DashboardOverviewProps {
     users: User[]

@@ -1,6 +1,6 @@
 // src/utils/Channel.ts
 
-import { StatusAncaman } from "@/hooks/useInterpretasiAI";
+import { StatusAncaman } from "@/types/aiInterpretasi"
 import { Channel, TEKNIK_LABEL, TeknikArah } from "@/types/shared";
 
 export const CH_STYLE: Record<

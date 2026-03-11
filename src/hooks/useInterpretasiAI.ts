@@ -4,11 +4,11 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import supabaseAnonKey from '@/libs/supabase/anon_key'
 import type { AnalysisInterpretasiAI, HasilInterpretasi } from '@/types/analysis'
 import type { User } from '@/types/Users'
+import { StatusAncaman } from '@/types/aiInterpretasi'
 
 const TABLE = 'analysis_interpretasi_ai'
 const PAGE_SIZE = 5
 
-export type StatusAncaman = 'Aman' | 'Mencurigakan' | 'Berbahaya'
 export type TeknikKey = `${string}:${string}`
 export type TeknikStatusMap = Record<TeknikKey, StatusAncaman>
 

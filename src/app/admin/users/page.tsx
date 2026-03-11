@@ -2,9 +2,9 @@
 
 import DashboardLayoutAdmins from '@/components/Layouts/DashboardLayoutAdmins'
 import { SectionPengguna } from '../../../components/Section/SectionPengguna'
-import { useState } from 'react'
-import { ModalDetailUser } from '@/components/Modal/DetailModals'
+import { Suspense, useState } from 'react'
 import { User } from '@/types/Users'
+import { ModalDetailUser } from '@/components/Modal/ModalDetailUser'
 
 export default function UserAdminPage() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null)
@@ -21,11 +21,13 @@ export default function UserAdminPage() {
 
                     <SectionPengguna onDetail={setSelectedUser} />
 
-                    <ModalDetailUser
-                        user={selectedUser}
-                        open={!!selectedUser}
-                        onClose={() => setSelectedUser(null)}
-                    />
+                    <Suspense fallback={<></>}>
+                        <ModalDetailUser
+                            user={selectedUser}
+                            open={!!selectedUser}
+                            onClose={() => setSelectedUser(null)}
+                        />
+                    </Suspense>
                 </div>
             </div>
         </DashboardLayoutAdmins>

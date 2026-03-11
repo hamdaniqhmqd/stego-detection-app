@@ -6,8 +6,9 @@ import type { AnalysisResult, HasilInterpretasi } from '@/types/analysis'
 import { CH_STYLE, CHANNEL_COLOR, ANCAMAN_STYLE } from '@/utils/Channel'
 import DecodeCard from './DecodeCard'
 import { DecodedRawItem, DecodedBitItem, TEKNIK_LABEL, type TeknikArah, type Channel } from '@/types/shared'
-import { buildTeknikStatusMap, makeTeknikKey, type StatusAncaman, type TeknikStatusMap } from '@/hooks/useInterpretasiAI'
+import { buildTeknikStatusMap, makeTeknikKey, type TeknikStatusMap } from '@/hooks/useInterpretasiAI'
 import { Tooltip } from '@/components/Ui/ToolTip'
+import { StatusAncaman } from '@/types/aiInterpretasi'
 
 function itemKey(item: DecodedRawItem) {
     return `${item.channel}__${item.arah}`

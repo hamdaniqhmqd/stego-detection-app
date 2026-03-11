@@ -16,10 +16,7 @@ import { Pagination } from '../Table/Pagination'
 import UserCell from '../Ui/UserCell'
 import { User } from '@/types/Users'
 import { TokenUsageCell } from '../Ui/TokenUsageCell'
-
-interface SectionInterpretasiAIProps {
-    onDetail?: (item: InterpretasiAIWithUser) => void
-}
+import { useRouter } from 'next/navigation'
 
 function summarizeStatus(hasil: InterpretasiAIWithUser['hasil']): Partial<Record<StatusAncaman, number>> {
     return (hasil ?? []).reduce<Partial<Record<StatusAncaman, number>>>((acc, h) => {
@@ -29,8 +26,9 @@ function summarizeStatus(hasil: InterpretasiAIWithUser['hasil']): Partial<Record
     }, {})
 }
 
-// ── Komponen utama ────────────────────────────────────────────
-export function SectionInterpretasiAI({ onDetail }: SectionInterpretasiAIProps) {
+export function SectionInterpretasiAI() {
+    const router = useRouter()
+
     const [showDeleted, setShowDeleted] = useState(false)
     const [confirm, setConfirm] = useState<ConfirmState>(null)
     const [pending, setPending] = useState<string | null>(null)
@@ -152,11 +150,11 @@ export function SectionInterpretasiAI({ onDetail }: SectionInterpretasiAIProps) 
                         {/* Aksi */}
                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center gap-0.5">
-                                {onDetail && (
+                                {item.id && (
                                     <ActionBtn
                                         icon={<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M128,56C48,56,16,128,16,128s32,72,112,72,112-72,112-72S208,56,128,56Zm0,112a40,40,0,1,1,40-40A40,40,0,0,1,128,168Z" opacity="0.2"></path><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"></path></svg>}
                                         label="Detail"
-                                        onClick={() => onDetail(item)} />
+                                        onClick={() => router.push(`/interpretasi-ai/${item.id}`)} />
                                 )}
                                 {item.deleted_at ? (
                                     <ActionBtn
