@@ -6,8 +6,9 @@ import type { AnalysisResult, HasilInterpretasi } from '@/types/analysis'
 import { CH_STYLE, CHANNEL_COLOR, ANCAMAN_STYLE } from '@/utils/Channel'
 import DecodeCard from './DecodeCard'
 import { DecodedRawItem, DecodedBitItem, TEKNIK_LABEL, type TeknikArah, type Channel } from '@/types/shared'
-import { buildTeknikStatusMap, makeTeknikKey, type StatusAncaman, type TeknikStatusMap } from '@/hooks/useInterpretasiAI'
+import { buildTeknikStatusMap, makeTeknikKey, type TeknikStatusMap } from '@/hooks/useInterpretasiAI'
 import { Tooltip } from '@/components/Ui/ToolTip'
+import { StatusAncaman } from '@/types/aiInterpretasi'
 
 function itemKey(item: DecodedRawItem) {
     return `${item.channel}__${item.arah}`
@@ -40,7 +41,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
     const getBitItem = (item: DecodedRawItem): DecodedBitItem | undefined =>
         decodedBits.find((b) => b.channel === item.channel && b.arah === item.arah)
 
-    // ── Build teknikByArah ────────────────────────────────────
+    // Build teknikByArah
     const teknikByArah = new Map<TeknikArah, Channel[]>()
     for (const t of (analysis.teknik ?? [])) {
         const existing = teknikByArah.get(t.arah)
@@ -64,7 +65,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
     const arahKeys = [...teknikByArah.keys()]
     const { toggle: toggleAccordion, isOpen } = useAccordion(arahKeys)
 
-    // ── Multi-select ──────────────────────────────────────────
+    // Multi-select
     const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set())
     const [isInterpreting, setIsInterpreting] = useState(false)
     const [interpretingKeys, setInterpretingKeys] = useState<Set<string>>(new Set())
@@ -145,7 +146,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
     return (
         <div className="max-w-7xl mx-auto mt-3 space-y-4">
 
-            {/* ── Header ── */}
+            {/* Header */}
             <div className="bg-neutral-100 rounded-sm px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3
                 border border-neutral-900">
                 <div className="flex-1">
@@ -230,7 +231,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                 )}
             </div>
 
-            {/* ── Accordion list ── */}
+            {/* Accordion list */}
             <div className="space-y-3">
                 {[...teknikByArah.entries()].map(([arah, channels], arahIdx) => {
                     const open = isOpen(arah)
@@ -248,7 +249,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                     return (
                         <div key={arah} className="pb-1.5">
 
-                            {/* ── Accordion header ── */}
+                            {/* Accordion header */}
                             <button
                                 type="button"
                                 onClick={() => toggleAccordion(arah)}
@@ -318,7 +319,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                                 </Tooltip>
                             </button>
 
-                            {/* ── Accordion body ── */}
+                            {/* Accordion body */}
                             {open && (
                                 <div className="divide-y divide-neutral-200 bg-neutral-50">
                                     {channels.map((ch, chIdx) => {
@@ -378,7 +379,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                 )}
             </div>
 
-            {/* ── Info hint ── */}
+            {/* Info hint */}
             {!someSelected && localAIResults.length === 0 && selectableItems.length > 0 && (
                 <div className="flex items-center gap-3 px-5 py-3 rounded-sm bg-neutral-50 border border-neutral-800">
                     <svg className="h-4 w-4 text-neutral-900 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

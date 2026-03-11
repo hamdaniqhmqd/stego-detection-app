@@ -17,7 +17,7 @@ const Navbar: React.FC = () => {
     return (
         <nav
             className={`
-                fixed top-0 left-0 right-0 z-50
+                fixed top-0 left-0 right-0 z-50 font-mono
                 transition-all duration-300 ease-in-out
                 ${scrolled
                     ? 'mx-4 mt-3 rounded-lg bg-white/40 backdrop-blur-md shadow-lg shadow-neutral-900/10 border border-neutral-200/60'

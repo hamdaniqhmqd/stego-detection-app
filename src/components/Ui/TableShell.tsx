@@ -32,8 +32,8 @@ export function TableShell({
         <div className="bg-white rounded-sm border border-neutral-100 shadow-sm overflow-hidden">
 
             <div className="px-6 py-4 border-b border-neutral-100
-                flex items-center justify-between gap-4 flex-wrap">
-                <div>
+                flex gap-4 flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div className="">
                     <div className="flex items-center gap-2">
                         <h2 className="text-base font-semibold text-neutral-900">{title}</h2>
                         {badge !== undefined && (
@@ -68,7 +68,7 @@ export function TableShell({
                             ))}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-neutral-50">
+                    <tbody className="divide-y divide-neutral-50 overflow-x-auto scrollbar_x_custom">
                         {isEmpty ? (
                             <tr>
                                 <td
@@ -103,28 +103,5 @@ export function TableShell({
                 </div>
             )}
         </div>
-    )
-}
-
-interface SkeletonRowsProps {
-    cols: number
-    rows?: number
-}
-
-export function SkeletonRows({ cols, rows = 4 }: SkeletonRowsProps) {
-    return (
-        <>
-            {Array(rows).fill(0).map((_, r) => (
-                <tr key={r}>
-                    {Array(cols).fill(0).map((_, c) => (
-                        <td key={c} className="px-4 py-3">
-                            <div className={`h-4 bg-neutral-100 rounded animate-pulse
-                                ${c === 0 ? 'w-32' : c === cols - 1 ? 'w-16' : 'w-24'}`}
-                            />
-                        </td>
-                    ))}
-                </tr>
-            ))}
-        </>
     )
 }

@@ -2,23 +2,8 @@
 'use client'
 
 import DashboardLayoutAdmins from '@/components/Layouts/DashboardLayoutAdmins'
-import { SectionInterpretasiAI } from './section/SectionInterpretasiAI'
-import { useRouter } from 'next/navigation'
-import { useInterpretasiAI } from '@/hooks/useInterpretasiAI'
-
+import { SectionInterpretasiAI } from '../../../components/Section/SectionInterpretasiAI'
 export default function InterpretasiAIPage() {
-    const router = useRouter()
-
-    const {
-        items: interpretasi,
-        isLoading: interpretasiLoading,
-        isLoadingMore: interpretasiLoadingMore,
-        hasMore: interpretasiHasMore,
-        loadMore: onInterpretasiLoadMore,
-        softDelete: interpretasiSoftDelete,
-        restore: interpretasiRestore,
-        hardDelete: interpretasiHardDelete,
-    } = useInterpretasiAI()
 
     return (
         <DashboardLayoutAdmins>
@@ -30,17 +15,7 @@ export default function InterpretasiAIPage() {
                         <div className="flex-1 h-px bg-neutral-300" />
                     </div>
 
-                    <SectionInterpretasiAI
-                        items={interpretasi}
-                        isLoading={interpretasiLoading}
-                        hasMore={interpretasiHasMore}
-                        isLoadingMore={interpretasiLoadingMore}
-                        onLoadMore={onInterpretasiLoadMore}
-                        onSoftDelete={interpretasiSoftDelete}
-                        onRestore={interpretasiRestore}
-                        onHardDelete={interpretasiHardDelete}
-                        onDetail={(item) => router.push(`/admin/interpretasi/${item.id}`)}
-                    />
+                    <SectionInterpretasiAI />
 
                 </div>
             </div>

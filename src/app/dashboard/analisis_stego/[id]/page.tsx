@@ -13,15 +13,12 @@ export default function DetilAnalisisStegoPage() {
     const router = useRouter()
     const { result: data, refresh, isLoading, error } = useAnalysisDetail(id as string)
 
-    // Derive readOnlyData dari data yang di-fetch
     const readOnlyData = data
         ? {
             analysis: data.analysis,
-            // Rekonstruksi Set channel dari teknik yang tersimpan
             selectedChannels: data.analysis.teknik
                 ? new Set(data.analysis.teknik.map((t) => t.channel) as Channel[])
                 : new Set<Channel>(['R', 'G', 'B']),
-            // Rekonstruksi Set teknik dari teknik yang tersimpan
             selectedTeknik: data.analysis.teknik
                 ? new Set(data.analysis.teknik.map((t) => t.arah) as TeknikArah[])
                 : new Set<TeknikArah>(),
@@ -104,11 +101,11 @@ export default function DetilAnalisisStegoPage() {
 
                     {/* Jika belum ada force decode (edge case) */}
                     {!data.forceDecode && (
-                        <div className="flex items-center gap-3 px-5 py-4 rounded-xl bg-neutral-900 border border-neutral-800 max-w-7xl mx-auto">
-                            <svg className="h-4 w-4 text-neutral-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="flex items-center gap-3 px-5 py-4 rounded-xl bg-neutral-50 border border-neutral-800 max-w-7xl mx-auto">
+                            <svg className="h-4 w-4 text-neutral-800 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <p className="text-xs text-neutral-500">
+                            <p className="text-xs text-neutral-700">
                                 Hasil decode belum tersedia untuk analisis ini.
                             </p>
                         </div>

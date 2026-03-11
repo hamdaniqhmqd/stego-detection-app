@@ -8,20 +8,19 @@ import { TEKNIK_LABEL, type TeknikArah, type Channel } from '@/types/shared'
 import { CH_STYLE, CHANNEL_COLOR, STATUS_COLOR, STATUS_DOT } from '@/utils/Channel'
 import { decodeRawText } from '@/utils/Decode'
 import { formatBitPreview } from '@/utils/Bit'
-import type { StatusAncaman, TeknikStatusMap } from '@/hooks/useInterpretasiAI'
+import type { TeknikStatusMap } from '@/hooks/useInterpretasiAI'
 import { buildTeknikStatusMap, makeTeknikKey } from '@/hooks/useInterpretasiAI'
 import { AIInterpretationText } from '../Ui/AIInterpretationFormatter'
 import { Tooltip } from '../Ui/ToolTip'
+import { StatusAncaman } from '@/types/aiInterpretasi'
 
 // Props
-
 interface HasilAnalisisAdminProps {
     result: AnalysisResult
     filePath?: string
 }
 
 // Copy hook
-
 function useCopy() {
     const [copiedKey, setCopiedKey] = useState<string | null>(null)
     const copy = useCallback(async (text: string, key: string) => {
@@ -44,7 +43,6 @@ function useCopy() {
 }
 
 // Copy button
-
 function CopyBtn({ text, copyKey, onCopy, isCopied }: {
     text: string; copyKey: string
     onCopy: (text: string, key: string) => void; isCopied: boolean
@@ -83,9 +81,7 @@ function CopyBtn({ text, copyKey, onCopy, isCopied }: {
         </Tooltip>
     )
 }
-
 // Stat pill
-
 export function StatPill({ label, value, tooltip, colorClass = 'text-neutral-700' }: {
     label: string; value: string | number; tooltip: string; colorClass?: string
 }) {
@@ -104,7 +100,6 @@ export function StatPill({ label, value, tooltip, colorClass = 'text-neutral-700
 }
 
 // AI Interpretation block
-
 function AIInterpretationBlock({ interpretation }: { interpretation: HasilInterpretasi }) {
     const status = interpretation.status_ancaman as StatusAncaman
 
@@ -144,7 +139,6 @@ function AIInterpretationBlock({ interpretation }: { interpretation: HasilInterp
 }
 
 // Channel decode block
-
 interface ChannelBlockProps {
     ch: Channel
     rawItem?: DecodedRawItem
@@ -338,7 +332,6 @@ function ChannelBlock({ ch, rawItem, bitItem, status, interpretation, hasAI, cop
 }
 
 // Teknik accordion
-
 export interface TeknikBlockProps {
     arah: TeknikArah
     channels: Channel[]
@@ -432,8 +425,6 @@ export function TeknikBlock({ arah, channels, decodedRaw, decodedBit, teknikMap,
         </div>
     )
 }
-
-// Main component
 
 export default function HasilAnalisisAdmin({ result, filePath }: HasilAnalisisAdminProps) {
     const { analysis, forceDecode, aiInterpretasi } = result

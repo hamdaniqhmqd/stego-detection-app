@@ -6,151 +6,20 @@ import { useRouter } from 'next/navigation'
 import DashboardLayoutAdmins from '@/components/Layouts/DashboardLayoutAdmins'
 import { useAnalysisDetail } from '@/hooks/useAnalisisDetail'
 import HasilAnalisisAdmin from '@/components/Section/HasilAnalisisAdmin'
-import { fmtDate, StatusBadge } from '@/components/Modal/DetailModals'
-import { CHANNEL_COLOR, STATUS_COLOR, STATUS_DOT, CH_STYLE } from '@/utils/Channel'
+import { CHANNEL_COLOR, STATUS_COLOR, STATUS_DOT } from '@/utils/Channel'
 import { TEKNIK_LABEL, type TeknikArah } from '@/types/shared'
 import {
     buildTeknikStatusMap,
     makeTeknikKey,
-    summarizeInterpretasi,
-    type StatusAncaman,
     type TeknikStatusMap,
 } from '@/hooks/useInterpretasiAI'
-import type { User } from '@/types/Users'
-import supabaseAnonKey from '@/libs/supabase/anon_key'
-import { useEffect, useState } from 'react'
-
-// Helpers 
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-    return (
-        <div className="space-y-3">
-            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-widest
-                pb-2 border-b border-neutral-200">
-                {title}
-            </h3>
-            {children}
-        </div>
-    )
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-    return (
-        <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">{label}</span>
-            <div className="text-sm text-neutral-800">{children}</div>
-        </div>
-    )
-}
-
-function FieldGrid({ children }: { children: React.ReactNode }) {
-    return <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">{children}</div>
-}
-
-// Skeleton 
-function SkeletonBlock({ className }: { className?: string }) {
-    return <div className={`bg-neutral-100 rounded animate-pulse ${className}`} />
-}
-
-function PageSkeleton() {
-    return (
-        <div className="space-y-8">
-            <div className="flex items-center gap-3">
-                <SkeletonBlock className="w-8 h-8 rounded-sm" />
-                <div className="space-y-1.5">
-                    <SkeletonBlock className="w-48 h-4" />
-                    <SkeletonBlock className="w-32 h-3" />
-                </div>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1 space-y-4">
-                    <SkeletonBlock className="w-full h-48 rounded-xl" />
-                    <SkeletonBlock className="w-full h-20 rounded-xl" />
-                    <SkeletonBlock className="w-full h-32 rounded-xl" />
-                </div>
-                <div className="lg:col-span-2 space-y-4">
-                    <SkeletonBlock className="w-full h-16 rounded-xl" />
-                    <SkeletonBlock className="w-full h-64 rounded-xl" />
-                </div>
-            </div>
-        </div>
-    )
-}
-
-// User card 
-
-function UserCard({ userId }: { userId: string }) {
-    const [user, setUser] = useState<User | null | undefined>(undefined)
-
-    useEffect(() => {
-        supabaseAnonKey
-            .from('users')
-            .select('id, username, fullname, photo, email, role, is_verified, created_at, updated_at, deleted_at, verified_at')
-            .eq('id', userId)
-            .single()
-            .then(({ data }) => setUser((data as User) ?? null))
-    }, [userId])
-
-    if (user === undefined) {
-        return (
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50
-                border border-neutral-100 animate-pulse">
-                <div className="w-10 h-10 rounded-full bg-neutral-200 shrink-0" />
-                <div className="space-y-1.5 flex-1">
-                    <SkeletonBlock className="w-28 h-3" />
-                    <SkeletonBlock className="w-20 h-2.5" />
-                </div>
-            </div>
-        )
-    }
-    if (!user) return (
-        <p className="text-xs text-neutral-400 italic px-1">Data pengguna tidak ditemukan</p>
-    )
-
-    const displayName = user.fullname ?? user.username
-    return (
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 border border-neutral-100">
-            <img
-                src={user.photo ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random&color=fff&size=64`}
-                alt={displayName}
-                className="w-10 h-10 rounded-full object-cover shrink-0 border border-neutral-200"
-            />
-            <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-neutral-800 truncate">{displayName}</p>
-                <p className="text-xs text-neutral-400 truncate">@{user.username}</p>
-            </div>
-            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border shrink-0
-                ${user.role === 'superadmin'
-                    ? 'bg-violet-50 text-violet-700 border-violet-200'
-                    : 'bg-neutral-100 text-neutral-500 border-neutral-200'
-                }`}>
-                {user.role}
-            </span>
-        </div>
-    )
-}
-
-// Image preview 
-
-function ImagePreview({ src }: { src?: string }) {
-    const [err, setErr] = useState(false)
-    if (!src || err) {
-        return (
-            <div className="w-full h-44 rounded-sm bg-neutral-100 border border-neutral-200
-                flex flex-col items-center justify-center gap-2 text-neutral-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 256 256">
-                    <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,200V172l52-52,44,44,20-20,40,40.07L196.07,216H40A0,0,0,0,1,40,200Z" />
-                </svg>
-                <span className="text-xs">Gambar tidak tersedia</span>
-            </div>
-        )
-    }
-    return (
-        <div className="w-full rounded-sm overflow-hidden border border-neutral-200 bg-neutral-100">
-            <img src={src} alt="preview" className="w-full max-h-56 object-contain" onError={() => setErr(true)} />
-        </div>
-    )
-}
+import { StatusAncaman } from '@/types/aiInterpretasi'
+import { PageSkeleton } from '@/components/Ui/Skeleton'
+import { UserCard } from '@/components/Ui/UserCard'
+import { ImagePreview } from '@/components/Ui/ImagePreview'
+import { fmtDate } from '@/utils/format'
+import Section from '@/components/Ui/Section'
+import { Field } from '@/components/Ui/Field'
 
 // AI Summary bar 
 function AISummaryBar({ teknikMap }: { teknikMap: TeknikStatusMap }) {
@@ -327,7 +196,7 @@ export default function AnalisisDetailPage({ params }: PageProps) {
                         <div className="space-y-5">
                             {/* Info analisis */}
                             <Section title="Info Analisis">
-                                <FieldGrid>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                     <Field label="Metode">
                                         <span className="px-2 py-0.5 bg-neutral-100 text-neutral-700
                                         rounded font-mono text-xs inline-block">
@@ -345,13 +214,13 @@ export default function AnalisisDetailPage({ params }: PageProps) {
                                             <span className="text-red-600 text-xs">{fmtDate(analysis.deleted_at)}</span>
                                         </Field>
                                     )}
-                                </FieldGrid>
+                                </div>
                             </Section>
 
                             {/* Force decode meta */}
                             {forceDecode ? (
                                 <Section title="Force Decode">
-                                    <FieldGrid>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                         <Field label="Durasi">
                                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1
                                             rounded-sm border border-neutral-200 bg-neutral-50
@@ -371,7 +240,7 @@ export default function AnalisisDetailPage({ params }: PageProps) {
                                         <Field label="Dijalankan">
                                             <span className="text-xs">{fmtDate(forceDecode.created_at)}</span>
                                         </Field>
-                                    </FieldGrid>
+                                    </div>
                                 </Section>
                             ) : (
                                 <div className="px-4 py-3 rounded-xl bg-neutral-50 border border-dashed

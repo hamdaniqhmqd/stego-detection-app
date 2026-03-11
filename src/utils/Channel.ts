@@ -1,6 +1,6 @@
 // src/utils/Channel.ts
 
-import { StatusAncaman } from "@/hooks/useInterpretasiAI";
+import { StatusAncaman } from "@/types/aiInterpretasi"
 import { Channel, TEKNIK_LABEL, TeknikArah } from "@/types/shared";
 
 export const CH_STYLE: Record<
@@ -64,3 +64,38 @@ export const STATUS_DOT: Record<StatusAncaman, string> = {
     Mencurigakan: 'bg-amber-500',
     Berbahaya: 'bg-red-500',
 }
+
+export const STATUS_RING: Record<StatusAncaman, string> = {
+    Aman: 'ring-emerald-200',
+    Mencurigakan: 'ring-amber-200',
+    Berbahaya: 'ring-red-200',
+}
+
+export const STATUS_BG: Record<StatusAncaman, string> = {
+    Aman: 'bg-emerald-50',
+    Mencurigakan: 'bg-amber-50',
+    Berbahaya: 'bg-red-50',
+}
+
+export const STATUS_TEXT: Record<StatusAncaman, string> = {
+    Aman: 'text-emerald-700',
+    Mencurigakan: 'text-amber-700',
+    Berbahaya: 'text-red-700',
+}
+
+export const CHANNEL_TOOLTIPS: Record<Channel, string> = {
+    R: "Kanal Merah (Red): menyimpan bit pada nilai merah setiap piksel. Perubahan tidak terlihat mata manusia.",
+    G: "Kanal Hijau (Green): mata manusia paling sensitif terhadap hijau, namun perubahan 1-bit tetap tidak terdeteksi.",
+    B: "Kanal Biru (Blue): menyimpan bit pada nilai biru setiap piksel. Semakin banyak kanal aktif, semakin besar kapasitas pesan.",
+};
+
+export const TRAVERSAL_TOOLTIPS: Record<string, string> = {
+    "top-bottom-left-right": "Membaca piksel dari kiri atas ke kanan bawah, baris demi baris — pola paling umum.",
+    "bottom-top-right-left": "Membaca piksel dari kanan bawah ke kiri atas, kebalikan dari pola default.",
+    "left-right-top-bottom": "Membaca piksel secara vertikal dari atas ke bawah, kolom demi kolom.",
+    "right-left-bottom-top": "Membaca piksel secara vertikal dari bawah ke atas, kolom demi kolom, dimulai dari kanan.",
+    "spiral-inward": "Membaca piksel mengikuti pola spiral dari tepi gambar menuju pusat.",
+    "zigzag": "Membaca piksel dengan pola zig-zag — berganti arah setiap baris.",
+    "diagonal": "Membaca piksel mengikuti garis diagonal dari sudut ke sudut.",
+    "random": "Urutan piksel diacak berdasarkan seed tertentu — menambah keamanan namun wajib konsisten saat dekode.",
+};

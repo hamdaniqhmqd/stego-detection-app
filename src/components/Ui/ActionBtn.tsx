@@ -14,10 +14,10 @@ export function ActionBtn({ icon, label, onClick, danger }: ActionBtnProps) {
         <button
             onClick={onClick}
             title={label}
-            className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all duration-150
+            className={`w-7 h-7 rounded-sm flex items-center justify-center text-xs transition-all duration-150
                 ${danger
-                    ? 'hover:bg-red-50 text-neutral-400 hover:text-red-600'
-                    : 'hover:bg-neutral-100 text-neutral-400 hover:text-neutral-700'
+                    ? 'hover:bg-red-200 text-red-600 hover:text-red-900'
+                    : 'hover:bg-neutral-200 text-neutral-600 hover:text-neutral-700'
                 }`}
         >
             {icon}

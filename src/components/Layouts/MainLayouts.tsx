@@ -12,7 +12,7 @@ const MainLayouts: React.FC<MainLayoutsProps> = ({ children }) => {
     return (
         <>
             <Navbar />
-            <main className="bg-neutral-100 overflow-y-auto min-h-screen">
+            <main className="bg-neutral-100 overflow-y-auto min-h-screen font-mono">
                 {children}
             </main>
             <Footer />

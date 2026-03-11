@@ -23,7 +23,6 @@ export default function AnalisisStegoPage() {
 
     const handleResult = (r: AnalysisResult) => {
         setResult(r)
-        // Scroll ke hasil
         setTimeout(() => {
             document.getElementById('hasil-analisis')?.scrollIntoView({ behavior: 'smooth' })
         }, 100)
