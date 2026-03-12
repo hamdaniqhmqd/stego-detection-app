@@ -179,10 +179,11 @@ export async function sendVerificationEmail(
                             </a>
                         </div>
 
-                        <p style="color: #666; line-height: 1.6; margin-top: 30px; font-size: 14px;">
+                        <p style="display: hidden; color: #666; line-height: 1.6; margin-top: 30px; font-size: 14px;">
                             Atau salin dan tempel link berikut di browser Anda:
                         </p>
-                        <div style="background-color: #fff; 
+                        <div style="display: hidden; 
+                                    background-color: #fff; 
                                     padding: 15px; 
                                     border-radius: 5px; 
                                     border: 1px solid #e5e7eb;

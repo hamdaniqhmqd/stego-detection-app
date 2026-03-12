@@ -1,5 +1,3 @@
-'use client';
-
 import FormRegister from './section/FormRegister';
 import MainLayouts from '@/components/Layouts/MainLayouts';
 import { Suspense } from 'react';
