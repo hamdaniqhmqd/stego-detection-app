@@ -21,7 +21,7 @@ const Navbar: React.FC = () => {
                 transition-all duration-300 ease-in-out
                 ${scrolled
                     ? 'mx-4 mt-3 rounded-lg bg-white/40 backdrop-blur-md shadow-lg shadow-neutral-900/10 border border-neutral-200/60'
-                    : 'mx-0 mt-0 rounded-none bg-neutral-100 border-b border-neutral-200'
+                    : 'mx-0 mt-0 rounded-none bg-neutral-50 border-b border-neutral-200'
                 }
             `}
         >

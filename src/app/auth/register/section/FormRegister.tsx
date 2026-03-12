@@ -69,7 +69,7 @@ export default function FormRegister() {
 
           <div className="
             content sm:w-md w-full bg-white p-6 md:p-8 
-            rounded-md border border-slate-900
+            rounded-md border border-neutral-900
             shadow-[-10px_10px_0_rgba(26,26,46,1)]
           ">
 
@@ -137,7 +137,7 @@ export default function FormRegister() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-[50%] -translate-y-1/2 text-neutral-600"
+                    className="absolute right-3 top-[50%] -tranneutral-y-1/2 text-neutral-600"
                   >
                     {showPassword ? (
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
@@ -186,7 +186,7 @@ export default function FormRegister() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-[50%] -translate-y-1/2 text-neutral-600"
+                    className="absolute right-3 top-[50%] -tranneutral-y-1/2 text-neutral-600"
                   >
                     {showConfirmPassword ? (
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
@@ -220,13 +220,13 @@ export default function FormRegister() {
                 <button
                   type="submit"
                   className="
-                    w-full py-3 text-slate-900 font-medium
-                    bg-slate-100 border border-slate-900
-                    hover:bg-slate-50 rounded-sm 
+                    w-full py-3 text-neutral-900 font-medium
+                    bg-neutral-100 border border-neutral-900
+                    hover:bg-neutral-50 rounded-sm 
                     cursor-pointer
-                    disabled:bg-slate-400 disabled:cursor-not-allowed 
+                    disabled:bg-neutral-200 disabled:cursor-not-allowed 
                     transition-all duration-300 ease-in-out
-                    hover:-translate-y-0.5 hover:shadow-[-7px_7px_0_rgba(26,26,46,1)] 
+                    hover:-tranneutral-y-0.5 hover:shadow-[-7px_7px_0_rgba(26,26,46,1)] 
                   "
                   disabled={isLoading}
                 >
