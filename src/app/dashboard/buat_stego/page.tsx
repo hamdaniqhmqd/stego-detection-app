@@ -274,7 +274,7 @@ export default function BuatStegoPage() {
                                         rows={4}
                                         placeholder="Masukkan pesan yang ingin disembunyikan dalam gambar..."
                                         className="w-full bg-white border border-neutral-400 rounded-sm text-neutral-800 px-4 py-2.5 text-sm
-                                                outline-none placeholder-neutral-400 focus:border-neutral-700 transition-colors resize-none"
+                                                outline-none placeholder-neutral-400 focus:border-neutral-700 transition-colors"
                                     />
                                     <div className="text-right text-xs text-neutral-500 mt-1">
                                         {message.length} karakter

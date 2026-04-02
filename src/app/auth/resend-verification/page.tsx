@@ -1,7 +1,7 @@
 
 import MainLayouts from '@/components/Layouts/MainLayouts';
 import { Suspense } from 'react';
-import ResendVerification from './section/ResendVerification';
+import ResendVerification from '@/components/Section/ResendVerification';
 
 export default function ResendVerificationPage() {
     return (

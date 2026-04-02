@@ -261,12 +261,6 @@ export default function InputAnalisis({
                                     {new Date(readOnlyData.analysis.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
                                 </strong>
                             </p>
-                            {readOnlyData.analysis.waktu_proses && (
-                                <p className="text-xs text-neutral-500">
-                                    <span className="text-neutral-400">Waktu Proses:</span>{' '}
-                                    {readOnlyData.analysis.waktu_proses}
-                                </p>
-                            )}
                         </div>
                     )}
 
@@ -326,6 +320,50 @@ export default function InputAnalisis({
                         })}
                     </div>
                 </div>
+
+                {/* Interpretasi AI */}
+                <div>
+                    <div className="flex items-center gap-1.5 mb-3">
+                        <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">Interpretasi dengan AI?</h2>
+                        <Tooltip text="Jika diaktifkan, semua hasil ekstraksi akan langsung dikirim ke AI untuk dianalisis — mendeteksi pesan tersembunyi dan menilai tingkat ancaman. Membutuhkan waktu lebih lama.">
+                            <span className="text-neutral-700 cursor-default"><InfoIcon /></span>
+                        </Tooltip>
+                        <div className="flex-1 h-px bg-neutral-300" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {([true, false] as const).map((val) => {
+                            const active = useAI === val
+                            return (
+                                <Tooltip
+                                    key={String(val)}
+                                    text={val
+                                        ? 'AI menganalisis semua hasil secara otomatis setelah ekstraksi. Lebih lambat tapi langsung dapat hasil penilaian ancaman.'
+                                        : 'Hanya ekstraksi LSB tanpa AI. Kamu tetap bisa meminta interpretasi AI secara manual setelah hasil tampil.'
+                                    }
+                                >
+                                    <button
+                                        type="button"
+                                        onClick={() => !readOnly && setUseAI(val)}
+                                        disabled={readOnly}
+                                        className={`w-full flex items-center gap-2 px-4 py-3 rounded-sm
+                                            border transition-all duration-200 text-left ease-in-out
+                                            ${active ?
+                                                'border-neutral-800 bg-neutral-100 shadow-[-4px_5px_0_rgba(26,26,46,1)] -translate-y-0.5'
+                                                : 'border-neutral-400 bg-neutral-100 hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5'}`}
+                                    >
+                                        <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center
+                                            ${active ? 'border-neutral-900' : 'border-neutral-400'}`}>
+                                            {active && <span className="w-2 h-2 rounded-full bg-neutral-900" />}
+                                        </span>
+                                        <span className={`text-sm font-medium ${active ? 'text-neutral-800' : 'text-neutral-600'}`}>
+                                            {val ? 'Ya, pakai AI' : 'Tidak, decode saja'}
+                                        </span>
+                                    </button>
+                                </Tooltip>
+                            )
+                        })}
+                    </div>
+                </div>
             </div>
 
             {/*  Kanan: Konfigurasi  */}
@@ -375,50 +413,6 @@ export default function InputAnalisis({
                                         <span className="flex-1">
                                             <span className={`text-xs font-mono ${active ? 'text-neutral-900' : 'text-neutral-600'} mr-2`}>T{idx + 1}</span>
                                             <span className={`text-sm ${active ? 'text-neutral-800' : 'text-neutral-600'}`}>{TEKNIK_LABEL[arah]}</span>
-                                        </span>
-                                    </button>
-                                </Tooltip>
-                            )
-                        })}
-                    </div>
-                </div>
-
-                {/* Interpretasi AI */}
-                <div>
-                    <div className="flex items-center gap-1.5 mb-3">
-                        <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">Interpretasi dengan AI?</h2>
-                        <Tooltip text="Jika diaktifkan, semua hasil ekstraksi akan langsung dikirim ke AI untuk dianalisis — mendeteksi pesan tersembunyi dan menilai tingkat ancaman. Membutuhkan waktu lebih lama.">
-                            <span className="text-neutral-700 cursor-default"><InfoIcon /></span>
-                        </Tooltip>
-                        <div className="flex-1 h-px bg-neutral-300" />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {([true, false] as const).map((val) => {
-                            const active = useAI === val
-                            return (
-                                <Tooltip
-                                    key={String(val)}
-                                    text={val
-                                        ? 'AI menganalisis semua hasil secara otomatis setelah ekstraksi. Lebih lambat tapi langsung dapat hasil penilaian ancaman.'
-                                        : 'Hanya ekstraksi LSB tanpa AI. Kamu tetap bisa meminta interpretasi AI secara manual setelah hasil tampil.'
-                                    }
-                                >
-                                    <button
-                                        type="button"
-                                        onClick={() => !readOnly && setUseAI(val)}
-                                        disabled={readOnly}
-                                        className={`w-full flex items-center gap-2 px-4 py-3 rounded-sm
-                                            border transition-all duration-200 text-left ease-in-out
-                                            ${active ?
-                                                'border-neutral-800 bg-neutral-100 shadow-[-4px_5px_0_rgba(26,26,46,1)] -translate-y-0.5'
-                                                : 'border-neutral-400 bg-neutral-100 hover:shadow-[-4px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5'}`}
-                                    >
-                                        <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center
-                                            ${active ? 'border-neutral-900' : 'border-neutral-400'}`}>
-                                            {active && <span className="w-2 h-2 rounded-full bg-neutral-900" />}
-                                        </span>
-                                        <span className={`text-sm font-medium ${active ? 'text-neutral-800' : 'text-neutral-600'}`}>
-                                            {val ? 'Ya, pakai AI' : 'Tidak, decode saja'}
                                         </span>
                                     </button>
                                 </Tooltip>

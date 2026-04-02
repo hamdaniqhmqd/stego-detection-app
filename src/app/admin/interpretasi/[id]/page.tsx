@@ -177,9 +177,6 @@ export default function InterpretasiDetailPage({ params }: PageProps) {
                                                 {analysis.metode ?? '—'}
                                             </span>
                                         </Field>
-                                        <Field label="Waktu proses" tooltip="Durasi total proses analisis awal gambar">
-                                            <span className="font-mono text-xs">{analysis.waktu_proses ?? '—'}</span>
-                                        </Field>
                                         <Field label="Dibuat" tooltip="Waktu ketika record analisis ini pertama kali dibuat">
                                             <span className="text-xs">{fmtDate(analysis.created_at)}</span>
                                         </Field>

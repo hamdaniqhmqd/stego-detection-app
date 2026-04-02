@@ -203,9 +203,6 @@ export default function AnalisisDetailPage({ params }: PageProps) {
                                             {analysis.metode ?? '—'}
                                         </span>
                                     </Field>
-                                    <Field label="Waktu proses">
-                                        <span className="font-mono text-xs">{analysis.waktu_proses ?? '—'}</span>
-                                    </Field>
                                     <Field label="Dibuat">
                                         <span className="text-xs">{fmtDate(analysis.created_at)}</span>
                                     </Field>

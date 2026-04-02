@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { TableShell } from '@/components/Ui/TableShell'
+import { TableShell } from '@/components/Table/TableShell'
 import { SkeletonRows } from '@/components/Ui/SkeletonRows'
 import { ActionBtn } from '@/components/Ui/ActionBtn'
 import { ConfirmModal } from '@/components/Ui/ConfirmModal'

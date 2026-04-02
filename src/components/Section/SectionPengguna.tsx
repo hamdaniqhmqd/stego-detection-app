@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { TableShell } from '@/components/Ui/TableShell'
+import { TableShell } from '@/components/Table/TableShell'
 import { SkeletonRows } from '@/components/Ui/SkeletonRows'
 import { ActionBtn } from '@/components/Ui/ActionBtn'
 import { MiniStat } from '@/components/Card/MiniStatCard'
 import { RoleBadge, VerifBadge } from '@/components/Ui/Badge'
 import { ToggleSwitch } from '@/components/Ui/ToggleSwitch'
 import { ConfirmModal } from '@/components/Ui/ConfirmModal'
-import { fmt } from '@/utils/format'
+import { ConfirmState, fmt } from '@/utils/format'
 import { User } from '@/types/Users'
 import { useUsers } from '@/hooks/useUsers'
 import UserCell from '../Ui/UserCell'
@@ -18,9 +18,7 @@ interface SectionPenggunaProps {
     onDetail?: (item: User) => void
 }
 
-type ConfirmState = { type: 'soft' | 'hard'; id: string; name: string } | null
-
-// ── Main component ────────────────────────────────────────────
+// Main component
 export function SectionPengguna({ onDetail }: SectionPenggunaProps) {
     const [showDeleted, setShowDeleted] = useState(false)
     const [confirm, setConfirm] = useState<ConfirmState>(null)
@@ -139,14 +137,14 @@ export function SectionPengguna({ onDetail }: SectionPenggunaProps) {
                                             icon={<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M200,56V208a8,8,0,0,1-8,8H64a8,8,0,0,1-8-8V56Z" opacity="0.2"></path><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path></svg>}
                                             label="Hapus permanen"
                                             danger
-                                            onClick={() => setConfirm({ type: 'hard', id: u.id, name: u.fullname ?? u.username })}
+                                            onClick={() => setConfirm({ type: 'hard', id: u.id, label: u.fullname ?? u.username })}
                                         />
                                     </>
                                 ) : (
                                     <ActionBtn
                                         icon={<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M216,128a88,88,0,1,1-88-88A88,88,0,0,1,216,128Z" opacity="0.2"></path><path d="M120,128V48a8,8,0,0,1,16,0v80a8,8,0,0,1-16,0Zm60.37-78.7a8,8,0,0,0-8.74,13.4C194.74,77.77,208,101.57,208,128a80,80,0,0,1-160,0c0-26.43,13.26-50.23,36.37-65.3a8,8,0,0,0-8.74-13.4C47.9,67.38,32,96.06,32,128a96,96,0,0,0,192,0C224,96.06,208.1,67.38,180.37,49.3Z"></path></svg>}
                                         label="Nonaktifkan"
-                                        onClick={() => setConfirm({ type: 'soft', id: u.id, name: u.fullname ?? u.username })}
+                                        onClick={() => setConfirm({ type: 'soft', id: u.id, label: u.fullname ?? u.username })}
                                     />
                                 )}
                             </div>
@@ -168,8 +166,8 @@ export function SectionPengguna({ onDetail }: SectionPenggunaProps) {
                 title={confirm?.type === 'hard' ? 'Hapus Permanen?' : 'Nonaktifkan Pengguna?'}
                 message={
                     confirm?.type === 'hard'
-                        ? `Data "${confirm?.name}" akan dihapus secara permanen dan tidak dapat dipulihkan.`
-                        : `Pengguna "${confirm?.name}" akan dinonaktifkan. Dapat dipulihkan nanti.`
+                        ? `Data "${confirm?.label}" akan dihapus secara permanen dan tidak dapat dipulihkan.`
+                        : `Pengguna "${confirm?.label}" akan dinonaktifkan. Dapat dipulihkan nanti.`
                 }
                 variant={confirm?.type === 'hard' ? 'danger' : 'warning'}
                 onConfirm={handleConfirm}

@@ -137,7 +137,7 @@ export default function FormRegister() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-[50%] -tranneutral-y-1/2 text-neutral-600"
+                    className="absolute right-3 top-[30%] -tranneutral-y-1/2 text-neutral-600"
                   >
                     {showPassword ? (
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
@@ -186,7 +186,7 @@ export default function FormRegister() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-[50%] -tranneutral-y-1/2 text-neutral-600"
+                    className="absolute right-3 top-[30%] -tranneutral-y-1/2 text-neutral-600"
                   >
                     {showConfirmPassword ? (
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
