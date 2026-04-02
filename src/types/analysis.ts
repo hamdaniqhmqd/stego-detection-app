@@ -6,7 +6,6 @@ export interface Analysis extends BaseRecord {
     id: string
     user_id: string
     file_path?: string
-    waktu_proses?: string
     metode?: string
     teknik?: DecodeTeknik[]
     interpretasi_ai: boolean
@@ -28,7 +27,6 @@ export interface AnalysisUpdate {
     metode?: string
     teknik?: DecodeTeknik[]
     interpretasi_ai?: boolean
-    waktu_proses?: string
 }
 
 export interface AnalysisForceDecode {
@@ -43,9 +41,6 @@ export interface AnalysisForceDecode {
     deleted_at?: string
 }
 
-// ── Token Usage Types ──────────────────────────────────────────
-
-/** Pemakaian token per satu item (channel × arah) */
 export interface PerItemTokenUsage {
     channel: string
     arah: string
@@ -54,7 +49,6 @@ export interface PerItemTokenUsage {
     total_tokens: number
 }
 
-/** Summary token usage untuk seluruh sesi interpretasi */
 export interface TokenUsageSummary {
     gemini_token_id: string
     gemini_token_label: string
@@ -63,8 +57,6 @@ export interface TokenUsageSummary {
     total_tokens: number
     per_item: PerItemTokenUsage[]
 }
-
-// ── Analysis Interpretasi AI ───────────────────────────────────
 
 export interface AnalysisInterpretasiAI {
     id: string

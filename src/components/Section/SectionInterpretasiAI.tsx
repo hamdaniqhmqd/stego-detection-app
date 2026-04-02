@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { TableShell } from '@/components/Ui/TableShell'
+import { TableShell } from '@/components/Table/TableShell'
 import { ActionBtn } from '@/components/Ui/ActionBtn'
 import { ConfirmModal } from '@/components/Ui/ConfirmModal'
 import { ToggleSwitch } from '@/components/Ui/ToggleSwitch'

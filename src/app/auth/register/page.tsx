@@ -1,4 +1,4 @@
-import FormRegister from './section/FormRegister';
+import FormRegister from '@/components/Section/FormRegister';
 import MainLayouts from '@/components/Layouts/MainLayouts';
 import { Suspense } from 'react';
 

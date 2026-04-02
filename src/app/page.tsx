@@ -88,17 +88,6 @@ export default function Home() {
           </div>
         </section>
 
-
-
-        <section className="w-full bg-neutral-200 lg:py-20 sm:py-14 py-10">
-
-        </section>
-
-        <section className=""></section>
-
-        <section className=""></section>
-
-        <section className=""></section>
       </MainLayouts>
     </>
   );

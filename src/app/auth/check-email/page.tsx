@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense } from 'react';
-import CheckEmailContent from './section/CheckEmailContent';
+import CheckEmailContent from '@/components/Section/CheckEmailContent';
 import MainLayouts from '@/components/Layouts/MainLayouts';
 
 export default function CheckEmail() {
