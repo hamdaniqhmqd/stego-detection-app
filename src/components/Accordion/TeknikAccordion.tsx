@@ -18,11 +18,15 @@ export interface TeknikAccordionProps {
 }
 
 export const ARAH_TOOLTIP: Record<TeknikArah, string> = {
-    'kiri-kanan-atas-bawah': 'Piksel dibaca dari kiri ke kanan, baris demi baris dari atas ke bawah. Pola paling umum digunakan dalam steganografi LSB.',
-    'kanan-kiri-bawah-atas': 'Piksel dibaca dari kanan ke kiri, baris demi baris dari bawah ke atas. Kebalikan dari pola standar.',
-    'atas-bawah-kiri-kanan': 'Piksel dibaca dari atas ke bawah, kolom demi kolom dari kiri ke kanan. Pola vertikal.',
-    'bawah-atas-kanan-kiri': 'Piksel dibaca dari bawah ke atas, kolom demi kolom dari kanan ke kiri. Pola vertikal terbalik.',
-}
+    'atas-bawah-kiri-kanan-col': 'Piksel dibaca per kolom (column-major): dari atas ke bawah dalam satu kolom, lalu lanjut ke kolom berikutnya dari kiri ke kanan.',
+    'atas-bawah-kanan-kiri-col': 'Piksel dibaca per kolom (column-major): dari atas ke bawah dalam satu kolom, lalu lanjut ke kolom berikutnya dari kanan ke kiri.',
+    'bawah-atas-kiri-kanan-col': 'Piksel dibaca per kolom (column-major): dari bawah ke atas dalam satu kolom, lalu lanjut ke kolom berikutnya dari kiri ke kanan.',
+    'bawah-atas-kanan-kiri-col': 'Piksel dibaca per kolom (column-major): dari bawah ke atas dalam satu kolom, lalu lanjut ke kolom berikutnya dari kanan ke kiri.',
+    'kiri-kanan-atas-bawah-row': 'Piksel dibaca per baris (row-major): dari kiri ke kanan dalam satu baris, lalu lanjut ke baris berikutnya dari atas ke bawah. Pola standar paling umum.',
+    'kanan-kiri-atas-bawah-row': 'Piksel dibaca per baris (row-major): dari kanan ke kiri dalam satu baris, lalu lanjut ke baris berikutnya dari atas ke bawah.',
+    'kiri-kanan-bawah-atas-row': 'Piksel dibaca per baris (row-major): dari kiri ke kanan dalam satu baris, lalu lanjut ke baris berikutnya dari bawah ke atas.',
+    'kanan-kiri-bawah-atas-row': 'Piksel dibaca per baris (row-major): dari kanan ke kiri dalam satu baris, lalu lanjut ke baris berikutnya dari bawah ke atas.',
+};
 
 export function TeknikAccordion({ arah, channels, hasilAI, teknikMap, index, tokenUsage }: TeknikAccordionProps) {
     const [open, setOpen] = useState(true)

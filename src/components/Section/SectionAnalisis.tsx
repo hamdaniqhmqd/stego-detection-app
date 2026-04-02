@@ -124,7 +124,7 @@ export function SectionAnalisis() {
                 {current.isLoading ? (
                     <SkeletonRows cols={7} />
                 ) : current.items.map((a) => {
-                    const durasi = a.force_decode?.waktu_proses ?? a.waktu_proses
+                    const durasi = a.force_decode?.waktu_proses
                     const hasRun = !!a.force_decode
                     const user = userMap.get(a.user_id)
 
