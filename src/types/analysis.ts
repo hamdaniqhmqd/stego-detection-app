@@ -1,5 +1,6 @@
 // src/types/analysis.ts
 
+import { MethodForceDecode } from './forceDecode'
 import type { BaseRecord, Channel, DecodedBitItem, DecodedRawItem, DecodeTeknik, TeknikArah } from './shared'
 
 export interface Analysis extends BaseRecord {
@@ -33,8 +34,6 @@ export interface AnalysisForceDecode {
     id: string
     analysis_id: string
     decode_teknik?: DecodeTeknik[]
-    decoded_bit?: DecodedBitItem[]
-    decoded_raw?: DecodedRawItem[]
     waktu_proses?: string
     created_at: string
     updated_at?: string
@@ -107,5 +106,6 @@ export interface AIInterpretationPayload {
 export interface AnalysisResult {
     analysis: Analysis
     forceDecode: AnalysisForceDecode | null
+    methodForceDecodes?: MethodForceDecode[]
     aiInterpretasi?: AnalysisInterpretasiAI
 }

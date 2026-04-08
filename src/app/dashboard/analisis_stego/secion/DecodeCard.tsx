@@ -174,11 +174,29 @@ export default function DecodeCard({
                                 Bit LSB
                             </span>
                         </Tooltip>
-                        <Tooltip text={`${bitItem.total_bits.toLocaleString()} bit ÷ 8 = ${item.total_chars.toLocaleString()} karakter.`}>
-                            <span className="text-xs text-neutral-900 font-mono cursor-default">
-                                {bitItem.total_bits.toLocaleString()} bit
-                            </span>
-                        </Tooltip>
+
+                        <div className="flex items-center gap-2">
+                            <Tooltip text={`${bitItem.total_bits.toLocaleString()} bit ÷ 8 = ${item.total_chars.toLocaleString()} karakter.`}>
+                                <span className="text-xs text-neutral-900 font-mono cursor-default">
+                                    {bitItem.total_bits.toLocaleString()} bit
+                                </span>
+                            </Tooltip>
+
+                            <span className="h-4 w-px bg-neutral-800"></span>
+
+                            {bitHasMore && (
+                                <Tooltip text={`Tampilkan semua ${bitItem.total_bits.toLocaleString()} bit yang diekstrak. Saat ini hanya ditampilkan ${BIT_PREVIEW.toLocaleString()} bit pertama.`}>
+                                    <button
+                                        onClick={() => setExpandedBit(v => !v)}
+                                        className="text-xs text-neutral-600 hover:text-neutral-800 transition-colors"
+                                    >
+                                        {expandedBit
+                                            ? 'Tutup bit penuh'
+                                            : `Buka semua bit`}
+                                    </button>
+                                </Tooltip>
+                            )}
+                        </div>
                     </div>
                     <div className="rounded-sm bg-neutral-100 border border-neutral-800 p-3 font-mono text-xs text-neutral-800 leading-relaxed break-all overflow-hidden">
                         {expandedBit ? bitFullStr : bitPreviewStr}
@@ -209,11 +227,28 @@ export default function DecodeCard({
                             )}
                         </span>
                     </Tooltip>
-                    <Tooltip text={`${item.total_chars.toLocaleString()} karakter total — ${printablePercent}% printable, ${100 - printablePercent}% non-printable.`}>
-                        <span className="text-xs text-neutral-800 font-mono cursor-default">
-                            {item.total_chars.toLocaleString()} char
-                        </span>
-                    </Tooltip>
+                    <div className="flex items-center gap-2">
+                        <Tooltip text={`${item.total_chars.toLocaleString()} karakter total — ${printablePercent}% printable, ${100 - printablePercent}% non-printable.`}>
+                            <span className="text-xs text-neutral-800 font-mono cursor-default">
+                                {item.total_chars.toLocaleString()} char
+                            </span>
+                        </Tooltip>
+
+                        <span className="h-4 w-px bg-neutral-800"></span>
+
+                        {rawHasMore && (
+                            <Tooltip text={`Tampilkan semua ${item.total_chars.toLocaleString()} karakter. Saat ini hanya ditampilkan ${RAW_PREVIEW.toLocaleString()} karakter pertama.`}>
+                                <button
+                                    onClick={() => setExpandedRaw(v => !v)}
+                                    className="text-xs text-neutral-600 hover:text-neutral-800 transition-colors"
+                                >
+                                    {expandedRaw
+                                        ? 'Tutup teks penuh'
+                                        : 'Buka semua teks'}
+                                </button>
+                            </Tooltip>
+                        )}
+                    </div>
                 </div>
                 <div className="rounded-sm bg-neutral-100 border border-neutral-800 p-3 font-mono text-xs text-neutral-800 leading-relaxed break-all overflow-hidden">
                     {rawText.length === 0 ? (
@@ -239,43 +274,47 @@ export default function DecodeCard({
             </div>
 
             {/* ── AI loading ── */}
-            {isInterpretingThis && !interpretation && (
-                <div className="mx-4 mb-4 px-3 py-2 rounded-sm bg-neutral-100 border border-neutral-800 flex items-center gap-2">
-                    <svg className="animate-spin h-3.5 w-3.5 text-neutral-500 shrink-0" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                    <span className="text-xs text-neutral-600">AI sedang menganalisis...</span>
-                </div>
-            )}
+            {
+                isInterpretingThis && !interpretation && (
+                    <div className="mx-4 mb-4 px-3 py-2 rounded-sm bg-neutral-100 border border-neutral-800 flex items-center gap-2">
+                        <svg className="animate-spin h-3.5 w-3.5 text-neutral-500 shrink-0" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                        <span className="text-xs text-neutral-600">AI sedang menganalisis...</span>
+                    </div>
+                )
+            }
 
             {/* ── AI Interpretation result ── */}
-            {interpretation && (
-                <div className="mx-4 mb-4 rounded-sm bg-neutral-100 border border-neutral-800 overflow-hidden">
-                    <div className="flex items-center justify-between px-3 py-2 border-b border-neutral-800">
-                        <Tooltip text="Hasil analisis AI — AI membaca data yang diekstrak dan menilai apakah mengandung pesan tersembunyi, seberapa jelas teks-nya, dan seberapa berbahaya kontennya.">
-                            <span className="text-xs text-neutral-800 font-medium cursor-default">
-                                Interpretasi AI
-                            </span>
-                        </Tooltip>
-                        <Tooltip text={
-                            interpretation.status_ancaman === 'Aman'
-                                ? 'Aman — tidak ada indikasi steganografi atau konten berbahaya yang terdeteksi.'
-                                : interpretation.status_ancaman === 'Mencurigakan'
-                                    ? 'Mencurigakan — terdapat pola tidak biasa yang perlu diperiksa lebih lanjut.'
-                                    : 'Berbahaya — kemungkinan kuat terdapat pesan tersembunyi atau konten berbahaya.'
-                        }>
-                            <span className={`text-xs px-2 py-0.5 rounded-sm font-semibold border cursor-default
+            {
+                interpretation && (
+                    <div className="mx-4 mb-4 rounded-sm bg-neutral-100 border border-neutral-800 overflow-hidden">
+                        <div className="flex items-center justify-between px-3 py-2 border-b border-neutral-800">
+                            <Tooltip text="Hasil analisis AI — AI membaca data yang diekstrak dan menilai apakah mengandung pesan tersembunyi, seberapa jelas teks-nya, dan seberapa berbahaya kontennya.">
+                                <span className="text-xs text-neutral-800 font-medium cursor-default">
+                                    Interpretasi AI
+                                </span>
+                            </Tooltip>
+                            <Tooltip text={
+                                interpretation.status_ancaman === 'Aman'
+                                    ? 'Aman — tidak ada indikasi steganografi atau konten berbahaya yang terdeteksi.'
+                                    : interpretation.status_ancaman === 'Mencurigakan'
+                                        ? 'Mencurigakan — terdapat pola tidak biasa yang perlu diperiksa lebih lanjut.'
+                                        : 'Berbahaya — kemungkinan kuat terdapat pesan tersembunyi atau konten berbahaya.'
+                            }>
+                                <span className={`text-xs px-2 py-0.5 rounded-sm font-semibold border cursor-default
                                 ${ANCAMAN_STYLE[interpretation.status_ancaman] ?? 'bg-neutral-900 text-neutral-500 border-neutral-700'}`}>
-                                {interpretation.status_ancaman}
-                            </span>
-                        </Tooltip>
+                                    {interpretation.status_ancaman}
+                                </span>
+                            </Tooltip>
+                        </div>
+                        <div className="px-3 py-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent">
+                            <AIInterpretationText text={interpretation.interpretation} />
+                        </div>
                     </div>
-                    <div className="px-3 py-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent">
-                        <AIInterpretationText text={interpretation.interpretation} />
-                    </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     )
 }

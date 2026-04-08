@@ -9,6 +9,7 @@ import { DecodedRawItem, DecodedBitItem, TEKNIK_LABEL, type TeknikArah, type Cha
 import { buildTeknikStatusMap, makeTeknikKey, type TeknikStatusMap } from '@/hooks/useInterpretasiAI'
 import { Tooltip } from '@/components/Ui/ToolTip'
 import { StatusAncaman } from '@/types/aiInterpretasi'
+import { MethodForceDecode } from '@/types/forceDecode'
 
 function itemKey(item: DecodedRawItem) {
     return `${item.channel}__${item.arah}`
@@ -30,18 +31,47 @@ function useAccordion(keys: TeknikArah[]) {
     return { toggle, isOpen }
 }
 
+// ── Helper: konversi MethodForceDecode → DecodedRawItem & DecodedBitItem ──
+export function methodToRawItem(m: MethodForceDecode): DecodedRawItem | null {
+    if (!m.decoded_raw) return null
+    return {
+        channel: m.channel,
+        arah: m.arah,
+        text: m.decoded_raw.text,
+        base64_encoded: m.decoded_raw.base64_encoded,
+        printable_ratio: m.decoded_raw.printable_ratio,
+        total_chars: m.decoded_raw.total_chars,
+    }
+}
+
+export function methodToBitItem(m: MethodForceDecode): DecodedBitItem | null {
+    if (!m.decoded_bit) return null
+    return {
+        channel: m.channel,
+        arah: m.arah,
+        bits: m.decoded_bit.bits,
+        total_bits: m.decoded_bit.total_bits,
+    }
+}
+
 export default function HasilAnalisis({ result }: HasilAnalisisProps) {
-    const { analysis, forceDecode, aiInterpretasi } = result
+    const { analysis, forceDecode, methodForceDecodes, aiInterpretasi } = result
 
     if (!forceDecode) return null
 
-    const decodedItems: DecodedRawItem[] = forceDecode.decoded_raw ?? []
-    const decodedBits: DecodedBitItem[] = forceDecode.decoded_bit ?? []
+    // ── Sumber data: prioritaskan methodForceDecodes, fallback ke forceDecode legacy ──
+    const decodedItems: DecodedRawItem[] = methodForceDecodes && methodForceDecodes.length > 0
+        ? methodForceDecodes.map(methodToRawItem).filter((x): x is DecodedRawItem => x !== null)
+        : []
+
+    const decodedBits: DecodedBitItem[] = methodForceDecodes && methodForceDecodes.length > 0
+        ? methodForceDecodes.map(methodToBitItem).filter((x): x is DecodedBitItem => x !== null)
+        : []
 
     const getBitItem = (item: DecodedRawItem): DecodedBitItem | undefined =>
         decodedBits.find((b) => b.channel === item.channel && b.arah === item.arah)
 
-    // Build teknikByArah
+    // Build teknikByArah — sama seperti sebelumnya
     const teknikByArah = new Map<TeknikArah, Channel[]>()
     for (const t of (analysis.teknik ?? [])) {
         const existing = teknikByArah.get(t.arah)
@@ -65,7 +95,6 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
     const arahKeys = [...teknikByArah.keys()]
     const { toggle: toggleAccordion, isOpen } = useAccordion(arahKeys)
 
-    // Multi-select
     const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set())
     const [isInterpreting, setIsInterpreting] = useState(false)
     const [interpretingKeys, setInterpretingKeys] = useState<Set<string>>(new Set())
@@ -143,6 +172,9 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
     const allSelectableSelected = selectableItems.length > 0 && selectedKeys.size === selectableItems.length
     const someSelected = selectedKeys.size > 0
 
+    // ── Indikator sumber data ──
+    const usingMethodTable = methodForceDecodes && methodForceDecodes.length > 0
+
     return (
         <div className="max-w-7xl mx-auto mt-3 space-y-4">
 
@@ -173,10 +205,20 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                                 </Tooltip>
                             </>
                         )}
+                        {usingMethodTable && (
+                            <>
+                                <span>&nbsp;·&nbsp;</span>
+                                <Tooltip text="Data dibaca dari tabel method_forcedecode — setiap kombinasi channel × teknik disimpan sebagai baris terpisah.">
+                                    <span className="cursor-default text-violet-600 font-mono text-[10px] border border-violet-300 bg-violet-50 px-1 py-0.5 rounded">
+                                        per-method
+                                    </span>
+                                </Tooltip>
+                            </>
+                        )}
                     </p>
                 </div>
 
-                {/* Action bar */}
+                {/* Action bar — sama seperti sebelumnya */}
                 {selectableItems.length > 0 && (
                     <div className="flex items-center gap-2 flex-wrap">
                         <Tooltip text={allSelectableSelected
@@ -194,7 +236,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                         </Tooltip>
 
                         {someSelected && (
-                            <Tooltip text={`Kirim ${selectedKeys.size} kombinasi terpilih ke AI untuk dianalisis — AI akan menilai apakah data mengandung pesan tersembunyi.`}>
+                            <Tooltip text={`Kirim ${selectedKeys.size} kombinasi terpilih ke AI untuk dianalisis.`}>
                                 <button
                                     type="button"
                                     onClick={handleInterpretSelected}
@@ -231,7 +273,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                 )}
             </div>
 
-            {/* Accordion list */}
+            {/* Accordion list — tidak berubah */}
             <div className="space-y-3">
                 {[...teknikByArah.entries()].map(([arah, channels], arahIdx) => {
                     const open = isOpen(arah)
@@ -248,8 +290,6 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
 
                     return (
                         <div key={arah} className="pb-1.5">
-
-                            {/* Accordion header */}
                             <button
                                 type="button"
                                 onClick={() => toggleAccordion(arah)}
@@ -259,22 +299,13 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                                     hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-[-5px_5px_0_rgba(26,26,46,1)]
                                     ${open ? '-translate-y-0.5 -translate-x-0.5 shadow-[-5px_5px_0_rgba(26,26,46,1)]' : ''}`}
                             >
-                                {/* Chevron */}
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
                                     fill="currentColor" viewBox="0 0 256 256"
                                     className={`text-neutral-600 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>
                                     <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z" />
                                 </svg>
-
-                                <span className="text-xs font-mono font-bold text-neutral-600 shrink-0 w-5">
-                                    T{arahIdx + 1}
-                                </span>
-
-                                <span className="text-xs font-semibold text-neutral-900 flex-1 text-left">
-                                    {TEKNIK_LABEL[arah]}
-                                </span>
-
-                                {/* Channel pills */}
+                                <span className="text-xs font-mono font-bold text-neutral-600 shrink-0 w-5">T{arahIdx + 1}</span>
+                                <span className="text-xs font-semibold text-neutral-900 flex-1 text-left">{TEKNIK_LABEL[arah]}</span>
                                 <div className="flex gap-0.5 shrink-0">
                                     {channels.map(ch => (
                                         <Tooltip key={ch} text={`Channel ${ch === 'R' ? 'Red' : ch === 'G' ? 'Green' : ch === 'B' ? 'Blue' : ch} — data diekstrak dari komponen warna ini.`}>
@@ -285,73 +316,39 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                                         </Tooltip>
                                     ))}
                                 </div>
-
-                                {/* Worst status badge */}
                                 {worstStatus && (
                                     <Tooltip text={
-                                        worstStatus === 'Aman'
-                                            ? 'Semua channel pada teknik ini dinilai aman oleh AI.'
-                                            : worstStatus === 'Mencurigakan'
-                                                ? 'Setidaknya satu channel pada teknik ini dinilai mencurigakan oleh AI.'
-                                                : 'Setidaknya satu channel pada teknik ini dinilai berbahaya oleh AI.'
+                                        worstStatus === 'Aman' ? 'Semua channel pada teknik ini dinilai aman oleh AI.'
+                                            : worstStatus === 'Mencurigakan' ? 'Setidaknya satu channel dinilai mencurigakan.'
+                                                : 'Setidaknya satu channel dinilai berbahaya.'
                                     }>
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-sm font-semibold border shrink-0
-                                            ${ANCAMAN_STYLE[worstStatus] ?? ''}`}>
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-sm font-semibold border shrink-0 ${ANCAMAN_STYLE[worstStatus] ?? ''}`}>
                                             {worstStatus}
                                         </span>
                                     </Tooltip>
                                 )}
-
-                                {/* Badge belum AI */}
                                 {uninterpretedCount > 0 && (
-                                    <Tooltip text={`${uninterpretedCount} dari ${arahItems.length} channel pada teknik ini belum diinterpretasi AI. Buka accordion lalu centang card untuk menganalisis.`}>
-                                        <span className="text-[10px] px-2 py-0.5 rounded-sm border
-                                            border-neutral-400 text-neutral-500 shrink-0 font-mono">
+                                    <Tooltip text={`${uninterpretedCount} dari ${arahItems.length} channel belum diinterpretasi AI.`}>
+                                        <span className="text-[10px] px-2 py-0.5 rounded-sm border border-neutral-400 text-neutral-500 shrink-0 font-mono">
                                             {uninterpretedCount} belum AI
                                         </span>
                                     </Tooltip>
                                 )}
-
                                 <Tooltip text={`Teknik ini memiliki ${arahItems.length} kanal warna yang diekstrak.`}>
-                                    <span className="text-xs text-neutral-400 shrink-0 cursor-default">
-                                        {arahItems.length} kanal
-                                    </span>
+                                    <span className="text-xs text-neutral-400 shrink-0 cursor-default">{arahItems.length} kanal</span>
                                 </Tooltip>
                             </button>
 
-                            {/* Accordion body */}
                             {open && (
-                                <div className="divide-y divide-neutral-200 bg-neutral-50">
+                                <div className="bg-neutral-50">
                                     {channels.map((ch, chIdx) => {
                                         const item = arahItems.find(i => i.channel === ch)
                                         if (!item) return null
 
-                                        const chStyle = CH_STYLE[ch]
                                         const interpreted = isInterpreted(item)
-                                        const chName = ch === 'R' ? 'Red' : ch === 'G' ? 'Green' : ch === 'B' ? 'Blue' : ch
 
                                         return (
-                                            <div key={ch} className="py-3 space-y-2">
-                                                {/* Channel sub-header */}
-                                                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-sm bg-neutral-50 border ${chStyle.header}`}>
-                                                    <span className={`w-2 h-2 rounded-full shrink-0 ${chStyle.dot}`} />
-                                                    <Tooltip text={`Ekstraksi LSB dari channel warna ${chName} dengan arah ${TEKNIK_LABEL[arah]}.`}>
-                                                        <span className={`text-xs font-mono font-bold cursor-default ${chStyle.pill.split(' ')[1]}`}>
-                                                            Channel {ch}
-                                                        </span>
-                                                    </Tooltip>
-                                                    <span className="text-xs text-neutral-400 ml-auto">
-                                                        {chIdx + 1}/{channels.length}
-                                                    </span>
-                                                    {interpreted && (
-                                                        <Tooltip text="Channel ini sudah diinterpretasi oleh AI — hasil analisis ditampilkan di dalam card.">
-                                                            <span className="text-[10px] px-2 py-0.5 rounded-sm
-                                                                bg-neutral-900 text-white font-medium shrink-0 cursor-default">
-                                                                ✓ AI
-                                                            </span>
-                                                        </Tooltip>
-                                                    )}
-                                                </div>
+                                            <div key={ch} className="py-2 space-y-2">
 
                                                 <DecodeCard
                                                     item={item}
@@ -379,7 +376,6 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                 )}
             </div>
 
-            {/* Info hint */}
             {!someSelected && localAIResults.length === 0 && selectableItems.length > 0 && (
                 <div className="flex items-center gap-3 px-5 py-3 rounded-sm bg-neutral-50 border border-neutral-800">
                     <svg className="h-4 w-4 text-neutral-900 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

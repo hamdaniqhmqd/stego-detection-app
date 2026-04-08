@@ -188,7 +188,7 @@ export default function InputAnalisis({
                                     <span className="text-neutral-700 cursor-default"><InfoIcon /></span>
                                 </Tooltip>
                             )}
-                            <div className="flex-1 h-px bg-neutral-300" />
+                            <div className="flex-1 h-px bg-neutral-500" />
                         </h2>
                         {readOnly && (
                             <Tooltip text="Mode hanya lihat — konfigurasi tidak dapat diubah dari halaman ini.">
@@ -286,7 +286,7 @@ export default function InputAnalisis({
                             <Tooltip text="Channel warna yang akan diekstrak bit LSB-nya. R = Red, G = Green, B = Blue. Lebih banyak channel = lebih banyak kombinasi yang dianalisis.">
                                 <span className="text-neutral-700 cursor-default"><InfoIcon /></span>
                             </Tooltip>
-                            <div className="flex-1 h-px bg-neutral-300" />
+                            <div className="flex-1 h-px bg-neutral-500" />
                         </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
@@ -328,7 +328,7 @@ export default function InputAnalisis({
                         <Tooltip text="Jika diaktifkan, semua hasil ekstraksi akan langsung dikirim ke AI untuk dianalisis — mendeteksi pesan tersembunyi dan menilai tingkat ancaman. Membutuhkan waktu lebih lama.">
                             <span className="text-neutral-700 cursor-default"><InfoIcon /></span>
                         </Tooltip>
-                        <div className="flex-1 h-px bg-neutral-300" />
+                        <div className="flex-1 h-px bg-neutral-500" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {([true, false] as const).map((val) => {
@@ -381,7 +381,7 @@ export default function InputAnalisis({
                             <Tooltip text="Teknik menentukan urutan baca piksel saat mengekstrak bit LSB. Setiap teknik menghasilkan bit yang berbeda dari gambar yang sama. Lebih banyak teknik = lebih lama prosesnya.">
                                 <span className="text-neutral-700 cursor-default"><InfoIcon /></span>
                             </Tooltip>
-                            <div className="flex-1 h-px bg-neutral-300" />
+                            <div className="flex-1 h-px bg-neutral-500" />
                         </div>
                     </div>
                     <div className="space-y-2 grid grid-cols-1 gap-2">

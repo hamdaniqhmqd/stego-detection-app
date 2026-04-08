@@ -6,6 +6,7 @@ import type {
     AnalysisInsert, AnalysisUpdate, AnalysisResult,
 } from '@/types/analysis'
 import { getWaktuWIB } from '@/utils/format'
+import { MethodForceDecode } from '@/types/forceDecode'
 
 const PAGE_SIZE = 5
 
@@ -155,22 +156,54 @@ export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysi
     }, [goToPage, state.isLoadingMore, state.hasMore])
 
     const getById = useCallback(async (id: string): Promise<AnalysisResult | null> => {
-        const { data: analysis, error: analysisError } = await supabaseAnonKey.from('analysis').select('*').eq('id', id).single()
+        const { data: analysis, error: analysisError } = await supabaseAnonKey
+            .from('analysis').select('*').eq('id', id).single()
         if (analysisError) throw new Error(analysisError.message)
         if (!analysis) return null
+
         const { data: forceDecode, error: forceError } = await supabaseAnonKey
-            .from('analysis_forcedecode').select('*').eq('analysis_id', id)
-            .is('deleted_at', null).order('created_at', { ascending: false }).limit(1).maybeSingle()
+            .from('analysis_forcedecode')
+            .select('*')
+            .eq('analysis_id', id)
+            .is('deleted_at', null)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
         if (forceError) throw new Error(forceError.message)
+
+        // Fetch method_forcedecode jika ada forceDecode
+        let methodForceDecodes: MethodForceDecode[] = []
+        if (forceDecode) {
+            const { data: methods, error: methodError } = await supabaseAnonKey
+                .from('method_forcedecode')
+                .select('*')
+                .eq('analysis_forcedecode_id', forceDecode.id)
+                .is('deleted_at', null)
+                .order('created_at', { ascending: true })
+            if (methodError) throw new Error(methodError.message)
+            methodForceDecodes = (methods ?? []) as MethodForceDecode[]
+        }
+
         let aiInterpretasi: AnalysisInterpretasiAI | undefined = undefined
         if (forceDecode) {
             const { data: ai, error: aiError } = await supabaseAnonKey
-                .from('analysis_interpretasi_ai').select('*').eq('analysis_forcedecode_id', forceDecode.id)
-                .is('deleted_at', null).order('created_at', { ascending: false }).limit(1).maybeSingle()
+                .from('analysis_interpretasi_ai')
+                .select('*')
+                .eq('analysis_forcedecode_id', forceDecode.id)
+                .is('deleted_at', null)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle()
             if (aiError) throw new Error(aiError.message)
             aiInterpretasi = ai ?? undefined
         }
-        return { analysis: analysis as Analysis, forceDecode: forceDecode as AnalysisForceDecode | null, aiInterpretasi }
+
+        return {
+            analysis: analysis as Analysis,
+            forceDecode: forceDecode as AnalysisForceDecode | null,
+            methodForceDecodes,
+            aiInterpretasi,
+        }
     }, [])
 
     const create = useCallback(async (payload: AnalysisInsert): Promise<Analysis> => {
