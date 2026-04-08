@@ -20,15 +20,31 @@ export interface DecodedRawItem {
 export interface AnalysisForceDecode extends BaseRecord {
     analysis_id: string
     decode_teknik?: DecodeTeknik[]
-    decoded_bit?: DecodedBitItem[]
-    decoded_raw?: DecodedRawItem[]
     waktu_proses?: string
 }
 
 export interface ForceDecodeInsert {
     analysis_id: string
     decode_teknik: DecodeTeknik[]
-    decoded_bit: DecodedBitItem[]
-    decoded_raw: DecodedRawItem[]
     waktu_proses?: string
+}
+
+export interface MethodForceDecode extends BaseRecord {
+    id: string
+    analysis_forcedecode_id: string
+    channel: Channel
+    arah: TeknikArah
+    decoded_bit?: {
+        bits: string
+        total_bits: number
+    } | null
+    decoded_raw?: {
+        text: string
+        base64_encoded?: boolean
+        printable_ratio: number
+        total_chars: number
+    } | null
+    created_at: string
+    updated_at?: string
+    deleted_at?: string
 }

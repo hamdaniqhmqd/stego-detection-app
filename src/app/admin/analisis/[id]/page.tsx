@@ -7,7 +7,7 @@ import DashboardLayoutAdmins from '@/components/Layouts/DashboardLayoutAdmins'
 import { useAnalysisDetail } from '@/hooks/useAnalisisDetail'
 import HasilAnalisisAdmin from '@/components/Section/HasilAnalisisAdmin'
 import { CHANNEL_COLOR, STATUS_COLOR, STATUS_DOT } from '@/utils/Channel'
-import { TEKNIK_LABEL, type TeknikArah } from '@/types/shared'
+import { DecodedRawItem, TEKNIK_LABEL, type TeknikArah } from '@/types/shared'
 import {
     buildTeknikStatusMap,
     makeTeknikKey,
@@ -20,6 +20,7 @@ import { ImagePreview } from '@/components/Ui/ImagePreview'
 import { fmtDate } from '@/utils/format'
 import Section from '@/components/Ui/Section'
 import { Field } from '@/components/Ui/Field'
+import { MethodForceDecode } from '@/types/forceDecode'
 
 // AI Summary bar 
 function AISummaryBar({ teknikMap }: { teknikMap: TeknikStatusMap }) {
@@ -51,6 +52,18 @@ function AISummaryBar({ teknikMap }: { teknikMap: TeknikStatusMap }) {
             </div>
         </div>
     )
+}
+
+export function methodToRawItem(m: MethodForceDecode): DecodedRawItem | null {
+    if (!m.decoded_raw) return null
+    return {
+        channel: m.channel,
+        arah: m.arah,
+        text: m.decoded_raw.text,
+        base64_encoded: m.decoded_raw.base64_encoded,
+        printable_ratio: m.decoded_raw.printable_ratio,
+        total_chars: m.decoded_raw.total_chars,
+    }
 }
 
 // Page 
@@ -97,14 +110,17 @@ export default function AnalisisDetailPage({ params }: PageProps) {
         )
     }
 
-    const { analysis, forceDecode, aiInterpretasi } = result
+    const { analysis, forceDecode, methodForceDecodes, aiInterpretasi } = result
 
     // Build teknik → status map
     const teknikMap: TeknikStatusMap = aiInterpretasi
         ? buildTeknikStatusMap(aiInterpretasi.hasil ?? [])
         : {} as TeknikStatusMap
 
-    const decodedRaw = forceDecode?.decoded_raw ?? []
+    const decodedRaw: DecodedRawItem[] = methodForceDecodes && methodForceDecodes.length > 0
+        ? methodForceDecodes.map(methodToRawItem).filter((x): x is DecodedRawItem => x !== null)
+        : []
+
     const filename = analysis.file_path?.split('/').pop() ?? '—'
 
     // Group teknik by arah for the info panel

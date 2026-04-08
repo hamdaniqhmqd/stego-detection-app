@@ -13,6 +13,7 @@ import { buildTeknikStatusMap, makeTeknikKey } from '@/hooks/useInterpretasiAI'
 import { AIInterpretationText } from '../Ui/AIInterpretationFormatter'
 import { Tooltip } from '../Ui/ToolTip'
 import { StatusAncaman } from '@/types/aiInterpretasi'
+import { MethodForceDecode } from '@/types/forceDecode'
 
 // Props
 interface HasilAnalisisAdminProps {
@@ -426,14 +427,42 @@ export function TeknikBlock({ arah, channels, decodedRaw, decodedBit, teknikMap,
     )
 }
 
+export function methodToRawItem(m: MethodForceDecode): DecodedRawItem | null {
+    if (!m.decoded_raw) return null
+    return {
+        channel: m.channel,
+        arah: m.arah,
+        text: m.decoded_raw.text,
+        base64_encoded: m.decoded_raw.base64_encoded,
+        printable_ratio: m.decoded_raw.printable_ratio,
+        total_chars: m.decoded_raw.total_chars,
+    }
+}
+
+export function methodToBitItem(m: MethodForceDecode): DecodedBitItem | null {
+    if (!m.decoded_bit) return null
+    return {
+        channel: m.channel,
+        arah: m.arah,
+        bits: m.decoded_bit.bits,
+        total_bits: m.decoded_bit.total_bits,
+    }
+}
+
 export default function HasilAnalisisAdmin({ result, filePath }: HasilAnalisisAdminProps) {
-    const { analysis, forceDecode, aiInterpretasi } = result
+    const { analysis, forceDecode, methodForceDecodes, aiInterpretasi } = result
     const { copy, copiedKey } = useCopy()
 
     if (!forceDecode) return null
 
-    const decodedRaw: DecodedRawItem[] = forceDecode.decoded_raw ?? []
-    const decodedBit: DecodedBitItem[] = forceDecode.decoded_bit ?? []
+    const decodedRaw: DecodedRawItem[] = methodForceDecodes && methodForceDecodes.length > 0
+        ? methodForceDecodes.map(methodToRawItem).filter((x): x is DecodedRawItem => x !== null)
+        : []
+
+    const decodedBit: DecodedBitItem[] = methodForceDecodes && methodForceDecodes.length > 0
+        ? methodForceDecodes.map(methodToBitItem).filter((x): x is DecodedBitItem => x !== null)
+        : []
+
     const hasAI = analysis.interpretasi_ai
     const hasilAI: HasilInterpretasi[] = aiInterpretasi?.hasil ?? []
 
