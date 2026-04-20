@@ -1,9 +1,9 @@
 // services/analysisService.ts
 
 import { supabaseServer } from '@/libs/supabase/server'
-import type { CreateAnalysisPayload } from '@/types/analysis'
+import type { AnalysisInsert } from '@/types/analysis'
 
-export async function createAnalysis(payload: CreateAnalysisPayload) {
+export async function createAnalysis(payload: AnalysisInsert) {
     const { data, error } = await supabaseServer
         .from('analysis')
         .insert({

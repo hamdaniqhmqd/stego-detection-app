@@ -86,7 +86,7 @@ export function SectionAnalisis() {
         <div className="space-y-4">
 
             {/* Mini stats */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <MiniStat label="Total Aktif" value={stats.active}
                     color="text-violet-600" bg="bg-violet-50" border="border-violet-200" />
                 <MiniStat label="Pakai AI" value={stats.ai}
@@ -158,7 +158,7 @@ export function SectionAnalisis() {
                     return (
                         <tr
                             key={a.id}
-                            className={`hover:bg-neutral-50/60 transition-colors
+                            className={`hover:bg-neutral-50 transition-colors border-b border-neutral-200
                                 ${pending === a.id ? 'pointer-events-none opacity-40' : ''}`}
                         >
                             {/* Preview */}

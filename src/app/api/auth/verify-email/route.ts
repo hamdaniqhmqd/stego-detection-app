@@ -1,7 +1,7 @@
 // src/app/api/auth/verify-email/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import supabase from '@/libs/supabase/client';
+import { supabaseClient } from '@/libs/supabase/client';
 import { getWaktuWIB } from '@/utils/format';
 
 export async function GET(request: NextRequest) {
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
         const nowWIB = getWaktuWIB();
 
         // Cari token verifikasi
-        const { data: verification, error: verificationError } = await supabase
+        const { data: verification, error: verificationError } = await supabaseClient
             .from('email_verifications')
             .select('*')
             .eq('verification_code', token)
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Update user menjadi verified
-        const { error: updateUserError } = await supabase
+        const { error: updateUserError } = await supabaseClient
             .from('users')
             .update({
                 is_verified: true,
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Update email verification record
-        const { error: updateVerificationError } = await supabase
+        const { error: updateVerificationError } = await supabaseClient
             .from('email_verifications')
             .update({
                 verified_at: nowWIB.toISOString(),
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
 
         // Log successful verification
         try {
-            await supabase.from('email_logs').insert({
+            await supabaseClient.from('email_logs').insert({
                 user_id: verification.user_id,
                 email: verification.email,
                 type: 'verification_success',

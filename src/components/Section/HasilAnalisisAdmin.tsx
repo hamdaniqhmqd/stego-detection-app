@@ -1,4 +1,4 @@
-// src/app/admin/analisis/[id]/HasilAnalisisAdmin.tsx
+// src/components/Section/HasilAnalisisAdmin.tsx
 'use client'
 
 import { useState, useCallback } from 'react'
@@ -82,6 +82,7 @@ function CopyBtn({ text, copyKey, onCopy, isCopied }: {
         </Tooltip>
     )
 }
+
 // Stat pill
 export function StatPill({ label, value, tooltip, colorClass = 'text-neutral-700' }: {
     label: string; value: string | number; tooltip: string; colorClass?: string
@@ -427,6 +428,7 @@ export function TeknikBlock({ arah, channels, decodedRaw, decodedBit, teknikMap,
     )
 }
 
+// Fungsi konversi MethodForceDecode ke DecodedRawItem
 export function methodToRawItem(m: MethodForceDecode): DecodedRawItem | null {
     if (!m.decoded_raw) return null
     return {
@@ -439,6 +441,7 @@ export function methodToRawItem(m: MethodForceDecode): DecodedRawItem | null {
     }
 }
 
+// Fungsi konversi MethodForceDecode ke DecodedBitItem
 export function methodToBitItem(m: MethodForceDecode): DecodedBitItem | null {
     if (!m.decoded_bit) return null
     return {
@@ -453,15 +456,16 @@ export default function HasilAnalisisAdmin({ result, filePath }: HasilAnalisisAd
     const { analysis, forceDecode, methodForceDecodes, aiInterpretasi } = result
     const { copy, copiedKey } = useCopy()
 
-    if (!forceDecode) return null
+    if (!forceDecode || !methodForceDecodes || methodForceDecodes.length === 0) return null
 
-    const decodedRaw: DecodedRawItem[] = methodForceDecodes && methodForceDecodes.length > 0
-        ? methodForceDecodes.map(methodToRawItem).filter((x): x is DecodedRawItem => x !== null)
-        : []
+    // Konversi methodForceDecodes ke decodedRaw dan decodedBit
+    const decodedRaw: DecodedRawItem[] = methodForceDecodes
+        .map(methodToRawItem)
+        .filter((x): x is DecodedRawItem => x !== null)
 
-    const decodedBit: DecodedBitItem[] = methodForceDecodes && methodForceDecodes.length > 0
-        ? methodForceDecodes.map(methodToBitItem).filter((x): x is DecodedBitItem => x !== null)
-        : []
+    const decodedBit: DecodedBitItem[] = methodForceDecodes
+        .map(methodToBitItem)
+        .filter((x): x is DecodedBitItem => x !== null)
 
     const hasAI = analysis.interpretasi_ai
     const hasilAI: HasilInterpretasi[] = aiInterpretasi?.hasil ?? []
@@ -470,17 +474,28 @@ export default function HasilAnalisisAdmin({ result, filePath }: HasilAnalisisAd
         ? buildTeknikStatusMap(hasilAI)
         : {} as TeknikStatusMap
 
+    // Build teknik by arah dari decoded data + analysis teknik
     const teknikByArah = new Map<TeknikArah, Channel[]>()
+
+    // First, prioritize dari analysis.teknik jika ada
     for (const t of (analysis.teknik ?? [])) {
         const existing = teknikByArah.get(t.arah)
-        if (existing) { if (!existing.includes(t.channel)) existing.push(t.channel) }
-        else teknikByArah.set(t.arah, [t.channel])
+        if (existing) {
+            if (!existing.includes(t.channel)) existing.push(t.channel)
+        } else {
+            teknikByArah.set(t.arah, [t.channel])
+        }
     }
+
+    // Fallback ke decodedRaw jika teknikByArah kosong
     if (teknikByArah.size === 0) {
         for (const r of decodedRaw) {
             const existing = teknikByArah.get(r.arah)
-            if (existing) { if (!existing.includes(r.channel)) existing.push(r.channel) }
-            else teknikByArah.set(r.arah, [r.channel])
+            if (existing) {
+                if (!existing.includes(r.channel)) existing.push(r.channel)
+            } else {
+                teknikByArah.set(r.arah, [r.channel])
+            }
         }
     }
 

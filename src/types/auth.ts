@@ -51,7 +51,7 @@ export interface EmailVerification {
     type: 'register' | 'forgot_password';
     expires_at: string;
     is_verified?: boolean;
-    verified_at?: string; // ✅ Ikuti typo di database
+    verified_at?: string;
     created_at: string;
     updated_at?: string;
 }

@@ -1,12 +1,12 @@
 import { makeTeknikKey, TeknikStatusMap } from "@/hooks/useInterpretasiAI"
 import { HasilInterpretasi, StatusAncaman } from "@/types/aiInterpretasi"
-import { TokenUsageSummary } from "@/types/analysis"
 import { Channel, TEKNIK_LABEL, TeknikArah } from "@/types/shared"
 import { useState } from "react"
 import { Tooltip } from "../Ui/ToolTip"
 import { CHANNEL_TOOLTIP, ChannelBlock } from "../Ui/ChannelBlock"
 import { fmtTokens } from "@/utils/format"
 import { CHANNEL_COLOR, STATUS_COLOR, STATUS_DOT } from "@/utils/Channel"
+import { TokenUsageSummary } from "@/types/GeminiToken"
 
 export interface TeknikAccordionProps {
     arah: TeknikArah

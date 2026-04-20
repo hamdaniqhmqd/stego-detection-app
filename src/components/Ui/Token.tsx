@@ -1,7 +1,7 @@
-import { TokenUsageSummary } from "@/types/analysis";
 import { Tooltip } from "./ToolTip";
 import { fmtTokens } from "@/utils/format";
 import { TEKNIK_LABEL, TeknikArah } from "@/types/shared";
+import { TokenUsageSummary } from "@/types/GeminiToken";
 
 export function TokenBar({ value, max }: { value: number; max: number }) {
     const pct = max > 0 ? Math.round((value / max) * 100) : 0

@@ -22,7 +22,7 @@ export function ModalDetailUser({ user, open, onClose }: ModalDetailUserProps) {
         >
             <div className="space-y-6">
                 {/* Avatar + nama */}
-                <div className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl
+                <div className="flex flex-col md:flex-row items-center gap-4 p-4 bg-neutral-50 rounded-xl
                     border border-neutral-100">
                     <img
                         src={
@@ -41,7 +41,7 @@ export function ModalDetailUser({ user, open, onClose }: ModalDetailUserProps) {
                         <span className={`mt-1 inline-flex px-2 py-0.5 rounded-full text-xs font-medium
                             ${user.role === 'superadmin'
                                 ? 'bg-violet-50 text-violet-700'
-                                : 'bg-neutral-100 text-neutral-600'
+                                : 'bg-neutral-200 text-neutral-600'
                             }`}>
                             {user.role}
                         </span>

@@ -95,7 +95,7 @@ export function SectionPengguna({ onDetail }: SectionPenggunaProps) {
                 ) : current.items.map((u) => (
                     <tr
                         key={u.id}
-                        className={`hover:bg-neutral-50/60 transition-colors
+                        className={`hover:bg-neutral-50 transition-colors border-b border-neutral-200
                             ${pending === u.id ? 'opacity-50 pointer-events-none' : ''}`}
                     >
                         {/* Pengguna */}

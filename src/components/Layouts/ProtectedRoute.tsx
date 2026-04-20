@@ -63,7 +63,7 @@ export default function ProtectedRoute({
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="bg-neutral-50 flex items-center justify-center min-h-screen">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-600 mx-auto"></div>
                     {/* <p className="mt-4 text-neutral-600">Memuat...</p> */}
@@ -74,7 +74,7 @@ export default function ProtectedRoute({
 
     if (!isAuthenticated || !user) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="bg-neutral-50 flex items-center justify-center min-h-screen">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-600 mx-auto"></div>
                     <p className="mt-4 text-neutral-600">Mengalihkan ke halaman login...</p>
@@ -89,7 +89,7 @@ export default function ProtectedRoute({
 
         if (!hasAccess) {
             return (
-                <div className="flex items-center justify-center min-h-screen">
+                <div className="bg-neutral-50 flex items-center justify-center min-h-screen">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-600 mx-auto"></div>
                         <p className="mt-4 text-neutral-600">Mengalihkan...</p>

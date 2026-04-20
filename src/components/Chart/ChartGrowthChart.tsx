@@ -100,8 +100,8 @@ export function ChartGrowthChart({ users, analysis, interpretasi }: GrowthChartP
 
     return (
         <div className="bg-white rounded-sm border border-neutral-200 shadow-sm p-5 space-y-3">
-            <div className="flex items-start justify-between">
-                <div>
+            <div className="flex flex-col md:flex-row gap-1.5 items-start justify-between">
+                <div className="">
                     <h3 className="text-sm font-semibold text-neutral-800">Pertumbuhan Aktivitas</h3>
                     <p className="text-xs text-neutral-400 mt-0.5">Pengguna, Analisis & Interpretasi</p>
                 </div>

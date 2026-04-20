@@ -1,4 +1,5 @@
 // hooks/useAnalysis.ts
+
 import { useState, useEffect, useCallback, useRef } from 'react'
 import supabaseAnonKey from '@/libs/supabase/anon_key'
 import type {
@@ -10,9 +11,6 @@ import { MethodForceDecode } from '@/types/forceDecode'
 
 const PAGE_SIZE = 5
 
-const FD_LIST_COLUMNS = ['id', 'analysis_id', 'waktu_proses', 'created_at', 'updated_at', 'deleted_at'].join(', ')
-const AI_LIST_COLUMNS = ['id', 'analysis_forcedecode_id', 'analysis_id', 'hasil', 'waktu_proses', 'created_at', 'updated_at', 'deleted_at'].join(', ')
-
 export interface AnalysisListItem extends Analysis {
     force_decode: AnalysisForceDecode | null
     ai_interpretasi: AnalysisInterpretasiAI | undefined
@@ -21,8 +19,8 @@ export interface AnalysisListItem extends Analysis {
 interface UseAnalysisState {
     items: AnalysisListItem[]
     total: number
-    currentPage: number       // ← tambahan
-    totalPages: number        // ← tambahan
+    currentPage: number
+    totalPages: number
     isLoading: boolean
     isLoadingMore: boolean
     hasMore: boolean
@@ -30,7 +28,7 @@ interface UseAnalysisState {
 }
 
 export interface UseAnalysisReturn extends UseAnalysisState {
-    goToPage: (page: number) => Promise<void>   // ← tambahan
+    goToPage: (page: number) => Promise<void>
     loadMore: () => Promise<void>
     refresh: () => Promise<void>
     getById: (id: string) => Promise<AnalysisResult | null>
@@ -42,43 +40,64 @@ export interface UseAnalysisReturn extends UseAnalysisState {
 }
 
 async function fetchLatestForceDecodes(analysisIds: string[]): Promise<Map<string, AnalysisForceDecode>> {
-    if (analysisIds.length === 0) return new Map()
+    if (analysisIds.length === 0) {
+        return new Map()
+    }
+
     const { data, error } = await supabaseAnonKey
         .from('analysis_forcedecode')
-        .select(FD_LIST_COLUMNS)
+        .select('*')
         .in('analysis_id', analysisIds)
         .is('deleted_at', null)
         .order('created_at', { ascending: false })
-    if (error) throw new Error(error.message)
+
+    if (error) {
+        throw new Error(error.message)
+    }
+
     const map = new Map<string, AnalysisForceDecode>()
     for (const row of (data ?? []) as unknown as AnalysisForceDecode[]) {
         if (!map.has(row.analysis_id)) map.set(row.analysis_id, row)
     }
+
     return map
 }
 
 async function fetchLatestInterpretasi(forceDecodeIds: string[]): Promise<Map<string, AnalysisInterpretasiAI>> {
-    if (forceDecodeIds.length === 0) return new Map()
+    if (forceDecodeIds.length === 0) {
+        return new Map()
+    }
+
     const { data, error } = await supabaseAnonKey
         .from('analysis_interpretasi_ai')
-        .select(AI_LIST_COLUMNS)
+        .select('*')
         .in('analysis_forcedecode_id', forceDecodeIds)
         .is('deleted_at', null)
         .order('created_at', { ascending: false })
-    if (error) throw new Error(error.message)
+
+    if (error) {
+        throw new Error(error.message)
+    }
+
     const map = new Map<string, AnalysisInterpretasiAI>()
     for (const row of (data ?? []) as unknown as AnalysisInterpretasiAI[]) {
         if (!map.has(row.analysis_forcedecode_id)) map.set(row.analysis_forcedecode_id, row)
     }
+
     return map
 }
 
 async function enrichAnalysisRows(rows: Analysis[]): Promise<AnalysisListItem[]> {
-    if (rows.length === 0) return []
+    if (rows.length === 0) {
+        return []
+    }
+
     const analysisIds = rows.map(r => r.id)
     const fdMap = await fetchLatestForceDecodes(analysisIds)
+
     const forceDecodeIds = [...fdMap.values()].map(fd => fd.id)
     const aiMap = await fetchLatestInterpretasi(forceDecodeIds)
+
     return rows.map(analysis => {
         const forceDecode = fdMap.get(analysis.id) ?? null
         const aiInterpretasi = forceDecode ? aiMap.get(forceDecode.id) : undefined
@@ -95,9 +114,17 @@ export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysi
 
     const baseQuery = useCallback(() => {
         let q = supabaseAnonKey.from('analysis').select('*')
-        if (userId) q = q.eq('user_id', userId)
-        if (!includeDeleted) q = q.is('deleted_at', null)
-        else q = q.not('deleted_at', 'is', null)
+
+        if (userId) {
+            q = q.eq('user_id', userId)
+        }
+
+        if (!includeDeleted) {
+            q = q.is('deleted_at', null)
+        } else {
+            q = q.not('deleted_at', 'is', null)
+        }
+
         return q
     }, [userId, includeDeleted])
 
@@ -106,11 +133,21 @@ export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysi
         if (!silent) setState(s => ({ ...s, isLoading: true, error: null }))
         try {
             let countQ = supabaseAnonKey.from('analysis').select('*', { count: 'exact', head: true })
-            if (userId) countQ = countQ.eq('user_id', userId)
-            if (!includeDeleted) countQ = countQ.is('deleted_at', null)
-            else countQ = countQ.not('deleted_at', 'is', null)
+
+            if (userId) {
+                countQ = countQ.eq('user_id', userId)
+            }
+
+            if (!includeDeleted) {
+                countQ = countQ.is('deleted_at', null)
+            } else {
+                countQ = countQ.not('deleted_at', 'is', null)
+            }
+
             const { count, error: countError } = await countQ
-            if (countError) throw countError
+            if (countError) {
+                throw countError
+            }
 
             const total = count ?? 0
             const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
@@ -120,7 +157,9 @@ export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysi
             const { data: analysisRows, error: analysisError } = await baseQuery()
                 .order('created_at', { ascending: false })
                 .range(from, from + PAGE_SIZE - 1)
-            if (analysisError) throw analysisError
+            if (analysisError) {
+                throw analysisError
+            }
 
             const items = await enrichAnalysisRows((analysisRows ?? []) as Analysis[])
             pageRef.current = safePage
@@ -142,14 +181,14 @@ export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysi
 
     const fetchInitial = useCallback(() => fetchPage(1), [fetchPage])
 
-    // goToPage — dipakai komponen pagination
+    // dipakai komponen pagination
     const goToPage = useCallback(async (page: number) => {
         if (page === pageRef.current) return
         setState(s => ({ ...s, isLoading: true }))
         await fetchPage(page)
     }, [fetchPage])
 
-    // loadMore — tetap ada untuk backward compat, tapi tidak dipakai di UI baru
+    // tetap ada untuk load more
     const loadMore = useCallback(async () => {
         if (state.isLoadingMore || !state.hasMore) return
         await goToPage(pageRef.current + 1)
@@ -208,7 +247,7 @@ export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysi
 
     const create = useCallback(async (payload: AnalysisInsert): Promise<Analysis> => {
         const { data, error } = await supabaseAnonKey.from('analysis')
-            .insert({ ...payload, created_at: getWaktuWIB().toISOString() }).select().single()
+            .insert({ ...payload }).select().single()
         if (error) throw new Error(error.message)
         return data as Analysis
     }, [])

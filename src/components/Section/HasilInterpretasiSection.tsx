@@ -1,9 +1,10 @@
-import { HasilInterpretasi, TokenUsageSummary } from "@/types/analysis"
+import { HasilInterpretasi } from "@/types/analysis"
 import { Channel, type TeknikArah } from "@/types/shared"
 import { Tooltip } from "../Ui/ToolTip"
 import { TeknikAccordion } from '@/components/Accordion/TeknikAccordion'
 import { fmtTokens } from "@/utils/format"
 import { type TeknikStatusMap } from "@/hooks/useInterpretasiAI"
+import { TokenUsageSummary } from "@/types/GeminiToken"
 
 export function HasilInterpretasiSection({
     hasilAI,

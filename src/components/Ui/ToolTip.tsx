@@ -17,7 +17,7 @@ export function Tooltip({ text, children }: { text: string; children: React.Reac
 
     return (
         <>
-            <span ref={ref} className="inline-block" onMouseEnter={show} onMouseLeave={hide}>
+            <span ref={ref} className="" onMouseEnter={show} onMouseLeave={hide}>
                 {children}
             </span>
             {pos && typeof document !== 'undefined' && createPortal(

@@ -26,16 +26,6 @@ export interface AuthUser {
     photo?: string;
 }
 
-export interface UserProfile {
-    id: string;
-    username: string;
-    email: string;
-    password: string;
-    role: string;
-    fullname?: string | null;
-    photo?: string | null;
-}
-
 export interface UserInsert {
     username: string
     email: string

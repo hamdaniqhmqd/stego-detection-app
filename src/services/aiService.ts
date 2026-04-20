@@ -1,50 +1,16 @@
 // services/aiService.ts
 
-import { supabaseServer } from '@/libs/supabase/server'
-import {
-    interpretWithAI,
-    getActiveGeminiToken,
-    type GeminiUsage,
-    type GeminiTokenRecord,
-} from '@/libs/ai/interpret'
+'use server'
+
+import { getActiveGeminiToken } from '@/libs/ai/getActiveGeminiToken'
+import { interpretWithAI } from '@/libs/ai/interpret'
+import supabaseAnonKey from '@/libs/supabase/anon_key'
 import type { HasilInterpretasi } from '@/types/analysis'
+import { GeminiTokenRecord, GeminiUsage, PerItemTokenUsage, TokenUsageSummary } from '@/types/GeminiToken'
 import { DecodedRawItem } from '@/types/shared'
-
-// ── Types ──────────────────────────────────────────────────────
-
-interface PerItemTokenUsage {
-    channel: string
-    arah: string
-    prompt_tokens: number
-    candidates_tokens: number
-    total_tokens: number
-}
-
-interface TokenUsageSummary {
-    gemini_token_id: string
-    gemini_token_label: string
-    total_prompt_tokens: number
-    total_candidates_tokens: number
-    total_tokens: number
-    per_item: PerItemTokenUsage[]
-}
-
-// ── Helpers ────────────────────────────────────────────────────
-
-/**
- * Decode base64 → teks asli sebelum dikirim ke AI.
- * text disimpan sebagai base64 di DB karena JSONB tidak support \u0000.
- */
-function decodeItemText(item: DecodedRawItem): string {
-    if (!item.base64_encoded) return item.text
-    try {
-        return Buffer.from(item.text, 'base64').toString('binary')
-    } catch {
-        return item.text
-    }
-}
-
-// ── Main Service ───────────────────────────────────────────────
+import { extractStatusAncaman } from '@/utils/ai/extractStatusAncaman'
+import { decodeItemText } from '@/utils/Decode'
+import { getWaktuWIB } from '@/utils/format'
 
 export async function processAIInterpretation(
     analysisId: string,
@@ -54,8 +20,7 @@ export async function processAIInterpretation(
     const start = Date.now()
     const hasil: HasilInterpretasi[] = []
 
-    // 1. Ambil token aktif dari DB sekali di awal
-    //    (satu proses batch pakai token yang sama)
+    // Ambil token aktif dari DB sekali di awal
     let activeToken: GeminiTokenRecord
     try {
         activeToken = await getActiveGeminiToken()
@@ -63,7 +28,7 @@ export async function processAIInterpretation(
         throw new Error(`Gagal mendapatkan token Gemini: ${err.message}`)
     }
 
-    // 2. Akumulasi token usage untuk seluruh batch
+    // Akumulasi token usage untuk seluruh batch
     const usageAccumulator: TokenUsageSummary = {
         gemini_token_id: activeToken.id,
         gemini_token_label: activeToken.label,
@@ -73,7 +38,7 @@ export async function processAIInterpretation(
         per_item: [],
     }
 
-    // 3. Proses setiap item
+    // Proses setiap item
     for (const item of selectedItems) {
         const decodedText = decodeItemText(item)
 
@@ -99,18 +64,11 @@ export async function processAIInterpretation(
         }
 
         try {
-            // interpretWithAI sudah:
-            // - Menggunakan token yang kita pass
-            // - Increment usage_count di DB per-request (fire-and-forget)
-            // - Return usage metadata dari Gemini
+            // Proses interpretasi
             const result = await interpretWithAI(decodedText, activeToken)
 
-            const statusMatch = result.text.match(
-                /Status Ancaman\s*[:：]\s*(Aman|Mencurigakan|Berbahaya)/i
-            )
-            const statusAncaman = statusMatch
-                ? (statusMatch[1] as HasilInterpretasi['status_ancaman'])
-                : 'Aman'
+            // Parse status ancaman
+            const statusAncaman = extractStatusAncaman(result.text)
 
             hasil.push({
                 channel: item.channel,
@@ -154,26 +112,23 @@ export async function processAIInterpretation(
 
     const waktuProses = `${((Date.now() - start) / 1000).toFixed(2)}s`
 
-    // 4. Update last_used_at di gemini_tokens sebagai penanda batch selesai
-    //    (usage_count sudah di-increment per-request di dalam interpretWithAI,
-    //     di sini kita hanya update timestamp terakhir dipakai)
-    await supabaseServer
+    // Update last_used_at di DB
+    await supabaseAnonKey
         .from('gemini_tokens')
-        .update({ last_used_at: new Date().toISOString() })
+        .update({ last_used_at: getWaktuWIB().toISOString() })
         .eq('id', activeToken.id)
         .then(({ error }) => {
             if (error) console.error('[aiService] Gagal update last_used_at:', error.message)
         })
 
-    // 5. Simpan hasil interpretasi + token_usage ke DB
-    const { data, error } = await supabaseServer
+    // Simpan hasil interpretasi + token_usage ke DB
+    const { data, error } = await supabaseAnonKey
         .from('analysis_interpretasi_ai')
         .insert({
             analysis_id: analysisId,
             analysis_forcedecode_id: forceDecodeId,
             hasil,
             waktu_proses: waktuProses,
-            // Kolom baru hasil migration
             gemini_token_id: activeToken.id,
             token_usage: usageAccumulator,
         })

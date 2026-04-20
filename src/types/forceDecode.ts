@@ -1,20 +1,10 @@
 // types/forceDecode.ts
 import type { BaseRecord, Channel, TeknikArah, DecodeTeknik } from './shared'
 
-export interface DecodedBitItem {
-    channel: Channel
-    arah: TeknikArah
-    bits: string
-    total_bits: number
-}
-
-export interface DecodedRawItem {
-    channel: Channel
-    arah: TeknikArah
-    text: string
-    base64_encoded?: boolean
-    printable_ratio: number
-    total_chars: number
+export interface ForceDecodePayload {
+    analysis_id: string
+    image_url: string
+    teknik: DecodeTeknik[]
 }
 
 export interface AnalysisForceDecode extends BaseRecord {
@@ -48,3 +38,5 @@ export interface MethodForceDecode extends BaseRecord {
     updated_at?: string
     deleted_at?: string
 }
+
+export type PixelCoord = { x: number; y: number }

@@ -1,9 +1,9 @@
 import { HasilInterpretasi, StatusAncaman } from "@/types/aiInterpretasi"
-import { PerItemTokenUsage } from "@/types/analysis"
 import { Channel, TEKNIK_LABEL, TeknikArah } from "@/types/shared"
 import { CH_STYLE, STATUS_COLOR, STATUS_DOT } from "@/utils/Channel"
 import { Tooltip } from "./ToolTip"
 import { AIInterpretationBlock } from "./AIInterpretationBlock"
+import { PerItemTokenUsage } from "@/types/GeminiToken"
 
 export const CHANNEL_TOOLTIP: Record<string, string> = {
     R: 'Channel Merah (Red): menyimpan nilai intensitas merah setiap piksel. LSB dari channel ini yang diekstrak dan dianalisis.',

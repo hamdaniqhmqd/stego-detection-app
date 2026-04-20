@@ -1,12 +1,13 @@
 // services/forceDecodeService.ts
+'use server'
 
-import { supabaseServer } from '@/libs/supabase/server'
 import { forceDecodeLSB } from '@/libs/steganalysis/forceDecode'
-import type { DecodeTeknik, DecodedBitItem, DecodedRawItem } from '@/types/shared'
+import supabaseAnonKey from '@/libs/supabase/anon_key'
+import type { DecodeTeknik } from '@/types/shared'
 import { getWaktuWIB } from '@/utils/format'
 
 function encodeTextForJsonb(text: string): string {
-    return Buffer.from(text, 'binary').toString('base64')
+    return Buffer.from(text, 'utf-8').toString('base64')
 }
 
 export async function processForceDecode(
@@ -31,8 +32,8 @@ export async function processForceDecode(
         base64_encoded: true,
     }))
 
-    // ── 1. Simpan ke analysis_forcedecode (ringkasan, tanpa payload besar) ──
-    const { data: fdRecord, error: fdError } = await supabaseServer
+    // Simpan ke analysis_forcedecode (ringkasan, tanpa payload besar
+    const { data: fdRecord, error: fdError } = await supabaseAnonKey
         .from('analysis_forcedecode')
         .insert({
             analysis_id: analysisId,
@@ -44,7 +45,7 @@ export async function processForceDecode(
 
     if (fdError) throw fdError
 
-    // ── 2. Simpan per-teknik ke method_forcedecode ──
+    // Simpan per-teknik ke method_forcedecode
     const methodRows = teknikList.map((teknik) => {
         const bitItem = decodedBit.find(
             (b) => b.channel === teknik.channel && b.arah === teknik.arah
@@ -71,7 +72,7 @@ export async function processForceDecode(
         }
     })
 
-    const { error: methodError } = await supabaseServer
+    const { error: methodError } = await supabaseAnonKey
         .from('method_forcedecode')
         .insert(methodRows)
 

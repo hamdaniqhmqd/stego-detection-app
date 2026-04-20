@@ -32,8 +32,8 @@ export const CH_STYLE: Record<
 
 export const ANCAMAN_STYLE: Record<string, string> = {
     Aman: 'bg-green-200 text-green-800 border-green-800',
-    Mencurigakan: 'bg-amber-950 text-amber-400 border-amber-800',
-    Berbahaya: 'bg-red-950 text-red-400 border-red-800',
+    Mencurigakan: 'bg-amber-200 text-amber-800 border-amber-800',
+    Berbahaya: 'bg-red-200 text-red-800 border-red-800',
 }
 
 export const CHANNELS: Channel[] = ['R', 'G', 'B']

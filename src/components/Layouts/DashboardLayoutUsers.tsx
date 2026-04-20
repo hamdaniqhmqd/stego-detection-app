@@ -54,7 +54,7 @@ export default function DashboardLayoutUsers({ children, className }: Readonly<{
                             className="w-9 h-9 rounded-full object-cover border-2 border-neutral-700"
                         />
                         <div className="hidden sm:block">
-                            <p className="text-sm font-semibold text-white">{user?.username || ''}</p>
+                            <p className="text-sm font-semibold text-neutral-900">{user?.username || ''}</p>
                             <p className="text-xs text-neutral-400">{user?.email || ''}</p>
                         </div>
                     </Link>

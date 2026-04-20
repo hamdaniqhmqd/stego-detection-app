@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/libs/auth/jwt';
-import supabase from '@/libs/supabase/client';
+import { supabaseClient } from '@/libs/supabase/client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
         if (decoded && refreshToken) {
           // Delete refresh token dari database
-          await supabase
+          await supabaseClient
             .from('refresh_tokens')
             .delete()
             .eq('user_id', decoded.userId)

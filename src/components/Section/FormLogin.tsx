@@ -192,7 +192,7 @@ export default function FormLogin() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end mt-3">
+              <div className="hidden items-center justify-end mt-3">
                 <Link className="text-neutral-800 hover:underline hover:text-neutral-900 text-sm" href="#">
                   Lupa kata sandi?
                 </Link>

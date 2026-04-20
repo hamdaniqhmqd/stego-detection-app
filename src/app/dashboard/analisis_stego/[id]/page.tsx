@@ -1,28 +1,65 @@
+// src/app/dashboard/analisis_stego/[id]/page.tsx
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import DashboardLayoutUsers from '@/components/Layouts/DashboardLayoutUsers'
-import InputAnalisis from '../secion/InputAnalisis'
-import HasilAnalisis from '../secion/HasilAnalisis'
+import InputAnalisis from '../../../../components/Section/InputAnalisis'
+import HasilAnalisis from '../../../../components/Section/HasilAnalisis'
 import { Channel, TeknikArah } from '@/types/shared'
-import { useAnalysisDetail } from '@/hooks/useAnalisisDetail'
+import { useAnalysis } from '@/hooks/useAnalysis'
+import type { AnalysisResult } from '@/types/analysis'
 
 export default function DetilAnalisisStegoPage() {
-    const { id } = useParams();
-    // console.log('id:', id)
+    const { id } = useParams()
     const router = useRouter()
-    const { result: data, refresh, isLoading, error } = useAnalysisDetail(id as string)
+    const { getById } = useAnalysis()
 
-    const readOnlyData = data
+    // State management langsung di component
+    const [result, setResult] = useState<AnalysisResult | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    // Fetch data
+    const refresh = async () => {
+        setIsLoading(true)
+        setError(null)
+        try {
+            const data = await getById(id as string)
+            if (!data) {
+                setError('Data analisis tidak ditemukan')
+                setResult(null)
+            } else {
+                setResult(data)
+            }
+        } catch (err: any) {
+            setError(err.message || 'Terjadi kesalahan saat memuat data')
+            setResult(null)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // Initial fetch
+    useEffect(() => {
+        if (id) {
+            refresh()
+        }
+    }, [id])
+
+    // console.log('Fetching analysis with ID:', id)
+    // console.log('Fetching analysis with result:', result)
+
+    const readOnlyData = result
         ? {
-            analysis: data.analysis,
-            selectedChannels: data.analysis.teknik
-                ? new Set(data.analysis.teknik.map((t) => t.channel) as Channel[])
+            analysis: result.analysis,
+            selectedChannels: result.analysis.teknik
+                ? new Set(result.analysis.teknik.map((t) => t.channel) as Channel[])
                 : new Set<Channel>(['R', 'G', 'B']),
-            selectedTeknik: data.analysis.teknik
-                ? new Set(data.analysis.teknik.map((t) => t.arah) as TeknikArah[])
+            selectedTeknik: result.analysis.teknik
+                ? new Set(result.analysis.teknik.map((t) => t.arah) as TeknikArah[])
                 : new Set<TeknikArah>(),
-            useAI: data.analysis.interpretasi_ai,
+            useAI: result.analysis.interpretasi_ai,
         }
         : undefined
 
@@ -44,7 +81,7 @@ export default function DetilAnalisisStegoPage() {
     }
 
     // Error state
-    if (error || !data) {
+    if (error || !result) {
         return (
             <DashboardLayoutUsers>
                 <section className="w-full h-full flex items-center justify-center">
@@ -74,7 +111,7 @@ export default function DetilAnalisisStegoPage() {
     return (
         <DashboardLayoutUsers>
             <section className="w-full min-h-screen">
-                <div className="space-y-4 lg:pb-16 lg:pt-8 sm:pb-10 sm:pt-5">
+                <div className="space-y-4 pb-10 lg:pb-16 lg:pt-8 sm:pb-10 sm:pt-5">
 
                     {/* Page header */}
                     <div className="mb-8 text-center">
@@ -93,14 +130,14 @@ export default function DetilAnalisisStegoPage() {
                     />
 
                     {/* HasilAnalisis — tampilkan hasil yang sudah ada */}
-                    {data.forceDecode && (
+                    {result.forceDecode && (
                         <div id="hasil-analisis">
-                            <HasilAnalisis result={data} />
+                            <HasilAnalisis result={result} />
                         </div>
                     )}
 
                     {/* Jika belum ada force decode (edge case) */}
-                    {!data.forceDecode && (
+                    {!result.forceDecode && (
                         <div className="flex items-center gap-3 px-5 py-4 rounded-xl bg-neutral-50 border border-neutral-800 max-w-7xl mx-auto">
                             <svg className="h-4 w-4 text-neutral-800 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

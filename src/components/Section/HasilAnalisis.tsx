@@ -3,17 +3,14 @@
 
 import { useState } from 'react'
 import type { AnalysisResult, HasilInterpretasi } from '@/types/analysis'
-import { CH_STYLE, CHANNEL_COLOR, ANCAMAN_STYLE } from '@/utils/Channel'
-import DecodeCard from './DecodeCard'
+import { CHANNEL_COLOR, ANCAMAN_STYLE } from '@/utils/Channel'
+import DecodeCard from '../Card/DecodeCard'
 import { DecodedRawItem, DecodedBitItem, TEKNIK_LABEL, type TeknikArah, type Channel } from '@/types/shared'
 import { buildTeknikStatusMap, makeTeknikKey, type TeknikStatusMap } from '@/hooks/useInterpretasiAI'
 import { Tooltip } from '@/components/Ui/ToolTip'
 import { StatusAncaman } from '@/types/aiInterpretasi'
-import { MethodForceDecode } from '@/types/forceDecode'
-
-function itemKey(item: DecodedRawItem) {
-    return `${item.channel}__${item.arah}`
-}
+import { methodToBitItem, methodToRawItem } from '@/utils/forceDecode/method'
+import { processAIInterpretation } from '@/services/aiService'
 
 interface HasilAnalisisProps {
     result: AnalysisResult
@@ -31,35 +28,12 @@ function useAccordion(keys: TeknikArah[]) {
     return { toggle, isOpen }
 }
 
-// ── Helper: konversi MethodForceDecode → DecodedRawItem & DecodedBitItem ──
-export function methodToRawItem(m: MethodForceDecode): DecodedRawItem | null {
-    if (!m.decoded_raw) return null
-    return {
-        channel: m.channel,
-        arah: m.arah,
-        text: m.decoded_raw.text,
-        base64_encoded: m.decoded_raw.base64_encoded,
-        printable_ratio: m.decoded_raw.printable_ratio,
-        total_chars: m.decoded_raw.total_chars,
-    }
-}
-
-export function methodToBitItem(m: MethodForceDecode): DecodedBitItem | null {
-    if (!m.decoded_bit) return null
-    return {
-        channel: m.channel,
-        arah: m.arah,
-        bits: m.decoded_bit.bits,
-        total_bits: m.decoded_bit.total_bits,
-    }
-}
-
 export default function HasilAnalisis({ result }: HasilAnalisisProps) {
     const { analysis, forceDecode, methodForceDecodes, aiInterpretasi } = result
 
     if (!forceDecode) return null
 
-    // ── Sumber data: prioritaskan methodForceDecodes, fallback ke forceDecode legacy ──
+    // Sumber data: prioritaskan methodForceDecodes
     const decodedItems: DecodedRawItem[] = methodForceDecodes && methodForceDecodes.length > 0
         ? methodForceDecodes.map(methodToRawItem).filter((x): x is DecodedRawItem => x !== null)
         : []
@@ -71,7 +45,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
     const getBitItem = (item: DecodedRawItem): DecodedBitItem | undefined =>
         decodedBits.find((b) => b.channel === item.channel && b.arah === item.arah)
 
-    // Build teknikByArah — sama seperti sebelumnya
+    // Build teknikByArah
     const teknikByArah = new Map<TeknikArah, Channel[]>()
     for (const t of (analysis.teknik ?? [])) {
         const existing = teknikByArah.get(t.arah)
@@ -113,7 +87,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
 
     const toggleSelect = (item: DecodedRawItem) => {
         if (isInterpreted(item)) return
-        const key = itemKey(item)
+        const key = `${item.channel}__${item.arah}`
         setSelectedKeys(prev => {
             const next = new Set(prev)
             next.has(key) ? next.delete(key) : next.add(key)
@@ -125,7 +99,9 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
         setSelectedKeys(
             selectedKeys.size === selectableItems.length && selectableItems.length > 0
                 ? new Set()
-                : new Set(selectableItems.map(itemKey))
+                : new Set(selectableItems.map(
+                    item => `${item.channel}__${item.arah}`,
+                ))
         )
     }
 
@@ -134,23 +110,22 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
 
     const handleInterpretSelected = async () => {
         if (selectedKeys.size === 0) return
-        const itemsToInterpret = decodedItems.filter(i => selectedKeys.has(itemKey(i)))
-        const keys = new Set(itemsToInterpret.map(itemKey))
+        const itemsToInterpret = decodedItems.filter(i => selectedKeys.has(
+            `${i.channel}__${i.arah}`,
+        ))
+        const keys = new Set(itemsToInterpret.map(
+            item => `${item.channel}__${item.arah}`,
+        ))
         setIsInterpreting(true)
         setInterpretingKeys(keys)
         try {
-            const res = await fetch('/api/ai-interpretation', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    analysis_id: analysis.id,
-                    force_decode_id: forceDecode.id,
-                    selected_items: itemsToInterpret,
-                }),
-            })
-            if (!res.ok) throw new Error(await res.text())
-            const data = await res.json()
-            const newHasil: HasilInterpretasi[] = data.hasil ?? []
+            // Gunakan processAIInterpretation dari aiService
+            const newHasil = await processAIInterpretation(
+                analysis.id,
+                forceDecode.id,
+                itemsToInterpret,
+            )
+
             setLocalAIResults(prev => {
                 const merged = [...prev]
                 for (const item of newHasil) {
@@ -172,7 +147,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
     const allSelectableSelected = selectableItems.length > 0 && selectedKeys.size === selectableItems.length
     const someSelected = selectedKeys.size > 0
 
-    // ── Indikator sumber data ──
+    // Indikator sumber data
     const usingMethodTable = methodForceDecodes && methodForceDecodes.length > 0
 
     return (
@@ -218,7 +193,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                     </p>
                 </div>
 
-                {/* Action bar — sama seperti sebelumnya */}
+                {/* Action bar */}
                 {selectableItems.length > 0 && (
                     <div className="flex items-center gap-2 flex-wrap">
                         <Tooltip text={allSelectableSelected
@@ -273,7 +248,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                 )}
             </div>
 
-            {/* Accordion list — tidak berubah */}
+            {/* Accordion list */}
             <div className="space-y-3">
                 {[...teknikByArah.entries()].map(([arah, channels], arahIdx) => {
                     const open = isOpen(arah)
@@ -304,39 +279,45 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                                     className={`text-neutral-600 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>
                                     <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z" />
                                 </svg>
-                                <span className="text-xs font-mono font-bold text-neutral-600 shrink-0 w-5">T{arahIdx + 1}</span>
-                                <span className="text-xs font-semibold text-neutral-900 flex-1 text-left">{TEKNIK_LABEL[arah]}</span>
-                                <div className="flex gap-0.5 shrink-0">
-                                    {channels.map(ch => (
-                                        <Tooltip key={ch} text={`Channel ${ch === 'R' ? 'Red' : ch === 'G' ? 'Green' : ch === 'B' ? 'Blue' : ch} — data diekstrak dari komponen warna ini.`}>
-                                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border leading-none
+                                <div className="flex flex-col md:flex-row items-start md:items-cente gap-1.5">
+                                    <div className="flex-1 flex items-center gap-1.5">
+                                        <span className="text-xs font-semibold text-neutral-900 flex-1 text-left">{TEKNIK_LABEL[arah]}</span>
+                                    </div>
+
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="flex gap-0.5 shrink-0">
+                                            {channels.map(ch => (
+                                                <Tooltip key={ch} text={`Channel ${ch === 'R' ? 'Red' : ch === 'G' ? 'Green' : ch === 'B' ? 'Blue' : ch} — data diekstrak dari komponen warna ini.`}>
+                                                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border leading-none
                                                 ${CHANNEL_COLOR[ch] ?? 'bg-neutral-100 text-neutral-500 border-neutral-200'}`}>
-                                                {ch}
-                                            </span>
+                                                        {ch}
+                                                    </span>
+                                                </Tooltip>
+                                            ))}
+                                        </div>
+                                        {worstStatus && (
+                                            <Tooltip text={
+                                                worstStatus === 'Aman' ? 'Semua channel pada teknik ini dinilai aman oleh AI.'
+                                                    : worstStatus === 'Mencurigakan' ? 'Setidaknya satu channel dinilai mencurigakan.'
+                                                        : 'Setidaknya satu channel dinilai berbahaya.'
+                                            }>
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-sm font-semibold border shrink-0 ${ANCAMAN_STYLE[worstStatus] ?? ''}`}>
+                                                    {worstStatus}
+                                                </span>
+                                            </Tooltip>
+                                        )}
+                                        {uninterpretedCount > 0 && (
+                                            <Tooltip text={`${uninterpretedCount} dari ${arahItems.length} channel belum diinterpretasi AI.`}>
+                                                <span className="text-[10px] px-2 py-0.5 rounded-sm border border-neutral-400 text-neutral-500 shrink-0 font-mono">
+                                                    {uninterpretedCount} belum AI
+                                                </span>
+                                            </Tooltip>
+                                        )}
+                                        <Tooltip text={`Teknik ini memiliki ${arahItems.length} kanal warna yang diekstrak.`}>
+                                            <span className="text-xs text-neutral-400 shrink-0 cursor-default">{arahItems.length} kanal</span>
                                         </Tooltip>
-                                    ))}
+                                    </div>
                                 </div>
-                                {worstStatus && (
-                                    <Tooltip text={
-                                        worstStatus === 'Aman' ? 'Semua channel pada teknik ini dinilai aman oleh AI.'
-                                            : worstStatus === 'Mencurigakan' ? 'Setidaknya satu channel dinilai mencurigakan.'
-                                                : 'Setidaknya satu channel dinilai berbahaya.'
-                                    }>
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-sm font-semibold border shrink-0 ${ANCAMAN_STYLE[worstStatus] ?? ''}`}>
-                                            {worstStatus}
-                                        </span>
-                                    </Tooltip>
-                                )}
-                                {uninterpretedCount > 0 && (
-                                    <Tooltip text={`${uninterpretedCount} dari ${arahItems.length} channel belum diinterpretasi AI.`}>
-                                        <span className="text-[10px] px-2 py-0.5 rounded-sm border border-neutral-400 text-neutral-500 shrink-0 font-mono">
-                                            {uninterpretedCount} belum AI
-                                        </span>
-                                    </Tooltip>
-                                )}
-                                <Tooltip text={`Teknik ini memiliki ${arahItems.length} kanal warna yang diekstrak.`}>
-                                    <span className="text-xs text-neutral-400 shrink-0 cursor-default">{arahItems.length} kanal</span>
-                                </Tooltip>
                             </button>
 
                             {open && (
@@ -354,10 +335,10 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                                                     item={item}
                                                     bitItem={getBitItem(item)}
                                                     index={arahIdx * channels.length + chIdx}
-                                                    isSelected={!interpreted && selectedKeys.has(itemKey(item))}
+                                                    isSelected={!interpreted && selectedKeys.has(`${item.channel}__${item.arah}`)}
                                                     onToggleSelect={interpreted ? () => { } : () => toggleSelect(item)}
                                                     interpretation={getInterpretation(item)}
-                                                    isInterpretingThis={interpretingKeys.has(itemKey(item))}
+                                                    isInterpretingThis={interpretingKeys.has(`${item.channel}__${item.arah}`)}
                                                     hideCheckbox={interpreted}
                                                 />
                                             </div>

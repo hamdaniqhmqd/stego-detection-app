@@ -84,7 +84,7 @@ export function SectionInterpretasiAI() {
         <div className="space-y-4">
 
             {/* Mini stats */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <MiniStat label="Aman" value={globalCounts.Aman} color="text-emerald-600" bg="bg-emerald-50" border="border-emerald-200" />
                 <MiniStat label="Mencurigakan" value={globalCounts.Mencurigakan} color="text-amber-600" bg="bg-amber-50" border="border-amber-200" />
                 <MiniStat label="Berbahaya" value={globalCounts.Berbahaya} color="text-red-600" bg="bg-red-50" border="border-red-200" />
@@ -107,7 +107,7 @@ export function SectionInterpretasiAI() {
                 ) : current.items.map((item) => (
                     <tr
                         key={item.id}
-                        className={`hover:bg-neutral-50/60 transition-colors
+                        className={`hover:bg-neutral-50 transition-colors border-b border-neutral-200
                             ${pending === item.id ? 'pointer-events-none opacity-40' : ''}`}
                     >
                         {/* Pengguna */}

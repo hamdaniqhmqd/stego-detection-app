@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       message: 'Token berhasil diperbarui',
     });
 
-    // 🔧 FIX: Cookie settings untuk localhost
+    // Cookie settings untuk localhost
     const isProduction = process.env.NODE_ENV === 'production';
 
     response.cookies.set('accessToken', newAccessToken, {
