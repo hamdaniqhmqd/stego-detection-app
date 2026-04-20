@@ -10,21 +10,21 @@ export default function VerificationSuccess() {
     const router = useRouter();
     const [countdown, setCountdown] = useState(5);
 
-    // useEffect(() => {
-    //     // Auto redirect ke login setelah 5 detik
-    //     const timer = setInterval(() => {
-    //         setCountdown((prev) => {
-    //             if (prev <= 1) {
-    //                 clearInterval(timer);
-    //                 router.push('/auth/login');
-    //                 return 0;
-    //             }
-    //             return prev - 1;
-    //         });
-    //     }, 1000);
+    useEffect(() => {
+        // Auto redirect ke login setelah 5 detik
+        const timer = setInterval(() => {
+            setCountdown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    router.push('/auth/login');
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
 
-    //     return () => clearInterval(timer);
-    // }, [router]);
+        return () => clearInterval(timer);
+    }, [router]);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-neutral-50 lg:py-20 sm:py-14 py-10 px-4 sm:px-6 lg:px-8">

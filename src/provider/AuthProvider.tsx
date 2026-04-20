@@ -36,14 +36,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     fetchUser();
   }, []);
 
-  /**
-   * Fetch current user dari server
-   */
+  // Fetch current user dari server
   const fetchUser = async () => {
     try {
       setIsLoading(true);
       const currentUser = await authService.getCurrentUser();
-      console.log('Fetched user:', currentUser);
+      // console.log('Fetched user:', currentUser);
       setUser(currentUser as AuthUser);
     } catch (error) {
       // console.error('Failed to fetch user:', error);
@@ -53,9 +51,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  /**
-   * Login function
-   */
+  // Login function
   const login = async (email: string, password: string) => {
     try {
       const result = await authService.login({ email, password });
@@ -74,7 +70,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       return { success: false, message: result.message, redirectUrl: result.redirectUrl, data: result.user };
     } catch (error) {
-      // console.error('Login error:', error);
+      console.error('Login error:', error);
       return {
         success: false,
         message: error instanceof Error ? error.message : 'Login gagal',
@@ -82,9 +78,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  /**
-   * Logout function
-   */
+  // Logout function
   const logout = async () => {
     try {
       const { success } = await authService.logout();
@@ -93,13 +87,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
       setUser(null);
     } catch (error) {
-      // console.error('Logout error:', error);
+      console.error('Logout error:', error);
     }
   };
 
-  /**
-   * Refresh user data
-   */
+  // Refresh user data
   const refreshUser = async () => {
     await fetchUser();
   };
@@ -120,9 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
-/**
- * Custom hook untuk menggunakan AuthContext
- */
+// Custom hook untuk menggunakan AuthContext
 export function useAuth() {
   const context = useContext(AuthContext);
 

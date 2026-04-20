@@ -44,7 +44,7 @@ export function TokenFormModal({ initial, onSubmit, onClose, isSubmitting }: Tok
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
             <div className="bg-white rounded-sm border border-neutral-200 shadow-xl w-full max-w-md mx-4 overflow-hidden">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
+                <div className="px-4 py-2 md:px-6 md:py-4 border-b border-neutral-100 flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-neutral-900">
                             {initial ? 'Edit Token' : 'Tambah Token Baru'}
@@ -64,7 +64,7 @@ export function TokenFormModal({ initial, onSubmit, onClose, isSubmitting }: Tok
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+                <form onSubmit={handleSubmit} className="px-4 py-3 md:px-6 md:py-4 space-y-4">
                     {/* Label */}
                     <div>
                         <label className={labelBase}>Label Token <span className="text-red-400">*</span></label>
@@ -134,20 +134,22 @@ export function TokenFormModal({ initial, onSubmit, onClose, isSubmitting }: Tok
 
                     {/* Set as default */}
                     <div className="flex items-center justify-between py-2 px-3 bg-neutral-100 rounded-sm border border-neutral-100">
-                        <div>
+                        <div className="flex flex-col">
                             <p className="text-xs font-medium text-neutral-800">Jadikan token default</p>
-                            <p className="text-[10px] text-neutral-600 mt-0.5">Token ini akan otomatis dipakai oleh sistem AI</p>
+                            <p className="text-[10px] text-neutral-600 mt-0.5 text-wrap">Token ini akan otomatis dipakai oleh sistem AI</p>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => setIsDefault(v => !v)}
-                            className={`relative w-9 h-5 rounded-full transition-colors duration-200 focus:outline-none
+                        <div className="w-9">
+                            <button
+                                type="button"
+                                onClick={() => setIsDefault(v => !v)}
+                                className={`relative w-9 h-5 rounded-full transition-colors duration-200 focus:outline-none
                                 ${isDefault ? 'bg-neutral-700' : 'bg-neutral-500'}`}
-                        >
-                            <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200
+                            >
+                                <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200
                                 ${isDefault ? 'translate-x-4' : 'translate-x-0'}`}
-                            />
-                        </button>
+                                />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Actions */}

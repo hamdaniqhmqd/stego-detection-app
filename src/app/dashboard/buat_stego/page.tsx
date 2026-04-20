@@ -3,8 +3,11 @@
 import DashboardLayoutUsers from "@/components/Layouts/DashboardLayoutUsers";
 import { Tooltip } from "@/components/Ui/ToolTip";
 import { Channel } from "@/types/shared";
+import { DEFAULT_MARKER, Mode, StegoConfig, TRAVERSAL_OPTIONS } from "@/types/Stego";
 import { CHANNEL_META, CHANNEL_TOOLTIPS, CHANNELS, TRAVERSAL_TOOLTIPS } from "@/utils/Channel";
-import { decodeLSB, DEFAULT_MARKER, encodeLSB, Mode, StegoConfig, TRAVERSAL_OPTIONS } from "@/utils/Stego";
+import { InfoIcon } from "@/utils/Icons";
+import { decodeLSB } from "@/utils/stego/decodeLSB";
+import { encodeLSB } from "@/utils/stego/encodeLSB";
 import { useState, useRef, useCallback } from "react";
 
 export default function BuatStegoPage() {
@@ -48,16 +51,37 @@ export default function BuatStegoPage() {
     };
 
     const handleProcess = async () => {
-        if (!imageFile) { setError('Pilih gambar terlebih dahulu'); return; }
-        if (mode === 'encode' && !message.trim()) { setError('Masukkan pesan yang ingin disisipkan'); return; }
-        if (!config.marker.trim()) { setError('Marker tidak boleh kosong'); return; }
+        if (!imageFile) {
+            setError('Pilih gambar terlebih dahulu');
+            return;
+        }
 
-        setLoading(true); setError(null); setResult(null); setDecodedMessage(null);
+        if (mode === 'encode' && !message.trim()) {
+            setError('Masukkan pesan yang ingin disisipkan');
+            return;
+        }
+
+        if (!config.marker.trim()) {
+            setError('Marker tidak boleh kosong');
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+        setResult(null);
+        setDecodedMessage(null);
+
         try {
-            if (mode === 'encode') setResult(await encodeLSB(imageFile, message, config));
-            else setDecodedMessage(await decodeLSB(imageFile, config));
-        } catch (e: any) { setError(e.message); }
-        finally { setLoading(false); }
+            if (mode === 'encode') {
+                setResult(await encodeLSB(imageFile, message, config));
+            } else {
+                setDecodedMessage(await decodeLSB(imageFile, config));
+            }
+        } catch (e: any) {
+            setError(e.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const downloadResult = () => {
@@ -81,16 +105,6 @@ export default function BuatStegoPage() {
 
     const isMarkerDefault = config.marker === DEFAULT_MARKER;
 
-    const InfoIcon = ({ text }: { text: string }) => (
-        <Tooltip text={text}>
-            <span className="text-neutral-900 cursor-default">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z" />
-                </svg>
-            </span>
-        </Tooltip>
-    );
-
     return (
         <DashboardLayoutUsers>
             <main className="w-full min-h-screen">
@@ -108,7 +122,7 @@ export default function BuatStegoPage() {
 
                     {/* Mode Toggle */}
                     <section className="max-w-5xl mx-auto mb-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {(['encode', 'decode'] as Mode[]).map((m) => (
                                 <Tooltip
                                     key={m}
@@ -149,7 +163,11 @@ export default function BuatStegoPage() {
                                     <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
                                         Gambar Input
                                     </h2>
-                                    <InfoIcon text="Unggah gambar yang akan dijadikan wadah penyimpanan pesan. Gunakan PNG untuk hasil terbaik karena tidak menggunakan kompresi lossy." />
+                                    <Tooltip text={"Unggah gambar yang akan dijadikan wadah penyimpanan pesan. Gunakan PNG untuk hasil terbaik karena tidak menggunakan kompresi lossy."}>
+                                        <span className="text-neutral-900 cursor-default">
+                                            <InfoIcon />
+                                        </span>
+                                    </Tooltip>
                                     <div className="flex-1 h-px bg-neutral-500" />
                                 </div>
 
@@ -207,17 +225,21 @@ export default function BuatStegoPage() {
                                     <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
                                         End Marker
                                     </h2>
-                                    <InfoIcon text="Penanda akhir pesan yang disisipkan ke dalam data bit. Wajib identik antara proses enkode dan dekode. Marker unik meningkatkan keamanan karena tanpanya pesan tidak bisa diekstrak." />
+                                    <Tooltip text="Penanda akhir pesan yang disisipkan ke dalam data bit. Wajib identik antara proses enkode dan dekode. Marker unik meningkatkan keamanan karena tanpanya pesan tidak bisa diekstrak." >
+                                        <span className="text-neutral-900 cursor-default">
+                                            <InfoIcon />
+                                        </span>
+                                    </Tooltip>
                                     <div className="flex-1 h-px bg-neutral-500" />
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex flex-col md:flex-row items-stretch justify-center gap-2">
                                     <input
                                         type="text"
                                         value={config.marker}
                                         onChange={(e) => setConfig(prev => ({ ...prev, marker: e.target.value }))}
                                         placeholder={DEFAULT_MARKER}
-                                        className={`flex-1 bg-white border rounded-sm text-neutral-800 px-4 py-2.5 text-sm font-mono
+                                        className={`w-full md:flex-1 bg-white border rounded-sm text-neutral-800 px-4 py-2.5 text-sm font-mono
                                                     outline-none placeholder-neutral-400 transition-colors
                                                     ${config.marker.trim() === ''
                                                 ? 'border-red-400 focus:border-red-500'
@@ -231,10 +253,10 @@ export default function BuatStegoPage() {
                                             onClick={() => setConfig(prev => ({ ...prev, marker: DEFAULT_MARKER }))}
                                             disabled={isMarkerDefault}
                                             title="Reset ke marker default"
-                                            className="shrink-0 px-3 py-2.5 text-xs border border-neutral-900 text-neutral-900 rounded-sm font-semibold 
-                                                       transition-all ease-in-out
-                                                       hover:shadow-[-5px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
-                                                       disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
+                                            className="w-full md:shrink-0 px-3 py-2.5 text-sm border border-neutral-900 text-neutral-900 rounded-sm font-semibold 
+                                                    transition-all ease-in-out
+                                                    hover:shadow-[-5px_5px_0_rgba(26,26,46,1)] hover:-translate-y-0.5
+                                                    disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
                                         >
                                             Reset
                                         </button>
@@ -265,7 +287,11 @@ export default function BuatStegoPage() {
                                         <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
                                             Pesan Rahasia
                                         </h2>
-                                        <InfoIcon text="Teks yang akan disembunyikan di dalam piksel gambar. Panjang maksimal sampai 100000 karakter." />
+                                        <Tooltip text="Teks yang akan disembunyikan di dalam piksel gambar.">
+                                            <span className="text-neutral-900 cursor-default">
+                                                <InfoIcon />
+                                            </span>
+                                        </Tooltip>
                                         <div className="flex-1 h-px bg-neutral-500" />
                                     </div>
                                     <textarea
@@ -289,7 +315,11 @@ export default function BuatStegoPage() {
                                         <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
                                             Informasi Dekode
                                         </h2>
-                                        <InfoIcon text="Pastikan konfigurasi kanal, pola traversal, dan marker sama persis dengan yang digunakan saat menyisipkan pesan. Jika tidak cocok, pesan tidak akan bisa diekstrak." />
+                                        <Tooltip text="Pastikan konfigurasi kanal, pola traversal, dan marker sama persis dengan yang digunakan saat menyisipkan pesan. Jika tidak cocok, pesan tidak akan bisa diekstrak." >
+                                            <span className="text-neutral-900 cursor-default">
+                                                <InfoIcon />
+                                            </span>
+                                        </Tooltip>
                                         <div className="flex-1 h-px bg-neutral-500" />
                                     </div>
                                     <p className="text-sm text-neutral-700 leading-relaxed">
@@ -313,10 +343,14 @@ export default function BuatStegoPage() {
                                     <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
                                         Kanal Warna
                                     </h2>
-                                    <InfoIcon text="Pilih kanal warna piksel (R/G/B) yang digunakan untuk menyimpan bit pesan. Lebih banyak kanal = kapasitas lebih besar, tapi wajib konsisten saat enkode & dekode." />
+                                    <Tooltip text="Pilih kanal warna piksel (R/G/B) yang digunakan untuk menyimpan bit pesan. Lebih banyak kanal = kapasitas lebih besar, tapi wajib konsisten saat enkode & dekode." >
+                                        <span className="text-neutral-900 cursor-default">
+                                            <InfoIcon />
+                                        </span>
+                                    </Tooltip>
                                     <div className="flex-1 h-px bg-neutral-500" />
                                 </div>
-                                <div className="grid grid-cols-3 gap-2">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                     {CHANNELS.map((ch) => {
                                         const meta = CHANNEL_META[ch];
                                         const active = config.channels.includes(ch);
@@ -356,10 +390,14 @@ export default function BuatStegoPage() {
                                     <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
                                         Pola Traversal
                                     </h2>
-                                    <InfoIcon text="Urutan pembacaan piksel saat menyisipkan atau mengekstrak bit pesan. Pola yang berbeda menghasilkan distribusi bit yang berbeda — wajib sama antara enkode dan dekode." />
+                                    <Tooltip text="Urutan pembacaan piksel saat menyisipkan atau mengekstrak bit pesan. Pola yang berbeda menghasilkan distribusi bit yang berbeda — wajib sama antara enkode dan dekode." >
+                                        <span className="text-neutral-900 cursor-default">
+                                            <InfoIcon />
+                                        </span>
+                                    </Tooltip>
                                     <div className="flex-1 h-px bg-neutral-500" />
                                 </div>
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                     {TRAVERSAL_OPTIONS.map(opt => (
                                         <Tooltip key={opt.value} text={TRAVERSAL_TOOLTIPS[opt.value] ?? opt.label}>
                                             <button
@@ -436,7 +474,11 @@ export default function BuatStegoPage() {
                                         <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
                                             Gambar Stego (Hasil)
                                         </h2>
-                                        <InfoIcon text="Gambar ini sudah mengandung pesan tersembunyi. Simpan dalam format PNG agar tidak ada data bit yang hilang akibat kompresi." />
+                                        <Tooltip text="Gambar ini sudah mengandung pesan tersembunyi. Simpan dalam format PNG agar tidak ada data bit yang hilang akibat kompresi." >
+                                            <span className="text-neutral-900 cursor-default">
+                                                <InfoIcon />
+                                            </span>
+                                        </Tooltip>
                                         <div className="flex-1 h-px bg-neutral-500" />
                                     </div>
                                     <div className="relative rounded-sm overflow-hidden border border-neutral-300">
@@ -470,7 +512,11 @@ export default function BuatStegoPage() {
                                         <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
                                             Pesan Tersembunyi
                                         </h2>
-                                        <InfoIcon text="Ini adalah pesan asli yang diekstrak dari bit LSB piksel gambar menggunakan konfigurasi kanal, traversal, dan marker yang Anda tentukan." />
+                                        <Tooltip text="Ini adalah pesan asli yang diekstrak dari bit LSB piksel gambar menggunakan konfigurasi kanal, traversal, dan marker yang Anda tentukan.">
+                                            <span className="text-neutral-900 cursor-default">
+                                                <InfoIcon />
+                                            </span>
+                                        </Tooltip>
                                         <div className="flex-1 h-px bg-neutral-500" />
                                         <Tooltip text="Salin seluruh teks pesan tersembunyi ke clipboard.">
                                             <button

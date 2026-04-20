@@ -41,7 +41,7 @@ export default function ModalShell({
     return (
         <div
             ref={overlayRef}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4"
             onClick={(e) => { if (e.target === overlayRef.current) onClose() }}
         >
             {/* Backdrop */}
@@ -52,7 +52,7 @@ export default function ModalShell({
                 w-full ${width} max-h-[90vh] flex flex-col`}>
 
                 {/* Header */}
-                <div className="flex items-start justify-between px-6 py-5
+                <div className="flex items-start justify-between px-4 py-3 md:px-6 md:py-5
                     border-b border-neutral-100 shrink-0">
                     <div>
                         <h2 className="text-base font-semibold text-neutral-900">{title}</h2>
@@ -71,7 +71,7 @@ export default function ModalShell({
                 </div>
 
                 {/* Scrollable body */}
-                <div className="overflow-y-auto flex-1 px-6 py-5">
+                <div className="overflow-y-auto flex-1 px-4 py-3 md:px-6 md:py-5">
                     {children}
                 </div>
             </div>

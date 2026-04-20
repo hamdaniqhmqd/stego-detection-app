@@ -1,10 +1,9 @@
 // src/app/api/auth/register/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import supabase from '@/libs/supabase/client';
+import { supabaseClient } from '@/libs/supabase/client';
 import bcrypt from 'bcryptjs';
 import { generateVerificationToken, getVerificationTokenExpiry, sendVerificationEmail } from '@/libs/auth/email-service';
-import { generateAccessToken, generateRefreshToken, getRefreshTokenExpiry } from '@/libs/auth/jwt';
 import { getWaktuWIB } from '@/utils/format';
 
 export async function POST(request: NextRequest) {
@@ -34,7 +33,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { data: existingUser } = await supabase
+        const { data: existingUser } = await supabaseClient
             .from('users')
             .select('id')
             .eq('email', email.toLowerCase())
@@ -48,7 +47,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { data: existingUsername } = await supabase
+        const { data: existingUsername } = await supabaseClient
             .from('users')
             .select('id')
             .eq('username', username)
@@ -74,7 +73,7 @@ export async function POST(request: NextRequest) {
             updated_at: nowWIB.toISOString(),
         };
 
-        const { data: newUser, error: insertError } = await supabase
+        const { data: newUser, error: insertError } = await supabaseClient
             .from('users')
             .insert(payloadInsertUser)
             .select('id, username, email, role, is_verified, verified_at, created_at')
@@ -102,14 +101,14 @@ export async function POST(request: NextRequest) {
             updated_at: nowWIB.toISOString(),
         };
 
-        const { data: tokenData, error: tokenError } = await supabase
+        const { data: tokenData, error: tokenError } = await supabaseClient
             .from('email_verifications')
             .insert(payloadInsertEmailVerification)
             .select('id, verification_code, expires_at')
             .single();
 
         if (tokenError) {
-            await supabase.from('users').delete().eq('id', newUser.id);
+            await supabaseClient.from('users').delete().eq('id', newUser.id);
             return NextResponse.json(
                 { success: false, message: 'Gagal membuat token verifikasi' },
                 { status: 500 }
@@ -125,7 +124,7 @@ export async function POST(request: NextRequest) {
 
         if (!emailResult.success) {
             try {
-                await supabase.from('email_logs').insert({
+                await supabaseClient.from('email_logs').insert({
                     user_id: newUser.id,
                     email: newUser.email,
                     type: 'verification',
@@ -139,7 +138,7 @@ export async function POST(request: NextRequest) {
         } else {
             // Log email sukses
             try {
-                await supabase.from('email_logs').insert({
+                await supabaseClient.from('email_logs').insert({
                     user_id: newUser.id,
                     email: newUser.email,
                     type: 'verification',
@@ -152,29 +151,6 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        const tokenPayload = {
-            userId: newUser.id,
-            email: newUser.email,
-            role: newUser.role,
-        };
-
-        const accessToken = await generateAccessToken(tokenPayload);
-        const refreshToken = await generateRefreshToken(tokenPayload);
-
-        const userAgent = request.headers.get('user-agent') || null;
-        const ipAddress = request.headers.get('x-forwarded-for') ||
-            request.headers.get('x-real-ip') ||
-            'unknown';
-
-        await supabase.from('refresh_tokens').insert({
-            user_id: newUser.id,
-            refresh_token: refreshToken,
-            user_agent: userAgent,
-            ip_address: ipAddress,
-            expires_at: getRefreshTokenExpiry().toISOString(),
-            created_at: nowWIB.toISOString(),
-        });
-
         const response = NextResponse.json({
             success: true,
             message: emailResult.success
@@ -184,24 +160,6 @@ export async function POST(request: NextRequest) {
             needsVerification: true,
             emailSent: emailResult.success,
         });
-
-        // response.cookies.set('accessToken', accessToken, {
-        //     httpOnly: true,
-        //     secure: process.env.NODE_ENV === 'production',
-        //     sameSite: 'lax',
-        //     maxAge: 60 * 15,
-        //     path: '/',
-        //     domain: process.env.COOKIE_DOMAIN || process.env.COOKIE_DEVELOPMENT_DOMAIN,
-        // });
-
-        // response.cookies.set('refreshToken', refreshToken, {
-        //     httpOnly: true,
-        //     secure: process.env.NODE_ENV === 'production',
-        //     sameSite: 'lax',
-        //     maxAge: 60 * 60 * 24 * 7,
-        //     path: '/',
-        //     domain: process.env.COOKIE_DOMAIN || process.env.COOKIE_DEVELOPMENT_DOMAIN,
-        // });
 
         return response;
     } catch (error) {

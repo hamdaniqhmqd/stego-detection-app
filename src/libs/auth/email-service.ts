@@ -1,9 +1,9 @@
 // src/libs/email-service.ts
 
 import nodemailer from 'nodemailer';
-import supabase from '@/libs/supabase/client';
 import { getWaktuWIB } from '@/utils/format';
 import crypto from 'crypto';
+import { supabaseClient } from '../supabase/client';
 
 interface EmailConfig {
     mail_mailer: string;
@@ -18,7 +18,7 @@ interface EmailConfig {
 
 async function getEmailConfig(): Promise<EmailConfig | null> {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('email_config')
             .select('*')
             .eq('is_active', true)
@@ -277,7 +277,7 @@ export async function sendAdminNotification(
     try {
         const { transporter, config } = await createEmailTransporter();
 
-        const { data: adminEmails, error } = await supabase
+        const { data: adminEmails, error } = await supabaseClient
             .from('admin_emails')
             .select('email')
             .eq('is_active', true);

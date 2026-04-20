@@ -1,20 +1,16 @@
+// components/Dashboard/ui/ConfirmModal.tsx
+
 'use client'
 
 import React from "react"
-
-// components/Dashboard/ui/ConfirmModal.tsx
-
 export type ConfirmModalVariant = 'info' | 'warning' | 'danger'
 
 interface ConfirmModalProps {
     open: boolean
     title: string
     message: string
-    /** @default 'warning' */
     variant?: ConfirmModalVariant
-    /** Label tombol konfirmasi — default menyesuaikan variant */
     confirmLabel?: string
-    /** Label tombol batal — default 'Batal' */
     cancelLabel?: string
     onConfirm: () => void
     onCancel: () => void

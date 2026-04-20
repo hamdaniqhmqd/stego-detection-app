@@ -23,15 +23,14 @@ export function SectionEmailConfig() {
     const [confirm, setConfirm] = useState<ConfirmState>(null)
     const [pending, setPending] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [revealedPasswords, setRevealedPasswords] = useState<Set<string>>(new Set())
 
-    // ── Dua instance hook ─────────────────────────────────────
+    // Dua instance hook
     const active = useEmailConfig({ includeDeleted: false })
     const deleted = useEmailConfig({ includeDeleted: true })
 
     const current = showDeleted ? deleted : active
 
-    // ── Stats dari active (tidak berubah saat toggle) ─────────
+    // Stats dari active (tidak berubah saat toggle)
     const stats = useMemo(() => ({
         totalActive: active.items.filter(c => c.is_active).length,
         total: active.total,
@@ -39,7 +38,7 @@ export function SectionEmailConfig() {
         activeConfig: active.items.find(c => c.is_active),
     }), [active.items, active.total, deleted.total])
 
-    // ── Handlers ──────────────────────────────────────────────
+    // Handlers
     const handleFormSubmit = async (
         payload: CreateEmailConfigPayload | UpdateEmailConfigPayload
     ) => {
@@ -79,18 +78,22 @@ export function SectionEmailConfig() {
         } finally { setPending(null) }
     }
 
-    const handleToggleActive = async (id: string, current: boolean) => {
+    // Toggle Active (Hanya 1 config aktif)
+    const handleSetActive = async (id: string) => {
         setPending(id)
-        try { await active.toggleActive(id, current) }
-        finally { setPending(null) }
-    }
+        try {
+            // Jika sudah aktif, tidak perlu diubah
+            if (stats.activeConfig?.id === id) {
+                setPending(null)
+                return
+            }
 
-    const toggleRevealPassword = (id: string) => {
-        setRevealedPasswords(prev => {
-            const next = new Set(prev)
-            next.has(id) ? next.delete(id) : next.add(id)
-            return next
-        })
+            // Set config ini sebagai aktif (otomatis nonaktifkan yang lain)
+            await active.toggleActive(id, false)
+            await active.refresh()
+        } finally {
+            setPending(null)
+        }
     }
 
     return (
@@ -106,7 +109,7 @@ export function SectionEmailConfig() {
             )}
 
             {/* Mini stats */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <MiniStat
                     label="Config Aktif"
                     value={stats.totalActive}
@@ -132,19 +135,24 @@ export function SectionEmailConfig() {
 
             {/* Active config info banner */}
             {stats.activeConfig && (
-                <div className="flex items-center gap-3 px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-sm">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-                    <div className="text-xs text-neutral-800 min-w-0">
-                        <span className="font-semibold">Config Aktif:</span>
-                        {' '}<span className="text-neutral-600 font-mono">{stats.activeConfig.mail_from_name}</span>
-                        {' '}—{' '}
-                        <span className="text-neutral-600 font-mono">{stats.activeConfig.mail_from_address}</span>
-                        {' '}
-                        <span className="text-neutral-700 font-semibold">via</span>
-                        {' '}
-                        <span className="text-neutral-600 font-mono">
+                <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-sm">
+                    <div className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="white" viewBox="0 0 256 256">
+                            <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-64-64a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" />
+                        </svg>
+                    </div>
+                    <div className="text-xs text-emerald-900 min-w-0 flex-1">
+                        <p className="font-semibold mb-0.5">Config Email Aktif</p>
+                        <div className="flex items-center gap-2 flex-wrap text-emerald-800">
+                            <span className="font-mono bg-emerald-100 px-2 py-0.5 rounded text-[11px]">
+                                {stats.activeConfig.mail_from_name}
+                            </span>
+                            <span className="text-emerald-700">→</span>
+                            <span className="font-mono text-[11px]">{stats.activeConfig.mail_from_address}</span>
+                        </div>
+                        <div className="mt-1 text-[11px] text-emerald-700 font-mono">
                             {stats.activeConfig.mail_host}:{stats.activeConfig.mail_port}
-                        </span>
+                        </div>
                     </div>
                 </div>
             )}
@@ -155,7 +163,7 @@ export function SectionEmailConfig() {
                 subtitle={showDeleted ? 'Konfigurasi SMTP yang diarsipkan' : 'Konfigurasi SMTP untuk pengiriman email sistem'}
                 badge={current.total}
                 actions={
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
                         <ToggleSwitch
                             checked={showDeleted}
                             onChange={setShowDeleted}
@@ -186,14 +194,14 @@ export function SectionEmailConfig() {
                 {current.isLoading ? (
                     <SkeletonRows cols={8} rows={3} />
                 ) : current.items.map((cfg) => {
-                    const isRevealed = revealedPasswords.has(cfg.id)
+                    const isActive = cfg.id === stats.activeConfig?.id
 
                     return (
                         <tr
                             key={cfg.id}
-                            className={`hover:bg-neutral-50/60 transition-colors
-                                ${cfg.deleted_at ? 'opacity-50' : ''}
-                                ${pending === cfg.id ? 'pointer-events-none opacity-40' : ''}`}
+                            className={`hover:bg-neutral-50 transition-colors border-b border-neutral-200
+                                ${pending === cfg.id ? 'pointer-events-none opacity-40' : ''}
+                                ${isActive ? 'bg-emerald-50/40' : ''}`}
                         >
                             {/* Pengirim */}
                             <td className="px-4 py-3">
@@ -202,9 +210,11 @@ export function SectionEmailConfig() {
                                         <span className="text-xs font-semibold text-neutral-800 truncate max-w-36">
                                             {cfg.mail_from_name}
                                         </span>
-                                        {cfg.is_active && (
-                                            <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[10px]
-                                                font-bold rounded ring-1 ring-emerald-200 whitespace-nowrap leading-none">
+                                        {isActive && (
+                                            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px]
+                                                font-bold rounded ring-1 ring-emerald-200 whitespace-nowrap leading-none
+                                                flex items-center gap-1">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                                 AKTIF
                                             </span>
                                         )}
@@ -236,15 +246,8 @@ export function SectionEmailConfig() {
                             <td className="px-4 py-3">
                                 <div className="flex items-center gap-1.5">
                                     <span className="font-mono text-[12px] text-neutral-800 tracking-tight">
-                                        {isRevealed ? cfg.mail_password : maskPassword(cfg.mail_password)}
+                                        {maskPassword(cfg.mail_password)}
                                     </span>
-                                    <button
-                                        onClick={() => toggleRevealPassword(cfg.id)}
-                                        className="text-neutral-400 hover:text-neutral-700 transition-colors shrink-0"
-                                        title={isRevealed ? 'Sembunyikan' : 'Tampilkan'}
-                                    >
-                                        {isRevealed ? <IconEyeOff /> : <IconEye />}
-                                    </button>
                                 </div>
                             </td>
 
@@ -262,22 +265,31 @@ export function SectionEmailConfig() {
                                 </span>
                             </td>
 
-                            {/* Status toggle */}
+                            {/* Status — Radio button style */}
                             <td className="px-4 py-3">
                                 <button
-                                    onClick={() => handleToggleActive(cfg.id, cfg.is_active)}
-                                    disabled={!!cfg.deleted_at}
-                                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[11px] font-semibold
-                                        transition-colors w-fit border
-                                        ${cfg.is_active
-                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                                            : 'bg-neutral-100 text-neutral-500 border-neutral-200 hover:bg-neutral-200'
-                                        } disabled:pointer-events-none`}
+                                    onClick={() => handleSetActive(cfg.id)}
+                                    disabled={!!cfg.deleted_at || pending === cfg.id}
+                                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-sm text-[11px] font-semibold
+                                        transition-all duration-200 w-fit
+                                        ${isActive
+                                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 shadow-sm'
+                                            : 'bg-neutral-50 text-neutral-600 border border-neutral-200 hover:bg-neutral-100 hover:border-neutral-300'
+                                        }
+                                        disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
-                                    <span className={`w-1.5 h-1.5 rounded-full shrink-0
-                                        ${cfg.is_active ? 'bg-emerald-500' : 'bg-neutral-400'}`}
-                                    />
-                                    {cfg.is_active ? 'Aktif' : 'Nonaktif'}
+                                    <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0
+                                        ${isActive
+                                            ? 'bg-emerald-500 border-emerald-500'
+                                            : 'border-neutral-400 hover:border-neutral-600'
+                                        }`}>
+                                        {isActive && (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" fill="white" viewBox="0 0 256 256">
+                                                <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-64-64a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" />
+                                            </svg>
+                                        )}
+                                    </span>
+                                    {isActive ? 'Aktif' : 'Nonaktif'}
                                 </button>
                             </td>
 

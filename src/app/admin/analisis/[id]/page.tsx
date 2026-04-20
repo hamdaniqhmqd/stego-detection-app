@@ -1,10 +1,10 @@
 // src/app/admin/analisis/[id]/page.tsx
 'use client'
 
-import { use } from 'react'
+import { use, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import DashboardLayoutAdmins from '@/components/Layouts/DashboardLayoutAdmins'
-import { useAnalysisDetail } from '@/hooks/useAnalisisDetail'
+import { useAnalysis } from '@/hooks/useAnalysis'
 import HasilAnalisisAdmin from '@/components/Section/HasilAnalisisAdmin'
 import { CHANNEL_COLOR, STATUS_COLOR, STATUS_DOT } from '@/utils/Channel'
 import { DecodedRawItem, TEKNIK_LABEL, type TeknikArah } from '@/types/shared'
@@ -21,6 +21,7 @@ import { fmtDate } from '@/utils/format'
 import Section from '@/components/Ui/Section'
 import { Field } from '@/components/Ui/Field'
 import { MethodForceDecode } from '@/types/forceDecode'
+import type { AnalysisResult } from '@/types/analysis'
 
 // AI Summary bar 
 function AISummaryBar({ teknikMap }: { teknikMap: TeknikStatusMap }) {
@@ -74,7 +75,37 @@ interface PageProps {
 export default function AnalisisDetailPage({ params }: PageProps) {
     const { id } = use(params)
     const router = useRouter()
-    const { result, isLoading, error, refresh } = useAnalysisDetail(id)
+    const { getById } = useAnalysis()
+
+    // State management langsung di component
+    const [result, setResult] = useState<AnalysisResult | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    // Fetch data
+    const refresh = async () => {
+        setIsLoading(true)
+        setError(null)
+        try {
+            const data = await getById(id)
+            if (!data) {
+                setError('Data analisis tidak ditemukan')
+                setResult(null)
+            } else {
+                setResult(data)
+            }
+        } catch (err: any) {
+            setError(err.message || 'Terjadi kesalahan saat memuat data')
+            setResult(null)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // Initial fetch
+    useEffect(() => {
+        refresh()
+    }, [id])
 
     if (isLoading) {
         return (
@@ -116,12 +147,6 @@ export default function AnalisisDetailPage({ params }: PageProps) {
     const teknikMap: TeknikStatusMap = aiInterpretasi
         ? buildTeknikStatusMap(aiInterpretasi.hasil ?? [])
         : {} as TeknikStatusMap
-
-    const decodedRaw: DecodedRawItem[] = methodForceDecodes && methodForceDecodes.length > 0
-        ? methodForceDecodes.map(methodToRawItem).filter((x): x is DecodedRawItem => x !== null)
-        : []
-
-    const filename = analysis.file_path?.split('/').pop() ?? '—'
 
     // Group teknik by arah for the info panel
     const teknikByArah = new Map<TeknikArah, string[]>()
@@ -247,7 +272,7 @@ export default function AnalisisDetailPage({ params }: PageProps) {
                                         </Field>
                                         <Field label="Kombinasi">
                                             <span className="text-xs font-semibold text-neutral-700">
-                                                {decodedRaw.length} teknik
+                                                {methodForceDecodes?.length ?? 0} teknik
                                             </span>
                                         </Field>
                                         <Field label="Dijalankan">
@@ -310,7 +335,7 @@ export default function AnalisisDetailPage({ params }: PageProps) {
 
                     {/* Hasil Analisis */}
                     <main className="">
-                        {forceDecode ? (
+                        {forceDecode && methodForceDecodes && methodForceDecodes.length > 0 ? (
                             <HasilAnalisisAdmin result={result} filePath={analysis.file_path} />
                         ) : (
                             <div className="flex flex-col items-center justify-center py-24 gap-3

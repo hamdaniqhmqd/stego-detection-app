@@ -44,7 +44,7 @@ export function DashboardOverview({
         <div className="space-y-8">
 
             {/* Stat cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Tooltip text="Total seluruh akun pengguna yang telah terdaftar dalam sistem, termasuk pengguna aktif.">
                     <StatCard
                         icon={

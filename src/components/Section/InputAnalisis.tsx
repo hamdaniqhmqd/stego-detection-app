@@ -4,16 +4,19 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Analysis, AnalysisResult } from '@/types/analysis'
-import { TEKNIK_LABEL, Channel, TeknikArah, DecodeTeknik } from '@/types/shared'
+import { TEKNIK_LABEL, Channel, TeknikArah, DecodeTeknik, DecodedRawItem } from '@/types/shared'
 import { AuthUser } from '@/types/Users'
 import { CHANNEL_META, CHANNELS, TEKNIK_KEYS } from '@/utils/Channel'
 import { Tooltip } from '@/components/Ui/ToolTip'
 import { InfoIcon } from '@/utils/Icons'
+import { uploadImage } from '@/services/uploadImage'
+import { useAnalysis } from '@/hooks/useAnalysis'
+import { processForceDecode } from '@/services/forceDecodeService'
+import { processAIInterpretation } from '@/services/aiService'
 
 interface InputAnalisisProps {
     user?: AuthUser
     onLoading?: (loading: boolean, step: string) => void
-    onResult?: (result: AnalysisResult) => void
     readOnly?: boolean
     readOnlyData?: {
         analysis: Analysis
@@ -27,11 +30,11 @@ interface InputAnalisisProps {
 export default function InputAnalisis({
     user,
     onLoading,
-    onResult,
     readOnly = false,
     readOnlyData,
 }: InputAnalisisProps) {
     const router = useRouter()
+    const { create: createAnalysis } = useAnalysis()
 
     const [selectedImage, setSelectedImage] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string>(readOnlyData?.analysis.file_path ?? '')
@@ -128,38 +131,34 @@ export default function InputAnalisis({
         onLoading?.(true, 'Mengunggah gambar...')
         try {
             const kombinasi = buildKombinasi()
+
+            // Upload gambar
             const fd = new FormData()
             fd.append('file', selectedImage)
-            const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd })
-            if (!uploadRes.ok) throw new Error(await uploadRes.text())
-            const img = await uploadRes.json()
+            const img = await uploadImage(fd)
 
-            onLoading?.(true, 'Membuat record analisis...')
-            const analysisRes = await fetch('/api/analysis', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, file_path: img.url, metode: 'force-decode', teknik: kombinasi, interpretasi_ai: useAI }),
+            // Buat analisis
+            onLoading?.(true, 'Membuat analisis...')
+            const analysis = await createAnalysis({
+                user_id: user.id,
+                file_path: img.url,
+                metode: 'force-decode',
+                teknik: kombinasi,
+                interpretasi_ai: useAI,
             })
-            if (!analysisRes.ok) throw new Error(await analysisRes.text())
-            const analysis = await analysisRes.json()
 
+            // Jalan force decode
             onLoading?.(true, `Menjalankan force decode (${totalKombinasi} kombinasi)...`)
-            const forceRes = await fetch('/api/force-decode', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ analysis_id: analysis.id, image_url: img.url, teknik: kombinasi }),
-            })
-            if (!forceRes.ok) throw new Error(await forceRes.text())
-            const forceDecode = await forceRes.json()
+            const forceDecode = await processForceDecode(analysis.id, img.url, kombinasi)
 
-            if (useAI && forceDecode.decoded_raw?.length) {
+            // Interpretasi AI (jika perlu)
+            if (useAI) {
                 onLoading?.(true, 'AI menganalisis semua hasil...')
-                const aiRes = await fetch('/api/ai-interpretation', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ analysis_id: analysis.id, force_decode_id: forceDecode.id, selected_items: forceDecode.decoded_raw }),
-                })
-                if (!aiRes.ok) throw new Error(await aiRes.text())
+                await processAIInterpretation(
+                    analysis.id as string,
+                    forceDecode.id as string,
+                    forceDecode.decoded_raw ?? [] as DecodedRawItem[],
+                )
             }
 
             onLoading?.(false, '')
@@ -240,7 +239,7 @@ export default function InputAnalisis({
                                             <span className="font-semibold text-neutral-800">Klik untuk upload</span> atau drag and drop
                                         </p>
                                         <p className="text-sm text-neutral-600">Direkomendasikan format <strong className="text-neutral-500">PNG</strong></p>
-                                        <p className="text-xs text-neutral-700 mt-1">(Maksimal 5MB)</p>
+                                        <p className="text-xs text-neutral-700 mt-1">(Maksimal 10MB)</p>
                                     </>
                                 )}
                             </div>
@@ -289,7 +288,7 @@ export default function InputAnalisis({
                             <div className="flex-1 h-px bg-neutral-500" />
                         </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                         {CHANNELS.map((ch) => {
                             const meta = CHANNEL_META[ch]
                             const active = selectedChannels.has(ch)
@@ -374,13 +373,18 @@ export default function InputAnalisis({
                 <div>
                     <div className="flex items-center gap-1.5 mb-3">
                         <div className="flex-1 flex items-center gap-1">
-                            <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
-                                Pilih Teknik Ekstraksi
-                            </h2>
-                            <span className="text-xs text-neutral-700">({selectedTeknik.size} dipilih)</span>
-                            <Tooltip text="Teknik menentukan urutan baca piksel saat mengekstrak bit LSB. Setiap teknik menghasilkan bit yang berbeda dari gambar yang sama. Lebih banyak teknik = lebih lama prosesnya.">
-                                <span className="text-neutral-700 cursor-default"><InfoIcon /></span>
-                            </Tooltip>
+                            <span className="flex flex-col">
+                                <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
+                                    Pilih Teknik Ekstraksi
+                                </h2>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-xs text-neutral-700">({selectedTeknik.size} dipilih)</span>
+
+                                    <Tooltip text="Teknik menentukan urutan baca piksel saat mengekstrak bit LSB. Setiap teknik menghasilkan bit yang berbeda dari gambar yang sama. Lebih banyak teknik = lebih lama prosesnya.">
+                                        <span className="text-neutral-700 cursor-default"><InfoIcon /></span>
+                                    </Tooltip>
+                                </div>
+                            </span>
                             <div className="flex-1 h-px bg-neutral-500" />
                         </div>
                     </div>
@@ -412,7 +416,7 @@ export default function InputAnalisis({
                                         </span>
                                         <span className="flex-1">
                                             <span className={`text-xs font-mono ${active ? 'text-neutral-900' : 'text-neutral-600'} mr-2`}>T{idx + 1}</span>
-                                            <span className={`text-sm ${active ? 'text-neutral-800' : 'text-neutral-600'}`}>{TEKNIK_LABEL[arah]}</span>
+                                            <span className={`text-sm ${active ? 'text-neutral-800' : 'text-neutral-600'} font-medium`}>{TEKNIK_LABEL[arah]}</span>
                                         </span>
                                     </button>
                                 </Tooltip>
@@ -423,7 +427,7 @@ export default function InputAnalisis({
 
                 {/* Info kombinasi */}
                 <Tooltip text={`${selectedChannels.size} channel × ${selectedTeknik.size} teknik = ${totalKombinasi} kombinasi yang akan diekstrak dan dianalisis. Semakin banyak kombinasi, semakin lama prosesnya.`}>
-                    <div className="px-4 py-2.5 rounded-sm bg-neutral-100 border border-neutral-800 flex items-center justify-between cursor-default">
+                    <div className="px-4 py-2.5 rounded-sm bg-neutral-100 border border-neutral-800 flex flex-wrap items-center justify-between cursor-default">
                         <span className="text-xs text-neutral-800">Total kombinasi yang dijalankan</span>
                         <span className="text-sm font-mono font-bold text-neutral-950">{totalKombinasi} kombinasi</span>
                     </div>

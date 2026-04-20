@@ -5,8 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import type { EmailConfig, CreateEmailConfigPayload, UpdateEmailConfigPayload } from '@/types/EmailConfig'
 import supabaseAnonKey from '@/libs/supabase/anon_key'
 
-const TABLE = 'email_config'
-const PAGE_SIZE = 10
+const PAGE_SIZE = 5
 
 interface UseEmailConfigState {
     items: EmailConfig[]
@@ -47,7 +46,7 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
         try {
             // Count
             let countQ = supabaseAnonKey
-                .from(TABLE)
+                .from('email_config')
                 .select('*', { count: 'exact', head: true })
             if (!includeDeleted) countQ = countQ.is('deleted_at', null)
             else countQ = countQ.not('deleted_at', 'is', null)
@@ -62,7 +61,7 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
 
             // Data
             let dataQ = supabaseAnonKey
-                .from(TABLE)
+                .from('email_config')
                 .select('*')
                 .order('created_at', { ascending: false })
                 .range(from, from + PAGE_SIZE - 1)
@@ -105,10 +104,10 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
         try {
             if (payload.is_active) {
                 await supabaseAnonKey
-                    .from(TABLE).update({ is_active: false }).eq('is_active', true)
+                    .from('email_config').update({ is_active: false }).eq('is_active', true)
             }
             const { data, error: err } = await supabaseAnonKey
-                .from(TABLE).insert([payload]).select().single()
+                .from('email_config').insert([payload]).select().single()
             if (err) throw err
             await fetchInitial()
             return data as EmailConfig
@@ -126,10 +125,10 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
         try {
             if (payload.is_active === true) {
                 await supabaseAnonKey
-                    .from(TABLE).update({ is_active: false }).neq('id', id)
+                    .from('email_config').update({ is_active: false }).neq('id', id)
             }
             const { data, error: err } = await supabaseAnonKey
-                .from(TABLE)
+                .from('email_config')
                 .update({ ...payload, updated_at: new Date().toISOString() })
                 .eq('id', id).select().single()
             if (err) throw err
@@ -148,7 +147,7 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
     const softDelete = useCallback(async (id: string): Promise<boolean> => {
         try {
             const { error: err } = await supabaseAnonKey
-                .from(TABLE)
+                .from('email_config')
                 .update({
                     deleted_at: new Date().toISOString(),
                     is_active: false,
@@ -168,7 +167,7 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
     const restore = useCallback(async (id: string): Promise<boolean> => {
         try {
             const { error: err } = await supabaseAnonKey
-                .from(TABLE)
+                .from('email_config')
                 .update({ deleted_at: null, updated_at: new Date().toISOString() })
                 .eq('id', id)
             if (err) throw err
@@ -184,7 +183,7 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
     const hardDelete = useCallback(async (id: string): Promise<boolean> => {
         try {
             const { error: err } = await supabaseAnonKey
-                .from(TABLE).delete().eq('id', id)
+                .from('email_config').delete().eq('id', id)
             if (err) throw err
             await fetchPage(pageRef.current, true)
             return true
@@ -200,12 +199,12 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
             if (!current) {
                 // Aktifkan → nonaktifkan yang lain dulu
                 await supabaseAnonKey
-                    .from(TABLE)
+                    .from('email_config')
                     .update({ is_active: false, updated_at: new Date().toISOString() })
                     .neq('id', id)
             }
             const { data, error: err } = await supabaseAnonKey
-                .from(TABLE)
+                .from('email_config')
                 .update({ is_active: !current, updated_at: new Date().toISOString() })
                 .eq('id', id).select().single()
             if (err) throw err

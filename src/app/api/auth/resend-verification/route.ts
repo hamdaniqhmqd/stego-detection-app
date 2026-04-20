@@ -1,7 +1,7 @@
 // src/app/api/auth/resend-verification/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import supabase from '@/libs/supabase/client';
+import { supabaseClient } from '@/libs/supabase/client';
 import { generateVerificationToken, getVerificationTokenExpiry, sendVerificationEmail } from '@/libs/auth/email-service';
 import { getWaktuWIB } from '@/utils/format';
 
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Cari user berdasarkan email
-        const { data: user, error: userError } = await supabase
+        const { data: user, error: userError } = await supabaseClient
             .from('users')
             .select('id, username, email, is_verified')
             .eq('email', email.toLowerCase())
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         // RATE LIMITING: Cek apakah ada request resend dalam 1 menit terakhir
         const oneMinuteAgo = new Date(nowWIB.getTime() - 60000); // 1 menit yang lalu
 
-        const { data: recentVerification } = await supabase
+        const { data: recentVerification } = await supabaseClient
             .from('email_verifications')
             .select('created_at')
             .eq('user_id', user.id)
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Invalidate semua token lama yang belum verified untuk user ini
-        await supabase
+        await supabaseClient
             .from('email_verifications')
             .delete()
             .eq('user_id', user.id)
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
             updated_at: nowWIB.toISOString(),
         };
 
-        const { data: tokenData, error: tokenError } = await supabase
+        const { data: tokenData, error: tokenError } = await supabaseClient
             .from('email_verifications')
             .insert(payloadInsertEmailVerification)
             .select('id, verification_code, expires_at')

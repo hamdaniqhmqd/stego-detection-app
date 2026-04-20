@@ -1,7 +1,8 @@
 // src/types/analysis.ts
 
 import { MethodForceDecode } from './forceDecode'
-import type { BaseRecord, Channel, DecodedBitItem, DecodedRawItem, DecodeTeknik, TeknikArah } from './shared'
+import { TokenUsageSummary } from './GeminiToken'
+import type { BaseRecord, Channel, DecodeTeknik, TeknikArah } from './shared'
 
 export interface Analysis extends BaseRecord {
     id: string
@@ -40,23 +41,6 @@ export interface AnalysisForceDecode {
     deleted_at?: string
 }
 
-export interface PerItemTokenUsage {
-    channel: string
-    arah: string
-    prompt_tokens: number
-    candidates_tokens: number
-    total_tokens: number
-}
-
-export interface TokenUsageSummary {
-    gemini_token_id: string
-    gemini_token_label: string
-    total_prompt_tokens: number
-    total_candidates_tokens: number
-    total_tokens: number
-    per_item: PerItemTokenUsage[]
-}
-
 export interface AnalysisInterpretasiAI {
     id: string
     analysis_id?: string
@@ -75,32 +59,6 @@ export interface HasilInterpretasi {
     arah: TeknikArah
     interpretation: string
     status_ancaman: 'Aman' | 'Mencurigakan' | 'Berbahaya'
-}
-
-export interface UploadPayload {
-    url: string
-    name: string
-    size: number
-}
-
-export interface CreateAnalysisPayload {
-    user_id: string
-    file_path: string
-    metode: string
-    teknik: DecodeTeknik[]
-    interpretasi_ai: boolean
-}
-
-export interface ForceDecodePayload {
-    analysis_id: string
-    image_url: string
-    teknik: DecodeTeknik[]
-}
-
-export interface AIInterpretationPayload {
-    analysis_id: string
-    force_decode_id: string
-    selected_items: DecodedRawItem[]
 }
 
 export interface AnalysisResult {

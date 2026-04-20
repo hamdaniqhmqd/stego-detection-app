@@ -1,4 +1,4 @@
-import { TokenUsageSummary } from "@/types/analysis"
+import { TokenUsageSummary } from "@/types/GeminiToken"
 import { fmtTokens } from "@/utils/format"
 
 export function TokenUsageCell({ usage }: { usage?: TokenUsageSummary | null }) {
