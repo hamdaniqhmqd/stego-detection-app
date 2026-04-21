@@ -105,7 +105,7 @@ async function enrichAnalysisRows(rows: Analysis[]): Promise<AnalysisListItem[]>
     })
 }
 
-export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysisReturn {
+export function useAnalysis(includeDeleted = false): UseAnalysisReturn {
     const [state, setState] = useState<UseAnalysisState>({
         items: [], total: 0, currentPage: 1, totalPages: 1,
         isLoading: true, isLoadingMore: false, hasMore: false, error: null,
@@ -115,10 +115,6 @@ export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysi
     const baseQuery = useCallback(() => {
         let q = supabaseAnonKey.from('analysis').select('*')
 
-        if (userId) {
-            q = q.eq('user_id', userId)
-        }
-
         if (!includeDeleted) {
             q = q.is('deleted_at', null)
         } else {
@@ -126,17 +122,13 @@ export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysi
         }
 
         return q
-    }, [userId, includeDeleted])
+    }, [includeDeleted])
 
-    // ── Fetch halaman tertentu ────────────────────────────────
+    // Fetch halaman tertentu
     const fetchPage = useCallback(async (page: number, silent = false) => {
         if (!silent) setState(s => ({ ...s, isLoading: true, error: null }))
         try {
             let countQ = supabaseAnonKey.from('analysis').select('*', { count: 'exact', head: true })
-
-            if (userId) {
-                countQ = countQ.eq('user_id', userId)
-            }
 
             if (!includeDeleted) {
                 countQ = countQ.is('deleted_at', null)
@@ -177,7 +169,7 @@ export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysi
         } catch (err: any) {
             setState(s => ({ ...s, error: err.message, isLoading: false, isLoadingMore: false }))
         }
-    }, [baseQuery, userId, includeDeleted])
+    }, [baseQuery, includeDeleted])
 
     const fetchInitial = useCallback(() => fetchPage(1), [fetchPage])
 
@@ -287,15 +279,14 @@ export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysi
 
     // Realtime
     useEffect(() => {
-        const userFilter = userId ? `user_id=eq.${userId}` : undefined
-        const channel = supabaseAnonKey.channel(`realtime-analysis-${userId ?? 'all'}-${includeDeleted}`)
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'analysis', ...(userFilter ? { filter: userFilter } : {}) }, (payload) => {
+        const channel = supabaseAnonKey.channel(`realtime-analysis-all-${includeDeleted}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'analysis' }, (payload) => {
                 const newRow = payload.new as Analysis
                 if (!includeDeleted && newRow.deleted_at) return
                 // Re-fetch halaman 1 supaya urutan tetap benar
                 fetchPage(1, true)
             })
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'analysis', ...(userFilter ? { filter: userFilter } : {}) }, (payload) => {
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'analysis' }, (payload) => {
                 const updated = payload.new as Analysis
                 setState(s => ({
                     ...s,
@@ -306,7 +297,7 @@ export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysi
                             : s.items.map(i => i.id === updated.id ? { ...updated, force_decode: i.force_decode, ai_interpretasi: i.ai_interpretasi } : i),
                 }))
             })
-            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'analysis', ...(userFilter ? { filter: userFilter } : {}) }, (payload) => {
+            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'analysis' }, (payload) => {
                 setState(s => ({ ...s, items: s.items.filter(i => i.id !== payload.old.id), total: Math.max(0, s.total - 1) }))
             })
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'analysis_forcedecode' }, (payload) => {
@@ -327,7 +318,7 @@ export function useAnalysis(userId?: string, includeDeleted = false): UseAnalysi
             })
             .subscribe()
         return () => { supabaseAnonKey.removeChannel(channel) }
-    }, [userId, includeDeleted, fetchPage])
+    }, [includeDeleted, fetchPage])
 
     useEffect(() => { fetchInitial() }, [fetchInitial])
 

@@ -27,8 +27,8 @@ export function SectionAnalisis() {
     const [pending, setPending] = useState<string | null>(null)
     const [userMap, setUserMap] = useState<Map<string, User>>(new Map())
 
-    const active = useAnalysis(undefined, false)
-    const deleted = useAnalysis(undefined, true)
+    const active = useAnalysis(false)
+    const deleted = useAnalysis(true)
 
     const current = showDeleted ? deleted : active
 

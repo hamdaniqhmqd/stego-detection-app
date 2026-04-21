@@ -3,8 +3,6 @@
 import DashboardLayoutUsers from "@/components/Layouts/DashboardLayoutUsers";
 import InputAnalisis from "../../../components/Section/InputAnalisis";
 import { useState } from "react";
-import { AnalysisResult } from "@/types/analysis";
-import HasilAnalisis from "../../../components/Section/HasilAnalisis";
 import { useAuth } from "@/provider/AuthProvider";
 import { AuthUser } from "@/types/Users";
 

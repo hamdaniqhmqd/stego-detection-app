@@ -13,7 +13,7 @@ export function extractLSBChannel(
     let bits = ''
 
     for (const { x, y } of coords) {
-        const idx = (y * width + x) * 4   // RGBA → 4 bytes per pixel
+        const idx = (y * width + x) * 4
         bits += (data[idx + channelOffset] & 1).toString()
         // console.log("extractLSBChannel - bits", bits)
     }

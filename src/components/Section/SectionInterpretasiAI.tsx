@@ -142,9 +142,9 @@ export function SectionInterpretasiAI() {
                         </td>
 
                         {/* Tanggal */}
-                        <td className="px-4 py-3 text-xs text-neutral-400 whitespace-nowrap">
+                        <td className="px-4 py-3 text-xs text-neutral-700 whitespace-nowrap">
                             <span className="block">{fmt(item.created_at)}</span>
-                            <span className="block text-neutral-300">{fmtTime(item.created_at)}</span>
+                            <span className="block text-neutral-500">{fmtTime(item.created_at)}</span>
                         </td>
 
                         {/* Aksi */}

@@ -22,6 +22,7 @@ export async function forceDecodeLSB(
 ): Promise<ForceDecodeResult> {
     const image = await Jimp.read(imageBuffer)
     const { width, height } = image.bitmap
+    // console.log('forceDecodeLSB - width, height', width, height)
     const pixelData = image.bitmap.data as unknown as Buffer
 
     const decodedBit: DecodedBitItem[] = []

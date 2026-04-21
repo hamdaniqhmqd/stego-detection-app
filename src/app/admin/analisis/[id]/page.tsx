@@ -11,9 +11,9 @@ import { DecodedRawItem, TEKNIK_LABEL, type TeknikArah } from '@/types/shared'
 import {
     buildTeknikStatusMap,
     makeTeknikKey,
-    type TeknikStatusMap,
+    TeknikStatusMap,
 } from '@/hooks/useInterpretasiAI'
-import { StatusAncaman } from '@/types/aiInterpretasi'
+import { HasilInterpretasi, StatusAncaman } from '@/types/aiInterpretasi'
 import { PageSkeleton } from '@/components/Ui/Skeleton'
 import { UserCard } from '@/components/Ui/UserCard'
 import { ImagePreview } from '@/components/Ui/ImagePreview'
@@ -22,38 +22,7 @@ import Section from '@/components/Ui/Section'
 import { Field } from '@/components/Ui/Field'
 import { MethodForceDecode } from '@/types/forceDecode'
 import type { AnalysisResult } from '@/types/analysis'
-
-// AI Summary bar 
-function AISummaryBar({ teknikMap }: { teknikMap: TeknikStatusMap }) {
-    const counts: Record<StatusAncaman, number> = { Aman: 0, Mencurigakan: 0, Berbahaya: 0 }
-    for (const st of Object.values(teknikMap)) counts[st as StatusAncaman]++
-    const total = Object.values(counts).reduce((a, b) => a + b, 0)
-    if (total === 0) return null
-
-    const worstStatus: StatusAncaman =
-        counts.Berbahaya > 0 ? 'Berbahaya' :
-            counts.Mencurigakan > 0 ? 'Mencurigakan' : 'Aman'
-
-    return (
-        <div className={`flex items-center gap-4 px-4 py-3 rounded-sm border
-            ${STATUS_COLOR[worstStatus]}`}>
-            <div className="flex items-center gap-2 flex-1">
-                <span className={`w-2 h-2 rounded-full shrink-0 ${STATUS_DOT[worstStatus]}`} />
-                <span className="text-xs font-semibold">Status Keseluruhan: {worstStatus}</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs">
-                {(['Aman', 'Mencurigakan', 'Berbahaya'] as StatusAncaman[]).map(s => (
-                    counts[s] > 0 && (
-                        <span key={s} className="flex items-center gap-1 opacity-80">
-                            <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[s]}`} />
-                            {counts[s]} {s}
-                        </span>
-                    )
-                ))}
-            </div>
-        </div>
-    )
-}
+import { AISummaryBar } from '@/components/AI/AISummaryBar'
 
 export function methodToRawItem(m: MethodForceDecode): DecodedRawItem | null {
     if (!m.decoded_raw) return null
@@ -143,6 +112,8 @@ export default function AnalisisDetailPage({ params }: PageProps) {
 
     const { analysis, forceDecode, methodForceDecodes, aiInterpretasi } = result
 
+    const hasilAI: HasilInterpretasi[] = aiInterpretasi?.hasil ?? []
+
     // Build teknik → status map
     const teknikMap: TeknikStatusMap = aiInterpretasi
         ? buildTeknikStatusMap(aiInterpretasi.hasil ?? [])
@@ -212,8 +183,10 @@ export default function AnalisisDetailPage({ params }: PageProps) {
                 </div>
 
                 {/* AI summary bar (jika ada)  */}
-                {Object.keys(teknikMap).length > 0 && (
-                    <AISummaryBar teknikMap={teknikMap} />
+                {hasilAI.length > 0 && (
+                    <div className="mb-4">
+                        <AISummaryBar hasil={hasilAI} />
+                    </div>
                 )}
 
                 {/* Main layout: sidebar + content */}

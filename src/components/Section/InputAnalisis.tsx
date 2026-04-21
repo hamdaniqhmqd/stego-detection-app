@@ -3,7 +3,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Analysis, AnalysisResult } from '@/types/analysis'
+import type { Analysis } from '@/types/analysis'
 import { TEKNIK_LABEL, Channel, TeknikArah, DecodeTeknik, DecodedRawItem } from '@/types/shared'
 import { AuthUser } from '@/types/Users'
 import { CHANNEL_META, CHANNELS, TEKNIK_KEYS } from '@/utils/Channel'
@@ -47,6 +47,7 @@ export default function InputAnalisis({
     const [useAI, setUseAI] = useState<boolean>(readOnlyData?.useAI ?? false)
     const [isAnalyzing, setIsAnalyzing] = useState(false)
 
+    // 
     const toggleChannel = (ch: Channel) => {
         if (readOnly) return
         setSelectedChannels(prev => {
