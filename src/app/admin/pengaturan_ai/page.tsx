@@ -14,7 +14,7 @@ export default function InterpretasiAIPage() {
                         <div className="flex-1 h-px bg-neutral-300" />
                     </div>
 
-                    <SectionGeminiTokens />\
+                    <SectionGeminiTokens />
 
                 </div>
             </div>

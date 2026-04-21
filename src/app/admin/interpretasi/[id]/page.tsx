@@ -139,7 +139,11 @@ export default function InterpretasiDetailPage({ params }: PageProps) {
                 </div>
 
                 {/* AI Summary bar */}
-                {hasilAI.length > 0 && <AISummaryBar hasil={hasilAI} />}
+                {hasilAI.length > 0 && (
+                    <div className="mb-4">
+                        <AISummaryBar hasil={hasilAI} />
+                    </div>
+                )}
 
                 {/* Main layout */}
                 <div className="grid grid-cols-1 gap-6 items-start">
