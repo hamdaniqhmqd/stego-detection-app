@@ -11,7 +11,7 @@ export default function FormLogin() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
-  const [emailOrUsername, setEmailOrUsername] = useState(''); // ✅ Ubah state name
+  const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -40,7 +40,7 @@ export default function FormLogin() {
 
       console.log('Login result:', result);
 
-      // ✅ Handle redirect untuk email belum verified
+      // Handle redirect untuk email belum verified
       if (!result.success && result.redirectUrl) {
         setError(result.message || 'Email Anda belum diverifikasi.');
         setTimeout(() => {
@@ -84,7 +84,7 @@ export default function FormLogin() {
   };
 
   return (
-    <section className="form_login min-h-screen flex items-center justify-center lg:py-20 sm:py-14 py-10 container mx-auto">
+    <section className="form_login min-h-screen flex items-center justify-center lg:py-20 py-14 container mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div className="flex flex-col justify-center gap-6 items-center p-4 md:p-0">
           <div className="md:hidden w-full flex flex-col justify-center items-center">
@@ -99,7 +99,8 @@ export default function FormLogin() {
           <div className="
             content sm:w-md w-full bg-white p-6 md:p-8 
             rounded-md border border-neutral-900
-            shadow-[-10px_10px_0_rgba(26,26,46,1)]
+            shadow-[-7px_7px_0_rgba(26,26,46,1)]
+            md:shadow-[-10px_10px_0_rgba(26,26,46,1)]
           ">
 
             {/* Error Alert */}
@@ -127,7 +128,7 @@ export default function FormLogin() {
             )}
 
             <form className="form mt-2" onSubmit={handleSubmit}>
-              {/* ✅ Email/Username Field */}
+              {/* Email/Username Field */}
               <div className="form-group">
                 <label className="block font-medium text-neutral-900 text-md">
                   Username atau Email
@@ -228,10 +229,11 @@ export default function FormLogin() {
 
               <div className="navigate mt-3">
                 <div className="flex items-center justify-center gap-1 text-sm">
-                  <span className="text-neutral-600">Belum memiliki akun?</span>
-                  <Link className="text-neutral-700 hover:underline hover:text-neutral-800 font-medium" href="/auth/register">
-                    Daftar di sini
-                  </Link>
+                  <span className="text-neutral-600 text-center">Belum memiliki akun?{' '}
+                    <Link className="text-neutral-700 hover:underline hover:text-neutral-800 font-medium" href="/auth/register">
+                      Daftar di sini
+                    </Link>
+                  </span>
                 </div>
               </div>
             </form>

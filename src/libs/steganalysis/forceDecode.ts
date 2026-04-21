@@ -30,12 +30,13 @@ export async function forceDecodeLSB(
     for (const { channel, arah } of teknikList) {
         // Ambil koordinat semua pixel
         const coords = getPixelCoordinates(width, height, arah)
+        // console.log('forceDecodeLSB - coords', coords)
 
         // Ekstrak semua bit LSB sesuai urutan koordinat
         const bits = extractLSBChannel(pixelData, coords, width, channel)
         // console.log('forceDecodeLSB - bits', bits)
 
-        // Decode semua bit ke teks ASCII — 0x00–0xFF, tanpa filter
+        // Decode semua bit ke teks ASCII
         const text = bitsToFullText(bits)
         // console.log("forceDecodeLSB - text", text)
 

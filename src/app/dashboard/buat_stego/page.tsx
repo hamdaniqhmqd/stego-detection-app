@@ -21,7 +21,7 @@ export default function BuatStegoPage() {
         marker: DEFAULT_MARKER,
     });
     const [result, setResult] = useState<string | null>(null);
-    const [decodedMessage, setDecodedMessage] = useState<string | null>(null);
+    const [decodedMessage, setDecodedMessage] = useState<Record<Channel, string> | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
@@ -94,7 +94,10 @@ export default function BuatStegoPage() {
 
     const copyMessage = () => {
         if (!decodedMessage) return;
-        navigator.clipboard.writeText(decodedMessage);
+        const text = Object.entries(decodedMessage)
+            .map(([ch, msg]) => `[Kanal ${ch}]\n${msg}`)
+            .join('\n\n');
+        navigator.clipboard.writeText(text);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -504,35 +507,74 @@ export default function BuatStegoPage() {
 
                             {/* Decode Result */}
                             {decodedMessage !== null && (
-                                <div className="bg-neutral-50 border border-neutral-900 rounded-sm p-6">
-                                    <div className="inline-flex items-center gap-1.5 bg-green-100 border border-green-600 text-green-700 px-4 py-1.5 rounded-sm text-xs mb-4">
-                                        ✓ Pesan berhasil diekstrak
+                                <div className="flex flex-col gap-4">
+                                    <div className="inline-flex items-center gap-1.5 bg-green-100 border border-green-600 text-green-700 px-4 py-1.5 rounded-sm text-xs">
+                                        ✓ Pesan berhasil diekstrak dari {Object.keys(decodedMessage).length} kanal
                                     </div>
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
-                                            Pesan Tersembunyi
-                                        </h2>
-                                        <Tooltip text="Ini adalah pesan asli yang diekstrak dari bit LSB piksel gambar menggunakan konfigurasi kanal, traversal, dan marker yang Anda tentukan.">
-                                            <span className="text-neutral-900 cursor-default">
-                                                <InfoIcon />
-                                            </span>
-                                        </Tooltip>
-                                        <div className="flex-1 h-px bg-neutral-500" />
-                                        <Tooltip text="Salin seluruh teks pesan tersembunyi ke clipboard.">
+
+                                    {(Object.entries(decodedMessage) as [Channel, string][]).map(([ch, msg]) => {
+                                        const meta = CHANNEL_META[ch];
+                                        return (
+                                            <div
+                                                key={ch}
+                                                className="bg-neutral-50 border border-neutral-900 rounded-sm p-6"
+                                            >
+                                                {/* Header kanal */}
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <span className={`text-xs font-bold px-2 py-0.5 rounded-sm border ${meta.bg} ${meta.border} ${meta.color}`}>
+                                                        Kanal {ch}
+                                                    </span>
+                                                    <h2 className="text-sm tracking-widest uppercase font-semibold text-neutral-900">
+                                                        Pesan Tersembunyi
+                                                    </h2>
+                                                    <Tooltip text={`Pesan yang diekstrak dari kanal ${ch} (${meta.label}) menggunakan konfigurasi traversal dan marker yang dipilih.`}>
+                                                        <span className="text-neutral-900 cursor-default">
+                                                            <InfoIcon />
+                                                        </span>
+                                                    </Tooltip>
+                                                    <div className="flex-1 h-px bg-neutral-500" />
+                                                    <Tooltip text={`Salin pesan dari kanal ${ch} ke clipboard.`}>
+                                                        <button
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(msg);
+                                                                setCopied(true);
+                                                                setTimeout(() => setCopied(false), 2000);
+                                                            }}
+                                                            className="relative bg-neutral-50 border border-neutral-400 text-neutral-600
+                                        hover:border-neutral-700 hover:text-neutral-900 text-xs font-semibold px-3 py-1 rounded-sm transition-all"
+                                                        >
+                                                            {copied ? '✓ Disalin!' : 'Salin'}
+                                                        </button>
+                                                    </Tooltip>
+                                                </div>
+
+                                                {/* Isi pesan */}
+                                                <div className={`relative bg-white border rounded-sm p-5 ${meta.border}`}>
+                                                    <pre className="text-sm text-neutral-800 whitespace-pre-wrap wrap-break-word leading-relaxed font-mono">
+                                                        {msg}
+                                                    </pre>
+                                                </div>
+
+                                                {/* Info karakter */}
+                                                <p className="text-xs text-neutral-500 mt-2">
+                                                    {msg.length.toLocaleString()} karakter · Kanal {ch} · Traversal [{config.traversal}]
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
+
+                                    {/* Tombol salin semua */}
+                                    {Object.keys(decodedMessage).length > 1 && (
+                                        <Tooltip text="Salin pesan dari semua kanal sekaligus ke clipboard.">
                                             <button
                                                 onClick={copyMessage}
-                                                className="relative bg-neutral-50 border border-neutral-400 text-neutral-600
-                                                        hover:border-neutral-700 hover:text-neutral-900 text-xs font-semibold px-3 py-1 rounded-sm transition-all"
+                                                className="self-start bg-neutral-50 border border-neutral-400 text-neutral-600
+                            hover:border-neutral-700 hover:text-neutral-900 text-xs font-semibold px-4 py-2 rounded-sm transition-all"
                                             >
-                                                {copied ? '✓ Disalin!' : 'Salin'}
+                                                {copied ? '✓ Disalin!' : 'Salin Semua Kanal'}
                                             </button>
                                         </Tooltip>
-                                    </div>
-                                    <div className="relative bg-white border border-neutral-300 rounded-sm p-5">
-                                        <pre className="text-sm text-neutral-800 whitespace-pre-wrap wrap-break-word leading-relaxed font-mono">
-                                            {decodedMessage}
-                                        </pre>
-                                    </div>
+                                    )}
                                 </div>
                             )}
                         </section>

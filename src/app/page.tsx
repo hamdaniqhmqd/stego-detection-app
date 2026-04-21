@@ -62,10 +62,10 @@ export default function Home() {
                 className="
                   relative rounded-sm px-8 py-3
                   flex items-center justify-center
-                  bg-neutral-900 border border-neutral-900
-                  text-white text-sm font-semibold
+                  bg-neutral-100 border border-neutral-900
+                  text-neutral-900 text-sm font-semibold
                   transition-all duration-300 ease-in-out
-                  hover:-translate-y-0.5 hover:shadow-[-5px_5px_0_rgba(107,114,128,0.6)]
+                  hover:-translate-y-0.5 hover:border-neutral-900 hover:shadow-[-5px_5px_0_rgba(26,26,46,0.8)]
                   active:translate-y-0 active:shadow-none
                   w-full sm:w-auto
                 "

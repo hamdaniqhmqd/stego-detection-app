@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     try {
         // Ambil access token dari cookie
         const accessToken = request.cookies.get('accessToken')?.value;
-        console.log('Access token:', accessToken);
+        // console.log('Access token:', accessToken);
 
         if (!accessToken) {
             return NextResponse.json(
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
         // Verify token
         const decoded = await verifyAccessToken(accessToken);
-        console.log('Decoded token:', decoded);
+        // console.log('Decoded token:', decoded);
 
         if (!decoded) {
             return NextResponse.json(
