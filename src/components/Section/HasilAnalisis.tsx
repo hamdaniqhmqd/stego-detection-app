@@ -279,7 +279,7 @@ export default function HasilAnalisis({ result }: HasilAnalisisProps) {
                                     className={`text-neutral-600 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>
                                     <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z" />
                                 </svg>
-                                <div className="flex flex-col md:flex-row items-start md:items-cente gap-1.5">
+                                <div className="flex flex-col md:flex-row items-start md:items-center gap-1.5">
                                     <div className="flex-1 flex items-center gap-1.5">
                                         <span className="text-xs font-semibold text-neutral-900 flex-1 text-left">{TEKNIK_LABEL[arah]}</span>
                                     </div>

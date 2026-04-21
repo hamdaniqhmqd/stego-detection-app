@@ -5,6 +5,9 @@ import { generateCoordinates } from "./generateCoordinates";
 import { Channel } from "@/types/shared";
 
 // LSB Encode
+// Setiap kanal aktif menyimpan pesan yang IDENTIK secara independen.
+// Kanal R menyimpan seluruh pesan, kanal G menyimpan seluruh pesan, dst.
+// Kapasitas = coords.length / 8 karakter per kanal (bukan dikali jumlah kanal).
 export async function encodeLSB(imageFile: File, message: string, config: StegoConfig): Promise<string> {
     return new Promise((resolve, reject) => {
         const endMarker = config.marker || DEFAULT_MARKER;
@@ -22,6 +25,7 @@ export async function encodeLSB(imageFile: File, message: string, config: StegoC
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
 
+            // Bangun array bit dari fullMessage (sama untuk semua kanal)
             const bits: number[] = [];
             for (let i = 0; i < fullMessage.length; i++) {
                 const code = fullMessage.charCodeAt(i);
@@ -31,25 +35,23 @@ export async function encodeLSB(imageFile: File, message: string, config: StegoC
             const coords = generateCoordinates(canvas.width, canvas.height, config.traversal);
             const channelMap: Record<Channel, number> = { R: 0, G: 1, B: 2 };
 
-            // Validasi: Kapasitas gambar (bits) harus cukup untuk menampung pesan + marker
-            const capacityBits = coords.length * config.channels.length;
-            if (bits.length > capacityBits) {
+            const capacityBitsPerChannel = coords.length;
+            if (bits.length > capacityBitsPerChannel) {
                 reject(new Error(
                     `Kapasitas gambar tidak cukup! ` +
-                    `Kapasitas: ${Math.floor(capacityBits / 8).toLocaleString()} karakter, ` +
+                    `Kapasitas per kanal: ${Math.floor(capacityBitsPerChannel / 8).toLocaleString()} karakter, ` +
                     `pesan + marker: ${Math.ceil(bits.length / 8).toLocaleString()} karakter.`
                 ));
                 return;
             }
 
-            let bitIdx = 0;
-            outer:
-            for (const [x, y] of coords) {
-                const pixelIdx = (y * canvas.width + x) * 4;
-                for (const ch of config.channels) {
-                    if (bitIdx >= bits.length) break outer;
-                    const offset = channelMap[ch];
-                    data[pixelIdx + offset] = (data[pixelIdx + offset] & ~1) | bits[bitIdx++];
+            // Encode: setiap kanal aktif menulis bit yang SAMA dari awal
+            for (const ch of config.channels) {
+                const offset = channelMap[ch];
+                for (let i = 0; i < bits.length; i++) {
+                    const [x, y] = coords[i];
+                    const pixelIdx = (y * canvas.width + x) * 4;
+                    data[pixelIdx + offset] = (data[pixelIdx + offset] & ~1) | bits[i];
                 }
             }
 

@@ -54,7 +54,7 @@ export default function FormRegister() {
   };
 
   return (
-    <section className="form_login min-h-screen flex items-center justify-center lg:py-20 sm:py-14 py-10 container mx-auto">
+    <section className="form_login min-h-screen flex items-center justify-center lg:py-20 py-14 container mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div className="flex flex-col justify-center gap-6 items-center p-4 md:p-0">
           <div className="md:hidden w-full flex flex-col justify-center items-center">
@@ -70,7 +70,8 @@ export default function FormRegister() {
           <div className="
             content sm:w-md w-full bg-white p-6 md:p-8 
             rounded-md border border-neutral-900
-            shadow-[-10px_10px_0_rgba(26,26,46,1)]
+            shadow-[-7px_7px_0_rgba(26,26,46,1)]
+            md:shadow-[-10px_10px_0_rgba(26,26,46,1)]
           ">
 
             {error && (
@@ -235,14 +236,15 @@ export default function FormRegister() {
               </div>
 
               <div className="navigate mt-4">
-                <div className="flex items-center justify-center gap-2 text-base">
-                  <span className="text-neutral-600">Sudah memiliki akun?</span>
-                  <Link
-                    className="text-neutral-700 hover:underline hover:text-neutral-800 font-medium"
-                    href="/auth/login"
-                  >
-                    Masuk
-                  </Link>
+                <div className="flex items-center justify-center gap-2 text-sm">
+                  <span className="text-neutral-600">Sudah memiliki akun?{' '}
+                    <Link
+                      className="text-neutral-700 hover:underline hover:text-neutral-800 font-medium"
+                      href="/auth/login"
+                    >
+                      Masuk
+                    </Link>
+                  </span>
                 </div>
               </div>
             </form>

@@ -16,7 +16,7 @@ export default function DashboardPage() {
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-2 md:gap-4">
+                    <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
                         <Link href="/dashboard/buat_stego"
                             className={`
                                 relative rounded-sm px-6 py-3

@@ -6,10 +6,6 @@ import supabaseAnonKey from '@/libs/supabase/anon_key'
 import type { DecodeTeknik } from '@/types/shared'
 import { getWaktuWIB } from '@/utils/format'
 
-function encodeTextForJsonb(text: string): string {
-    return Buffer.from(text, 'utf-8').toString('base64')
-}
-
 export async function processForceDecode(
     analysisId: string,
     imageUrl: string,
@@ -28,7 +24,7 @@ export async function processForceDecode(
     // Encode raw text untuk jsonb
     const safeRaw = decodedRaw.map((item) => ({
         ...item,
-        text: encodeTextForJsonb(item.text),
+        text: Buffer.from(item.text, 'utf-8').toString('base64'),
         base64_encoded: true,
     }))
 
