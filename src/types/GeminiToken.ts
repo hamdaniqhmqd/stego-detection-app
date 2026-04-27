@@ -55,7 +55,6 @@ export interface TokenUsageSummary {
     per_item: PerItemTokenUsage[]
 }
 
-
 export interface GeminiUsage {
     promptTokenCount: number
     candidatesTokenCount: number

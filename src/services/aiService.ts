@@ -16,11 +16,10 @@ export async function processAIInterpretation(
     analysisId: string,
     forceDecodeId: string,
     selectedItems: DecodedRawItem[]
-) {
+): Promise<HasilInterpretasi[]> {
     const start = Date.now()
     const hasil: HasilInterpretasi[] = []
 
-    // Ambil token aktif dari DB sekali di awal
     let activeToken: GeminiTokenRecord
     try {
         activeToken = await getActiveGeminiToken()
@@ -28,7 +27,6 @@ export async function processAIInterpretation(
         throw new Error(`Gagal mendapatkan token Gemini: ${err.message}`)
     }
 
-    // Akumulasi token usage untuk seluruh batch
     const usageAccumulator: TokenUsageSummary = {
         gemini_token_id: activeToken.id,
         gemini_token_label: activeToken.label,
@@ -38,7 +36,6 @@ export async function processAIInterpretation(
         per_item: [],
     }
 
-    // Proses setiap item
     for (const item of selectedItems) {
         const decodedText = decodeItemText(item)
 
@@ -46,12 +43,10 @@ export async function processAIInterpretation(
             hasil.push({
                 channel: item.channel,
                 arah: item.arah,
-                interpretation:
-                    'Tidak ada data tersembunyi yang terdeteksi atau data terlalu pendek untuk dianalisis.',
+                interpretation: 'Tidak ada data tersembunyi yang terdeteksi atau data terlalu pendek untuk dianalisis.',
                 status_ancaman: 'Aman',
             })
 
-            // Catat item ini dengan 0 token (tidak ada request ke Gemini)
             usageAccumulator.per_item.push({
                 channel: item.channel,
                 arah: item.arah,
@@ -64,10 +59,7 @@ export async function processAIInterpretation(
         }
 
         try {
-            // Proses interpretasi
             const result = await interpretWithAI(decodedText, activeToken)
-
-            // Parse status ancaman
             const statusAncaman = extractStatusAncaman(result.text)
 
             hasil.push({
@@ -77,7 +69,6 @@ export async function processAIInterpretation(
                 status_ancaman: statusAncaman,
             })
 
-            // Akumulasi usage dari response Gemini
             const usage: GeminiUsage | null = result.usage
             const perItem: PerItemTokenUsage = {
                 channel: item.channel,
@@ -112,7 +103,6 @@ export async function processAIInterpretation(
 
     const waktuProses = `${((Date.now() - start) / 1000).toFixed(2)}s`
 
-    // Update last_used_at di DB
     await supabaseAnonKey
         .from('gemini_tokens')
         .update({ last_used_at: getWaktuWIB().toISOString() })
@@ -121,8 +111,7 @@ export async function processAIInterpretation(
             if (error) console.error('[aiService] Gagal update last_used_at:', error.message)
         })
 
-    // Simpan hasil interpretasi + token_usage ke DB
-    const { data, error } = await supabaseAnonKey
+    const { error } = await supabaseAnonKey
         .from('analysis_interpretasi_ai')
         .insert({
             analysis_id: analysisId,
@@ -132,10 +121,9 @@ export async function processAIInterpretation(
             gemini_token_id: activeToken.id,
             token_usage: usageAccumulator,
         })
-        .select()
-        .single()
 
     if (error) throw error
 
-    return data
+    // ✅ Return array hasil, bukan DB row
+    return hasil
 }
