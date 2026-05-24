@@ -12,56 +12,56 @@ export function getPixelCoordinates(
 
     switch (arah) {
         // Atas → Bawah (y naik), Kiri → Kanan (x naik)
-        case 'atas-bawah-kiri-kanan-col':
+        case 'atas-bawah-kiri-kanan-row':
             for (let y = 0; y < height; y++)
                 for (let x = 0; x < width; x++)
                     coords.push({ x, y })
             break
 
         // Atas → Bawah (y naik), Kanan → Kiri (x turun)
-        case 'atas-bawah-kanan-kiri-col':
+        case 'atas-bawah-kanan-kiri-row':
             for (let y = 0; y < height; y++)
                 for (let x = width - 1; x >= 0; x--)
                     coords.push({ x, y })
             break
 
         // Bawah → Atas (y turun), Kiri → Kanan (x naik)
-        case 'bawah-atas-kiri-kanan-col':
+        case 'bawah-atas-kiri-kanan-row':
             for (let y = height - 1; y >= 0; y--)
                 for (let x = 0; x < width; x++)
                     coords.push({ x, y })
             break
 
         // Bawah → Atas (y turun), Kanan → Kiri (x turun)
-        case 'bawah-atas-kanan-kiri-col':
+        case 'bawah-atas-kanan-kiri-row':
             for (let y = height - 1; y >= 0; y--)
                 for (let x = width - 1; x >= 0; x--)
                     coords.push({ x, y })
             break
 
         // Kiri → Kanan (x naik), Atas → Bawah (y naik)
-        case 'kiri-kanan-atas-bawah-row':
+        case 'kiri-kanan-atas-bawah-col':
             for (let x = 0; x < width; x++)
                 for (let y = 0; y < height; y++)
                     coords.push({ x, y })
             break
 
         // Kanan → Kiri (x turun), Atas → Bawah (y naik)
-        case 'kanan-kiri-atas-bawah-row':
+        case 'kanan-kiri-atas-bawah-col':
             for (let x = width - 1; x >= 0; x--)
                 for (let y = 0; y < height; y++)
                     coords.push({ x, y })
             break
 
         // Kiri → Kanan (x naik), Bawah → Atas (y turun)
-        case 'kiri-kanan-bawah-atas-row':
+        case 'kiri-kanan-bawah-atas-col':
             for (let x = 0; x < width; x++)
                 for (let y = height - 1; y >= 0; y--)
                     coords.push({ x, y })
             break
 
         // Kanan → Kiri (x turun), Bawah → Atas (y turun)
-        case 'kanan-kiri-bawah-atas-row':
+        case 'kanan-kiri-bawah-atas-col':
             for (let x = width - 1; x >= 0; x--)
                 for (let y = height - 1; y >= 0; y--)
                     coords.push({ x, y })

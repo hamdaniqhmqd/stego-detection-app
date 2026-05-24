@@ -1,10 +1,6 @@
 // libs/ai/prompt.ts
 
 export function buildPrompt(decodedText: string): string {
-    const cleanText = decodedText
-        .replace(/[^\x20-\x7E\n\r\t]/g, '')
-        .trim()
-
     return `
 Anda adalah pakar Digital Forensics dan Steganalysis.
 Tugas Anda adalah menganalisis data mentah hasil "force-decode" dari sebuah file citra.
@@ -25,7 +21,7 @@ ATURAN:
 
 DATA UNTUK DIANALISIS:
 """
-${cleanText}
+${decodedText}
 """
 `
 }
