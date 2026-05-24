@@ -36,12 +36,6 @@ export default function Home() {
 
           {/* Heading + Description */}
           <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-center">
-              <span className="inline-block w-auto rounded-sm border border-neutral-400 bg-white px-3 py-1 text-xs font-medium text-neutral-600 tracking-widest uppercase">
-                Prototype
-              </span>
-            </div>
-
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase text-neutral-900 leading-tight tracking-tight">
               Deteksi<br className="sm:hidden" /> Steganografi
             </h1>

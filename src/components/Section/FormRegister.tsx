@@ -1,3 +1,5 @@
+// src/components/Section/FormRegister.tsx
+
 'use client';
 
 import { useState } from 'react';
@@ -80,7 +82,7 @@ export default function FormRegister() {
               </div>
             )}
 
-            <form className="form" onSubmit={handleSubmit}>
+            <form className="form mt-2" onSubmit={handleSubmit}>
               <div className="form-group">
                 <label className="block font-medium text-neutral-600 text-md">
                   Username <span className="text-red-600 font-semibold">*</span>
@@ -259,7 +261,34 @@ export default function FormRegister() {
             Bergabunglah dengan kami! Lengkapi formulir untuk membuat akun baru.
             Kami akan mengirimkan link verifikasi ke email Anda.
           </p>
-          <img src="/assets/image/photo-gallery.png" alt="" className="mt-6 h-52" />
+
+          {/* Ganti <img> dengan ilustrasi SVG */}
+          <div className="mt-8 w-full max-w-sm flex flex-col items-center gap-4">
+            <svg viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg" className="w-72 h-auto">
+              {/* Background card */}
+              <rect x="30" y="20" width="260" height="200" rx="16" fill="#f8f8f6" stroke="#e2e2de" strokeWidth="1" />
+
+              {/* Avatar circle */}
+              <circle cx="160" cy="80" r="38" fill="#e8e4fe" />
+              <circle cx="160" cy="68" r="16" fill="#7f77dd" />
+              <ellipse cx="160" cy="102" rx="24" ry="14" fill="#7f77dd" />
+
+              {/* Check badge */}
+              <circle cx="192" cy="56" r="12" fill="#1d9e75" />
+              <path d="M186 56 L190 60 L198 52" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+
+              {/* Form lines */}
+              <rect x="60" y="134" width="200" height="10" rx="5" fill="#d3d1c7" />
+              <rect x="60" y="154" width="160" height="10" rx="5" fill="#e2e2de" />
+              <rect x="60" y="174" width="180" height="10" rx="5" fill="#e2e2de" />
+
+              {/* Floating dots decoration */}
+              <circle cx="50" cy="40" r="5" fill="#afa9ec" opacity="0.6" />
+              <circle cx="270" cy="190" r="7" fill="#9fe1cb" opacity="0.5" />
+              <circle cx="285" cy="50" r="4" fill="#f5c4b3" opacity="0.7" />
+              <circle cx="40" cy="185" r="6" fill="#fac775" opacity="0.5" />
+            </svg>
+          </div>
         </div>
       </div>
 

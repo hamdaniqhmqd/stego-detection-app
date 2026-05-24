@@ -247,7 +247,40 @@ export default function FormLogin() {
           <p className="text-center text-neutral-600 text-sm mt-2 max-w-2/3">
             Selamat datang kembali! Masukkan email/username dan password Anda untuk mengakses akun.
           </p>
-          <img src="/assets/image/photo-gallery.png" alt="" className="mt-6 h-52" />
+
+          {/* Ganti <img> dengan ilustrasi SVG */}
+          <div className="mt-8 w-full max-w-sm flex flex-col items-center gap-4">
+            <svg viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg" className="w-72 h-auto">
+              {/* Background */}
+              <rect x="30" y="20" width="260" height="200" rx="16" fill="#f8f8f6" stroke="#e2e2de" strokeWidth="1" />
+
+              {/* Lock icon area */}
+              <rect x="120" y="55" width="80" height="60" rx="10" fill="#e8e4fe" />
+              <rect x="136" y="75" width="48" height="38" rx="6" fill="#7f77dd" />
+              <path d="M148 55 Q148 42 160 42 Q172 42 172 55" stroke="#afa9ec" strokeWidth="5" fill="none" strokeLinecap="round" />
+              <circle cx="160" cy="90" r="6" fill="white" />
+              <rect x="157" y="90" width="6" height="10" rx="3" fill="white" />
+
+              {/* Input field mockups */}
+              <rect x="55" y="136" width="210" height="18" rx="5" fill="white" stroke="#d3d1c7" strokeWidth="1" />
+              <rect x="63" y="142" width="80" height="6" rx="3" fill="#d3d1c7" />
+
+              <rect x="55" y="164" width="210" height="18" rx="5" fill="white" stroke="#d3d1c7" strokeWidth="1" />
+              <rect x="63" y="170" width="60" height="6" rx="3" fill="#d3d1c7" />
+              {/* Password dots */}
+              <circle cx="130" cy="173" r="3" fill="#888780" />
+              <circle cx="140" cy="173" r="3" fill="#888780" />
+              <circle cx="150" cy="173" r="3" fill="#888780" />
+              <circle cx="160" cy="173" r="3" fill="#888780" />
+              <circle cx="170" cy="173" r="3" fill="#888780" />
+
+              {/* Decorative dots */}
+              <circle cx="52" cy="38" r="5" fill="#afa9ec" opacity="0.6" />
+              <circle cx="272" cy="195" r="7" fill="#9fe1cb" opacity="0.5" />
+              <circle cx="285" cy="48" r="4" fill="#f5c4b3" opacity="0.7" />
+              <circle cx="38" cy="188" r="5" fill="#fac775" opacity="0.5" />
+            </svg>
+          </div>
         </div>
       </div>
     </section>

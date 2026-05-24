@@ -46,6 +46,7 @@ export async function interpretWithAI(
         }
 
         const data = await response.json()
+        // console.log('Gemini API response:', data)
 
         const interpretationText: string =
             data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
