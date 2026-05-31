@@ -71,7 +71,7 @@ export default function Home() {
                 className="
                   relative rounded-sm px-8 py-3
                   flex items-center justify-center
-                  bg-neutral-100 border border-neutral-400
+                  bg-neutral-100 border border-neutral-900
                   text-neutral-800 text-sm font-semibold
                   transition-all duration-300 ease-in-out
                   hover:-translate-y-0.5 hover:border-neutral-900 hover:shadow-[-5px_5px_0_rgba(26,26,46,0.8)]

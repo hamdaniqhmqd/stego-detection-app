@@ -4,27 +4,35 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/libs/auth/jwt';
 import { supabaseClient } from '@/libs/supabase/client';
 
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  maxAge: 0,
+  path: '/',
+  domain: process.env.NODE_ENV === 'production'
+    ? process.env.COOKIE_DOMAIN
+    : process.env.COOKIE_DEVELOPMENT_DOMAIN,
+};
+
 export async function POST(request: NextRequest) {
   try {
     const accessToken = request.cookies.get('accessToken')?.value;
     const refreshToken = request.cookies.get('refreshToken')?.value;
 
-    // Verify access token untuk mendapatkan user ID
     if (accessToken) {
       try {
         const decoded = await verifyAccessToken(accessToken);
 
         if (decoded && refreshToken) {
-          // Delete refresh token dari database
           await supabaseClient
             .from('refresh_tokens')
             .delete()
             .eq('user_id', decoded.userId)
             .eq('refresh_token', refreshToken);
         }
-      } catch (error) {
-        // Token sudah expired, tapi tetap lanjutkan logout
-        // console.log('Token already expired during logout');
+      } catch {
+        // Token sudah expired, tetap lanjutkan logout
       }
     }
 
@@ -33,23 +41,21 @@ export async function POST(request: NextRequest) {
       message: 'Logout berhasil',
     });
 
-    // Delete cookies
-    response.cookies.delete('accessToken');
-    response.cookies.delete('refreshToken');
+    // Gunakan .set() dengan maxAge: 0, bukan .delete()
+    // agar domain & path ikut terkirim dalam Set-Cookie header
+    response.cookies.set('accessToken', '', COOKIE_OPTIONS);
+    response.cookies.set('refreshToken', '', COOKIE_OPTIONS);
 
     return response;
 
-  } catch (error) {
-    // console.error('Logout error:', error);
-
-    // Tetap hapus cookies meskipun ada error
+  } catch {
     const response = NextResponse.json(
       { success: false, message: 'Terjadi kesalahan saat logout' },
       { status: 500 }
     );
 
-    response.cookies.delete('accessToken');
-    response.cookies.delete('refreshToken');
+    response.cookies.set('accessToken', '', COOKIE_OPTIONS);
+    response.cookies.set('refreshToken', '', COOKIE_OPTIONS);
 
     return response;
   }
