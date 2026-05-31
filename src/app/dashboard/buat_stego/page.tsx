@@ -9,6 +9,7 @@ import { InfoIcon } from "@/utils/Icons";
 import { decodeLSB } from "@/utils/stego/decodeLSB";
 import { encodeLSB } from "@/utils/stego/encodeLSB";
 import { useState, useRef, useCallback } from "react";
+import Swal from "sweetalert2";
 
 export default function BuatStegoPage() {
     const [mode, setMode] = useState<Mode>('encode');
@@ -30,7 +31,22 @@ export default function BuatStegoPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFile = (file: File) => {
-        if (!file.type.startsWith('image/')) { setError('File harus berupa gambar (PNG, JPG, dll)'); return; }
+        if (file.type !== 'image/png') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Format tidak didukung',
+                text: 'Hanya file PNG yang diperbolehkan.',
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#171717',
+                background: '#fafafa',
+                color: '#171717',
+                customClass: {
+                    popup: 'rounded-sm border border-neutral-900 shadow-[-6px_7px_0_rgba(26,26,46,1)]',
+                    confirmButton: 'rounded-sm font-bold text-sm',
+                }
+            })
+            return
+        }
         setImageFile(file); setResult(null); setDecodedMessage(null); setError(null);
         const reader = new FileReader();
         reader.onload = (e) => setImagePreview(e.target?.result as string);
@@ -194,7 +210,7 @@ export default function BuatStegoPage() {
                                         </div>
                                         <p className="font-bold text-neutral-800 text-sm mb-1">Drag & drop gambar di sini</p>
                                         <p className="text-xs text-neutral-500">atau klik untuk memilih file</p>
-                                        <p className="text-xs text-neutral-400 mt-1">PNG · JPG · WEBP · BMP</p>
+                                        <p className="text-xs text-neutral-400 mt-1">Hanya PNG</p>
                                     </div>
                                 ) : (
                                     <div className="relative rounded-sm overflow-hidden border border-neutral-300">
@@ -216,7 +232,7 @@ export default function BuatStegoPage() {
                                 <input
                                     ref={fileInputRef}
                                     type="file"
-                                    accept="image/*"
+                                    accept="image/png"
                                     className="hidden"
                                     onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
                                 />

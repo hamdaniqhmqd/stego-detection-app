@@ -13,6 +13,7 @@ import { uploadImage } from '@/services/uploadImage'
 import { useAnalysis } from '@/hooks/useAnalysis'
 import { processForceDecode } from '@/services/forceDecodeService'
 import { processAIInterpretation } from '@/services/aiService'
+import Swal from 'sweetalert2'
 
 interface InputAnalisisProps {
     user?: AuthUser
@@ -107,10 +108,26 @@ export default function InputAnalisis({
         e.preventDefault()
         e.stopPropagation()
         const file = e.dataTransfer.files?.[0]
-        if (file && file.type.startsWith('image/')) loadFile(file)
+        if (file && file.type === 'image/png') loadFile(file)
     }
 
     const loadFile = (file: File) => {
+        if (file.type !== 'image/png') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Format tidak didukung',
+                text: 'Hanya file PNG yang diperbolehkan.',
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#171717',
+                background: '#fafafa',
+                color: '#171717',
+                customClass: {
+                    popup: 'rounded-sm border border-neutral-900 shadow-[-6px_7px_0_rgba(26,26,46,1)]',
+                    confirmButton: 'rounded-sm font-bold text-sm',
+                }
+            })
+            return
+        }
         setSelectedImage(file)
         const reader = new FileReader()
         reader.onloadend = () => setPreviewUrl(reader.result as string)
@@ -247,7 +264,7 @@ export default function InputAnalisis({
                         )}
                     </div>
 
-                    <input id="fileInput" type="file" accept="image/*" onChange={handleImageUpload} disabled={readOnly} className="hidden" />
+                    <input id="fileInput" type="file" accept="image/png" onChange={handleImageUpload} disabled={readOnly} className="hidden" />
 
                     {readOnly && readOnlyData?.analysis && (
                         <div className="mt-4 space-y-1.5">

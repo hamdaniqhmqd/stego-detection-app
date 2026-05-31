@@ -9,6 +9,7 @@ import { ANCAMAN_STYLE, CH_STYLE } from '@/utils/Channel'
 import { formatBitPreview } from '@/utils/Bit'
 import { Tooltip } from '@/components/Ui/ToolTip'
 import { decodeRawText } from '@/utils/Decode'
+import { CopyBtn, useCopy } from '../Ui/CopyBtn'
 
 interface DecodeCardProps {
     item: DecodedRawItem
@@ -31,6 +32,7 @@ export default function DecodeCard({
     isInterpretingThis,
     hideCheckbox,
 }: DecodeCardProps) {
+    const { copy, copiedKey } = useCopy()
     const [expandedBit, setExpandedBit] = useState(false)
     const [expandedRaw, setExpandedRaw] = useState(false)
     const style = CH_STYLE[item.channel]
@@ -196,6 +198,15 @@ export default function DecodeCard({
                                     </button>
                                 </Tooltip>
                             )}
+                            <span className="h-4 w-px bg-neutral-800"></span>
+                            <Tooltip text={`Salin rangkaian bit ini ke clipboard.`}>
+                                <CopyBtn
+                                    text={expandedBit ? bitFullStr : bitPreviewStr}
+                                    copyKey={`bit-${item.channel}-${item.arah}`}
+                                    onCopy={copy}
+                                    isCopied={copiedKey === `bit-${item.channel}-${item.arah}`}
+                                />
+                            </Tooltip>
                         </div>
                     </div>
                     <div className="rounded-sm bg-neutral-100 border border-neutral-800 p-3 font-mono text-xs text-neutral-800 leading-relaxed break-all overflow-hidden">
@@ -248,6 +259,15 @@ export default function DecodeCard({
                                 </button>
                             </Tooltip>
                         )}
+                        <span className="h-4 w-px bg-neutral-800"></span>
+                        <Tooltip text={`Salin teks mentah ini ke clipboard.`}>
+                            <CopyBtn
+                                text={rawText}
+                                copyKey={`raw-${item.channel}-${item.arah}`}
+                                onCopy={copy}
+                                isCopied={copiedKey === `raw-${item.channel}-${item.arah}`}
+                            />
+                        </Tooltip>
                     </div>
                 </div>
                 <div className="rounded-sm bg-neutral-100 border border-neutral-800 p-3 font-mono text-xs text-neutral-800 leading-relaxed break-all overflow-hidden">
