@@ -553,7 +553,6 @@ export default function HasilAnalisisAdmin({ result, filePath }: HasilAnalisisAd
                 </svg>
                 <p className="text-xs text-neutral-600">
                     Mode tampilan admin. data hanya bisa dipantau dan disalin, tidak dapat dimodifikasi.
-                    Gunakan fitur <span className="text-neutral-900 font-semibold">Salin</span> untuk mengekstrak data.
                 </p>
             </div>
 

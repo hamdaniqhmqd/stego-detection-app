@@ -13,7 +13,6 @@ export interface GeminiToken {
     error_count: number
     last_error?: string | null
     last_error_at?: string | null
-    created_by?: string | null
     created_at: string
     updated_at: string
     deleted_at?: string | null

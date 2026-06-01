@@ -3,7 +3,7 @@
 'use client'
 
 import DashboardLayoutAdmins from '@/components/Layouts/DashboardLayoutAdmins'
-import { DashboardOverview } from './section/DashboardOverview'
+import { DashboardOverview } from '../../components/Section/DashboardOverview'
 import { useUsers } from '@/hooks/useUsers'
 import { useAnalysis } from '@/hooks/useAnalysis'
 import { useInterpretasiAI } from '@/hooks/useInterpretasiAI'

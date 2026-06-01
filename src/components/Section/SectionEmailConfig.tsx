@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from 'react'
 import { TableShell } from '@/components/Table/TableShell'
-import { SkeletonRows } from '@/components/Ui/SkeletonRows'
+import { SkeletonRows } from '@/components/Skeleton/SkeletonRows'
 import { ActionBtn } from '@/components/Ui/ActionBtn'
 import { ConfirmModal } from '@/components/Ui/ConfirmModal'
 import { ToggleSwitch } from '@/components/Ui/ToggleSwitch'
@@ -11,9 +11,9 @@ import { MiniStat } from '@/components/Card/MiniStatCard'
 import { Pagination } from '../Table/Pagination'
 import { useEmailConfig } from '@/hooks/useEmailConfig'
 import type { EmailConfig, CreateEmailConfigPayload, UpdateEmailConfigPayload } from '@/types/EmailConfig'
-import { IconPlus, IconDelete, IconEdit, IconEye, IconEyeOff } from '@/utils/Icons'
+import { IconPlus, IconDelete, IconEdit, IconEye, IconEyeOff, IconArsip, IconRestore } from '@/utils/Icons'
 import { ConfigFormModal } from '../Modal/ConfigFormModal'
-import { ConfirmState, fmt, fmtTime, maskPassword } from '@/utils/format'
+import { ConfirmState, fmt, fmtTime, formatDateMonthYears, formatTime, maskPassword } from '@/utils/format'
 
 
 export function SectionEmailConfig() {
@@ -24,7 +24,7 @@ export function SectionEmailConfig() {
     const [pending, setPending] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    // Dua instance hook
+    // Dua instance hook untuk data aktif dan data termasuk yang dihapus, agar tidak perlu refetch saat toggle
     const active = useEmailConfig({ includeDeleted: false })
     const deleted = useEmailConfig({ includeDeleted: true })
 
@@ -38,7 +38,7 @@ export function SectionEmailConfig() {
         activeConfig: active.items.find(c => c.is_active),
     }), [active.items, active.total, deleted.total])
 
-    // Handlers
+    // Handler form submit untuk create/update
     const handleFormSubmit = async (
         payload: CreateEmailConfigPayload | UpdateEmailConfigPayload
     ) => {
@@ -56,6 +56,7 @@ export function SectionEmailConfig() {
         }
     }
 
+    // Handler konfirmasi untuk soft delete / hard delete
     const handleConfirm = async () => {
         if (!confirm) return
         setPending(confirm.id)
@@ -70,6 +71,7 @@ export function SectionEmailConfig() {
         } finally { setPending(null); setConfirm(null) }
     }
 
+    // Restore token yang dihapus
     const handleRestore = async (id: string) => {
         setPending(id)
         try {
@@ -150,9 +152,6 @@ export function SectionEmailConfig() {
                             <span className="text-emerald-700">→</span>
                             <span className="font-mono text-[11px]">{stats.activeConfig.mail_from_address}</span>
                         </div>
-                        <div className="mt-1 text-[11px] text-emerald-700 font-mono">
-                            {stats.activeConfig.mail_host}:{stats.activeConfig.mail_port}
-                        </div>
                     </div>
                 </div>
             )}
@@ -183,7 +182,7 @@ export function SectionEmailConfig() {
                         )}
                     </div>
                 }
-                headers={['Pengirim', 'SMTP Host', 'Username', 'Password', 'Enkripsi', 'Status', 'Diperbarui', 'Aksi']}
+                headers={['Pengirim', 'SMTP Host', 'Username', 'Status', 'Diperbarui', 'Aksi']}
                 isEmpty={!current.isLoading && current.items.length === 0}
                 emptyText={
                     showDeleted
@@ -242,29 +241,6 @@ export function SectionEmailConfig() {
                                 </span>
                             </td>
 
-                            {/* Password */}
-                            <td className="px-4 py-3">
-                                <div className="flex items-center gap-1.5">
-                                    <span className="font-mono text-[12px] text-neutral-800 tracking-tight">
-                                        {maskPassword(cfg.mail_password)}
-                                    </span>
-                                </div>
-                            </td>
-
-                            {/* Enkripsi */}
-                            <td className="px-4 py-3">
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-bold
-                                    border uppercase tracking-wide
-                                    ${cfg.mail_encryption === 'tls'
-                                        ? 'bg-sky-50 text-sky-700 border-sky-200'
-                                        : cfg.mail_encryption === 'ssl'
-                                            ? 'bg-violet-50 text-violet-700 border-violet-200'
-                                            : 'bg-neutral-100 text-neutral-500 border-neutral-200'
-                                    }`}>
-                                    {cfg.mail_encryption}
-                                </span>
-                            </td>
-
                             {/* Status — Radio button style */}
                             <td className="px-4 py-3">
                                 <button
@@ -295,47 +271,70 @@ export function SectionEmailConfig() {
 
                             {/* Diperbarui */}
                             <td className="px-4 py-3 text-xs text-neutral-700 whitespace-nowrap">
-                                <span className="block">{fmt(cfg.updated_at)}</span>
-                                <span className="block text-neutral-500">{fmtTime(cfg.updated_at)}</span>
+                                <span className="block">{formatDateMonthYears(cfg.updated_at)}</span>
+                                <span className="block text-neutral-500">{formatTime(cfg.updated_at)}</span>
                             </td>
 
                             {/* Aksi */}
                             <td className="px-4 py-3">
                                 <div className="flex items-center gap-0.5">
                                     {/* Edit — hanya non-deleted */}
-                                    {!cfg.deleted_at && (
+                                    <ActionBtn
+                                        icon={<IconEdit />}
+                                        label="Edit"
+                                        onClick={() => { setEditTarget(cfg); setShowModal(true) }}
+                                    />
+
+                                    {/* Set aktif — hanya non-deleted & belum aktif */}
+                                    {!cfg.deleted_at && !isActive && (
                                         <ActionBtn
-                                            icon={<IconEdit />}
-                                            label="Edit"
-                                            onClick={() => { setEditTarget(cfg); setShowModal(true) }}
+                                            icon={
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
+                                                    <path d="M239.18,97.26A16.38,16.38,0,0,0,224.92,86l-59-4.76L143.14,26.15a16.36,16.36,0,0,0-30.27,0L90.11,81.23,31.08,86a16.46,16.46,0,0,0-9.37,28.86l45,38.83L53,211.75a16.38,16.38,0,0,0,24.5,17.82L128,198.49l50.53,31.08A16.4,16.4,0,0,0,203,211.75l-13.76-58.07,45-38.83A16.43,16.43,0,0,0,239.18,97.26Zm-15.34,5.47-48.7,42a8,8,0,0,0-2.56,7.91l14.88,62.8a.37.37,0,0,1-.17.48c-.18.14-.23.11-.38,0l-54.72-33.65a8,8,0,0,0-8.38,0L69.09,215.94c-.15.09-.19.12-.38,0a.37.37,0,0,1-.17-.48l14.88-62.8a8,8,0,0,0-2.56-7.91l-48.7-42c-.12-.1-.23-.19-.13-.5s.18-.27.33-.29l63.92-5.16A8,8,0,0,0,103,91.86l24.62-59.61c.08-.17.11-.25.35-.25s.27.08.35.25L153,91.86a8,8,0,0,0,6.75,4.92l63.92,5.16c.15,0,.24,0,.33.29S224,102.63,223.84,102.73Z"></path>
+                                                </svg>
+                                            }
+                                            label="Jadikan aktif"
+                                            onClick={() => handleSetActive(cfg.id)}
                                         />
+                                    )}
+
+                                    {/* Sudah aktif — icon bintang solid kuning */}
+                                    {!cfg.deleted_at && isActive && (
+                                        <span className="w-7 h-7 rounded-sm flex items-center justify-center text-xs hover:bg-amber-200 hover:text-amber-700 transition-all duration-150 text-amber-400" title="Config aktif">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
+                                                <path d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34l13.49-58.54-45.11-39.42a16,16,0,0,1,9.12-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L187,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z" />
+                                            </svg>
+                                        </span>
                                     )}
 
                                     {/* Arsipkan / Pulihkan */}
                                     {cfg.deleted_at ? (
                                         <ActionBtn
-                                            icon={<span>↩</span>}
+                                            icon={
+                                                <IconRestore />
+                                            }
                                             label="Pulihkan"
                                             onClick={() => handleRestore(cfg.id)}
                                         />
                                     ) : (
                                         <ActionBtn
-                                            icon={<IconDelete />}
+                                            icon={<IconArsip />}
                                             label="Arsipkan"
-                                            onClick={() =>
-                                                setConfirm({ type: 'soft', id: cfg.id, label: cfg.mail_from_name })
-                                            }
+                                            onClick={() => setConfirm({ type: 'soft', id: cfg.id, label: cfg.mail_from_name })}
                                         />
                                     )}
 
                                     {/* Hapus permanen */}
                                     <ActionBtn
-                                        icon={<span className="text-xs">✕</span>}
+                                        icon={
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
+                                                <path d="M200,56V208a8,8,0,0,1-8,8H64a8,8,0,0,1-8-8V56Z" opacity="0.2" />
+                                                <path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z" />
+                                            </svg>
+                                        }
                                         label="Hapus permanen"
                                         danger
-                                        onClick={() =>
-                                            setConfirm({ type: 'hard', id: cfg.id, label: cfg.mail_from_name })
-                                        }
+                                        onClick={() => setConfirm({ type: 'hard', id: cfg.id, label: cfg.mail_from_name })}
                                     />
                                 </div>
                             </td>

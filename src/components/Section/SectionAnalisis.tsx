@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { TableShell } from '@/components/Table/TableShell'
-import { SkeletonRows } from '@/components/Ui/SkeletonRows'
+import { SkeletonRows } from '@/components/Skeleton/SkeletonRows'
 import { ActionBtn } from '@/components/Ui/ActionBtn'
 import { ConfirmModal } from '@/components/Ui/ConfirmModal'
 import { ToggleSwitch } from '@/components/Ui/ToggleSwitch'

@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from 'react'
 import { TableShell } from '@/components/Table/TableShell'
-import { SkeletonRows } from '../Ui/SkeletonRows'
+import { SkeletonRows } from '../Skeleton/SkeletonRows'
 import { ActionBtn } from '@/components/Ui/ActionBtn'
 import { ConfirmModal } from '@/components/Ui/ConfirmModal'
 import { ToggleSwitch } from '@/components/Ui/ToggleSwitch'
@@ -22,7 +22,7 @@ export function SectionGeminiTokens() {
     const [pending, setPending] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    // Dua instance hook, mirip SectionInterpretasiAI
+    // Dua instance hook untuk data aktif dan data termasuk yang dihapus, agar tidak perlu refetch saat toggle
     const active = useGeminiTokens({ includeDeleted: false })
     const deleted = useGeminiTokens({ includeDeleted: true })
 
@@ -36,7 +36,7 @@ export function SectionGeminiTokens() {
         defaultToken: active.items.find(t => t.is_default),
     }), [active.items, active.total, deleted.total])
 
-    // Handlers
+    // Handler form submit untuk create/update
     const handleFormSubmit = async (payload: CreateGeminiTokenPayload | UpdateGeminiTokenPayload) => {
         setIsSubmitting(true)
         try {
@@ -52,6 +52,7 @@ export function SectionGeminiTokens() {
         }
     }
 
+    // Handler konfirmasi untuk soft delete / hard delete
     const handleConfirm = async () => {
         if (!confirm) return
         setPending(confirm.id)
@@ -66,6 +67,7 @@ export function SectionGeminiTokens() {
         } finally { setPending(null); setConfirm(null) }
     }
 
+    // Handler untuk restore token yang dihapus
     const handleRestore = async (id: string) => {
         setPending(id)
         try {
@@ -74,12 +76,14 @@ export function SectionGeminiTokens() {
         } finally { setPending(null) }
     }
 
+    // Handler untuk set default
     const handleSetDefault = async (id: string) => {
         setPending(id)
         try { await active.setDefault(id) }
         finally { setPending(null) }
     }
 
+    // Handler untuk toggle active
     const handleToggleActive = async (id: string, current: boolean) => {
         setPending(id)
         try { await active.toggleActive(id, current) }
@@ -301,11 +305,11 @@ export function SectionGeminiTokens() {
                                         />
                                     )}
                                     {!token.deleted_at && token.is_default && (
-                                        <div className="text-amber-400">
+                                        <span className="w-7 h-7 rounded-sm flex items-center justify-center text-xs hover:bg-amber-200 hover:text-amber-700 transition-all duration-150 text-amber-400" title="Config aktif">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
                                                 <path d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34l13.49-58.54-45.11-39.42a16,16,0,0,1,9.12-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L187,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z" />
                                             </svg>
-                                        </div>
+                                        </span>
                                     )}
 
                                     {/* Arsipkan / Pulihkan */}

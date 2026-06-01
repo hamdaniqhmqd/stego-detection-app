@@ -1,6 +1,6 @@
 import supabaseAnonKey from "@/libs/supabase/anon_key"
 import { useEffect, useState } from "react"
-import { SkeletonBlock } from "./Skeleton"
+import { SkeletonBlock } from "../Skeleton/SkeletonBlock"
 import { User } from "@/types/Users"
 
 export function UserCard({ userId }: { userId: string }) {

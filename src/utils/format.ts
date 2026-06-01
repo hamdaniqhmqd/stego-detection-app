@@ -71,6 +71,22 @@ export const formatDateSimple = (dateString: string) => {
     return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
 
+export const formatTime = (dateString: string) => {
+    const utcDate = new Date(dateString);
+
+    let hours: string, minutes: string;
+
+    if (dateString.includes('+') || dateString.includes('Z')) {
+        hours = utcDate.getUTCHours().toString().padStart(2, '0');
+        minutes = utcDate.getUTCMinutes().toString().padStart(2, '0');
+    } else {
+        hours = utcDate.getHours().toString().padStart(2, '0');
+        minutes = utcDate.getMinutes().toString().padStart(2, '0');
+    }
+
+    return `${hours}:${minutes}`;
+};
+
 export const fmt = (d: string) =>
     new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
 
