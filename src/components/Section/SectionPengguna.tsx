@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { TableShell } from '@/components/Table/TableShell'
-import { SkeletonRows } from '@/components/Ui/SkeletonRows'
+import { SkeletonRows } from '@/components/Skeleton/SkeletonRows'
 import { ActionBtn } from '@/components/Ui/ActionBtn'
 import { MiniStat } from '@/components/Card/MiniStatCard'
 import { RoleBadge, VerifBadge } from '@/components/Ui/Badge'

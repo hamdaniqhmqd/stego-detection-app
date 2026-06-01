@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import supabaseAnonKey from '@/libs/supabase/anon_key'
-import type { AnalysisInterpretasiAI, HasilInterpretasi } from '@/types/analysis'
+import type { AnalysisInterpretasiAI, Analysis, AnalysisForceDecode, HasilInterpretasi } from '@/types/analysis'
 import type { User } from '@/types/Users'
 import { StatusAncaman } from '@/types/aiInterpretasi'
 
@@ -59,6 +59,20 @@ export interface InterpretasiAIWithUser extends AnalysisInterpretasiAI {
     user?: InterpretasiUser
 }
 
+// ── Detail result type (menggantikan useInterpretasiDetail) ────────────────
+export interface InterpretasiDetailResult {
+    interpretasi: AnalysisInterpretasiAI
+    analysis: Analysis | null
+    forceDecode: AnalysisForceDecode | null
+    user: User | null
+}
+
+interface UseInterpretasiDetailState {
+    detail: InterpretasiDetailResult | null
+    isDetailLoading: boolean
+    detailError: string | null
+}
+
 async function enrichWithUsers(items: AnalysisInterpretasiAI[]): Promise<InterpretasiAIWithUser[]> {
     if (items.length === 0) return []
     const analysisIds = [...new Set(items.map(i => i.analysis_id).filter((id): id is string => !!id))]
@@ -95,18 +109,22 @@ async function enrichWithUsers(items: AnalysisInterpretasiAI[]): Promise<Interpr
 interface UseInterpretasiAIState {
     items: InterpretasiAIWithUser[]
     total: number
-    currentPage: number      // ← tambahan
-    totalPages: number      // ← tambahan
+    currentPage: number
+    totalPages: number
     isLoading: boolean
     isLoadingMore: boolean
     hasMore: boolean
     error: string | null
 }
 
-export interface UseInterpretasiAIReturn extends UseInterpretasiAIState {
-    goToPage: (page: number) => Promise<void>     // ← tambahan
+export interface UseInterpretasiAIReturn extends UseInterpretasiAIState, UseInterpretasiDetailState {
+    goToPage: (page: number) => Promise<void>
     loadMore: () => Promise<void>
     refresh: () => Promise<void>
+    // ── Detail (menggantikan useInterpretasiDetail) ──────────────────────────
+    fetchDetail: (id: string) => Promise<void>
+    refreshDetail: () => Promise<void>
+    // ── CRUD ────────────────────────────────────────────────────────────────
     getById: (id: string) => Promise<InterpretasiAIWithUser | null>
     getByForceDecodeId: (fdId: string) => Promise<InterpretasiAIWithUser[]>
     create: (payload: InterpretasiInsert) => Promise<AnalysisInterpretasiAI>
@@ -122,16 +140,27 @@ interface Options {
     forceDecodeId?: string
     analysisId?: string
     includeDeleted?: boolean
+    /** Jika diisi, hook akan langsung fetch detail saat mount */
+    detailId?: string
 }
 
 export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIReturn {
-    const { forceDecodeId, analysisId, includeDeleted = false } = options
+    const { forceDecodeId, analysisId, includeDeleted = false, detailId } = options
 
     const [state, setState] = useState<UseInterpretasiAIState>({
         items: [], total: 0, currentPage: 1, totalPages: 1,
         isLoading: true, isLoadingMore: false, hasMore: false, error: null,
     })
+
+    const [detailState, setDetailState] = useState<UseInterpretasiDetailState>({
+        detail: null,
+        isDetailLoading: !!detailId,
+        detailError: null,
+    })
+
     const pageRef = useRef(1)
+    // menyimpan id terakhir yang di-fetch untuk keperluan refreshDetail
+    const lastDetailIdRef = useRef<string | null>(detailId ?? null)
 
     const baseQuery = useCallback(() => {
         let q = supabaseAnonKey.from(TABLE).select('*')
@@ -142,7 +171,7 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         return q
     }, [forceDecodeId, analysisId, includeDeleted])
 
-    // ── Fetch halaman tertentu ────────────────────────────────
+    // ── Fetch halaman ─────────────────────────────────────────────────────
     const fetchPage = useCallback(async (page: number, silent = false) => {
         if (!silent) setState(s => ({ ...s, isLoading: true, error: null }))
         try {
@@ -192,6 +221,72 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         await goToPage(pageRef.current + 1)
     }, [goToPage, state.isLoadingMore, state.hasMore])
 
+    // ── Detail fetch (menggantikan useInterpretasiDetail) ─────────────────
+    const fetchDetail = useCallback(async (id: string) => {
+        if (!id) return
+        lastDetailIdRef.current = id
+        setDetailState(s => ({ ...s, isDetailLoading: true, detailError: null }))
+
+        try {
+            // 1. Fetch interpretasi
+            const { data: interpretasi, error: iErr } = await supabaseAnonKey
+                .from(TABLE)
+                .select('*')
+                .eq('id', id)
+                .single()
+            if (iErr) throw new Error(iErr.message)
+            if (!interpretasi) throw new Error('Data interpretasi tidak ditemukan')
+
+            const interp = interpretasi as AnalysisInterpretasiAI
+
+            // 2. Fetch analysis
+            let analysis: Analysis | null = null
+            if (interp.analysis_id) {
+                const { data: a } = await supabaseAnonKey
+                    .from('analysis')
+                    .select('*')
+                    .eq('id', interp.analysis_id)
+                    .single()
+                analysis = (a as Analysis) ?? null
+            }
+
+            // 3. Fetch force decode
+            let forceDecode: AnalysisForceDecode | null = null
+            if (interp.analysis_forcedecode_id) {
+                const { data: fd } = await supabaseAnonKey
+                    .from('analysis_forcedecode')
+                    .select('id, analysis_id, decode_teknik, waktu_proses, created_at, updated_at, deleted_at')
+                    .eq('id', interp.analysis_forcedecode_id)
+                    .single()
+                forceDecode = (fd as AnalysisForceDecode) ?? null
+            }
+
+            // 4. Fetch user via analysis.user_id
+            let user: User | null = null
+            if (analysis?.user_id) {
+                const { data: u } = await supabaseAnonKey
+                    .from('users')
+                    .select('id, username, fullname, email, photo, role, is_verified, created_at')
+                    .eq('id', analysis.user_id)
+                    .single()
+                user = (u as User) ?? null
+            }
+
+            setDetailState({
+                detail: { interpretasi: interp, analysis, forceDecode, user },
+                isDetailLoading: false,
+                detailError: null,
+            })
+        } catch (err: any) {
+            setDetailState({ detail: null, isDetailLoading: false, detailError: err.message })
+        }
+    }, [])
+
+    const refreshDetail = useCallback(async () => {
+        if (lastDetailIdRef.current) await fetchDetail(lastDetailIdRef.current)
+    }, [fetchDetail])
+
+    // ── CRUD ──────────────────────────────────────────────────────────────
     const getById = useCallback(async (id: string): Promise<InterpretasiAIWithUser | null> => {
         const { data, error } = await supabaseAnonKey.from(TABLE).select('*').eq('id', id).single()
         if (error) throw new Error(error.message)
@@ -221,6 +316,13 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         if (error) throw new Error(error.message)
         const updated = data as AnalysisInterpretasiAI
         setState(s => ({ ...s, items: s.items.map(i => i.id === id ? { ...i, ...updated } : i) }))
+        // Sinkronisasi detail jika sedang dibuka
+        if (lastDetailIdRef.current === id) {
+            setDetailState(s => s.detail
+                ? { ...s, detail: { ...s.detail, interpretasi: updated } }
+                : s
+            )
+        }
         return updated
     }, [])
 
@@ -234,17 +336,32 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
             items: s.items.filter(i => i.id !== id),
             total: Math.max(0, s.total - 1),
         }))
+        // Update detail state jika sedang dibuka
+        if (lastDetailIdRef.current === id) {
+            setDetailState(s => s.detail
+                ? { ...s, detail: { ...s.detail, interpretasi: { ...s.detail.interpretasi, deleted_at: now } } }
+                : s
+            )
+        }
     }, [])
 
     const restore = useCallback(async (id: string): Promise<void> => {
+        const now = new Date().toISOString()
         const { error } = await supabaseAnonKey.from(TABLE)
-            .update({ deleted_at: null, updated_at: new Date().toISOString() }).eq('id', id)
+            .update({ deleted_at: null, updated_at: now }).eq('id', id)
         if (error) throw new Error(error.message)
         setState(s => ({
             ...s,
             items: s.items.filter(i => i.id !== id),
             total: Math.max(0, s.total - 1),
         }))
+        // Update detail state jika sedang dibuka
+        if (lastDetailIdRef.current === id) {
+            setDetailState(s => s.detail
+                ? { ...s, detail: { ...s.detail, interpretasi: { ...s.detail.interpretasi, deleted_at: undefined } } }
+                : s
+            )
+        }
     }, [])
 
     const hardDelete = useCallback(async (id: string): Promise<void> => {
@@ -257,7 +374,7 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         }))
     }, [])
 
-    // Realtime
+    // ── Realtime ──────────────────────────────────────────────────────────
     useEffect(() => {
         const rtFilter = forceDecodeId
             ? `analysis_forcedecode_id=eq.${forceDecodeId}`
@@ -266,7 +383,7 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         const ch = supabaseAnonKey
             .channel(`rt-${TABLE}-${forceDecodeId ?? analysisId ?? 'all'}-${includeDeleted}`)
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: TABLE, ...(rtFilter ? { filter: rtFilter } : {}) },
-                () => { fetchPage(1, true) }   // ← re-fetch halaman 1 saat ada insert baru
+                () => { fetchPage(1, true) }
             )
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: TABLE, ...(rtFilter ? { filter: rtFilter } : {}) },
                 async (p) => {
@@ -283,6 +400,13 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
                                     : s.items.map(i => i.id === row.id ? merged : i),
                         }
                     })
+                    // Sinkronisasi detail jika sedang dibuka
+                    if (lastDetailIdRef.current === row.id) {
+                        setDetailState(s => s.detail
+                            ? { ...s, detail: { ...s.detail, interpretasi: row } }
+                            : s
+                        )
+                    }
                 }
             )
             .on('postgres_changes', { event: 'DELETE', schema: 'public', table: TABLE, ...(rtFilter ? { filter: rtFilter } : {}) },
@@ -298,11 +422,19 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         return () => { supabaseAnonKey.removeChannel(ch) }
     }, [forceDecodeId, analysisId, includeDeleted, fetchPage])
 
+    // ── Init ──────────────────────────────────────────────────────────────
     useEffect(() => { fetchInitial() }, [fetchInitial])
+
+    // Auto-fetch detail jika detailId diberikan lewat options
+    useEffect(() => {
+        if (detailId) fetchDetail(detailId)
+    }, [detailId, fetchDetail])
 
     return {
         ...state,
+        ...detailState,
         goToPage, loadMore, refresh: fetchInitial,
+        fetchDetail, refreshDetail,
         getById, getByForceDecodeId,
         create, update, softDelete, restore, hardDelete,
         summarize: (r) => summarizeInterpretasi(r),

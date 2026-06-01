@@ -18,14 +18,14 @@ export interface TeknikAccordionProps {
 }
 
 export const ARAH_TOOLTIP: Record<TeknikArah, string> = {
-    'atas-bawah-kiri-kanan-row': 'Piksel dibaca per baris (row-major): dari atas ke bawah dalam satu baris, lalu lanjut ke baris berikutnya dari kiri ke kanan.',
-    'atas-bawah-kanan-kiri-row': 'Piksel dibaca per baris (row-major): dari atas ke bawah dalam satu baris, lalu lanjut ke baris berikutnya dari kanan ke kiri.',
-    'bawah-atas-kiri-kanan-row': 'Piksel dibaca per baris (row-major): dari bawah ke atas dalam satu baris, lalu lanjut ke baris berikutnya dari kiri ke kanan.',
-    'bawah-atas-kanan-kiri-row': 'Piksel dibaca per baris (row-major): dari bawah ke atas dalam satu baris, lalu lanjut ke baris berikutnya dari kanan ke kiri.',
-    'kiri-kanan-atas-bawah-col': 'Piksel dibaca per kolom (column-major): dari kiri ke kanan dalam satu kolom, lalu lanjut ke kolom berikutnya dari atas ke bawah. Pola standar paling umum.',
-    'kanan-kiri-atas-bawah-col': 'Piksel dibaca per kolom (column-major): dari kanan ke kiri dalam satu kolom, lalu lanjut ke kolom berikutnya dari atas ke bawah.',
-    'kiri-kanan-bawah-atas-col': 'Piksel dibaca per kolom (column-major): dari kiri ke kanan dalam satu kolom, lalu lanjut ke kolom berikutnya dari bawah ke atas.',
-    'kanan-kiri-bawah-atas-col': 'Piksel dibaca per kolom (column-major): dari kanan ke kiri dalam satu kolom, lalu lanjut ke kolom berikutnya dari bawah ke atas.kolom.',
+    'kiri-kanan-atas-bawah-row': 'Piksel dibaca per baris (row-major): dari atas ke bawah dalam satu baris, lalu lanjut ke baris berikutnya dari kiri ke kanan.',
+    'kanan-kiri-atas-bawah-row': 'Piksel dibaca per baris (row-major): dari atas ke bawah dalam satu baris, lalu lanjut ke baris berikutnya dari kanan ke kiri.',
+    'kiri-kanan-bawah-atas-row': 'Piksel dibaca per baris (row-major): dari bawah ke atas dalam satu baris, lalu lanjut ke baris berikutnya dari kiri ke kanan.',
+    'kanan-kiri-bawah-atas-row': 'Piksel dibaca per baris (row-major): dari bawah ke atas dalam satu baris, lalu lanjut ke baris berikutnya dari kanan ke kiri.',
+    'atas-bawah-kiri-kanan-col': 'Piksel dibaca per kolom (column-major): dari kiri ke kanan dalam satu kolom, lalu lanjut ke kolom berikutnya dari atas ke bawah. Pola standar paling umum.',
+    'atas-bawah-kanan-kiri-col': 'Piksel dibaca per kolom (column-major): dari kanan ke kiri dalam satu kolom, lalu lanjut ke kolom berikutnya dari atas ke bawah.',
+    'bawah-atas-kiri-kanan-col': 'Piksel dibaca per kolom (column-major): dari kiri ke kanan dalam satu kolom, lalu lanjut ke kolom berikutnya dari bawah ke atas.',
+    'bawah-atas-kanan-kiri-col': 'Piksel dibaca per kolom (column-major): dari kanan ke kiri dalam satu kolom, lalu lanjut ke kolom berikutnya dari bawah ke atas.kolom.',
 }
 
 export function TeknikAccordion({ arah, channels, hasilAI, teknikMap, index, tokenUsage }: TeknikAccordionProps) {

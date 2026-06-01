@@ -40,7 +40,7 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
     })
     const pageRef = useRef(1)
 
-    // ── Fetch page ─────────────────────────────────────────────
+    //  Fetch page 
     const fetchPage = useCallback(async (page: number, silent = false) => {
         if (!silent) setState(s => ({ ...s, isLoading: true, error: null }))
         try {
@@ -97,7 +97,7 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
 
     useEffect(() => { fetchInitial() }, [fetchInitial])
 
-    // ── Create ─────────────────────────────────────────────────
+    //  Create 
     const createConfig = useCallback(async (
         payload: CreateEmailConfigPayload
     ): Promise<EmailConfig | null> => {
@@ -117,7 +117,7 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
         }
     }, [fetchInitial])
 
-    // ── Update ─────────────────────────────────────────────────
+    //  Update 
     const updateConfig = useCallback(async (
         id: string,
         payload: UpdateEmailConfigPayload
@@ -143,7 +143,7 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
         }
     }, [])
 
-    // ── Soft Delete ────────────────────────────────────────────
+    //  Soft Delete 
     const softDelete = useCallback(async (id: string): Promise<boolean> => {
         try {
             const { error: err } = await supabaseAnonKey
@@ -163,7 +163,7 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
         }
     }, [fetchPage])
 
-    // ── Restore ────────────────────────────────────────────────
+    //  Restore 
     const restore = useCallback(async (id: string): Promise<boolean> => {
         try {
             const { error: err } = await supabaseAnonKey
@@ -179,7 +179,7 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
         }
     }, [fetchPage])
 
-    // ── Hard Delete ────────────────────────────────────────────
+    //  Hard Delete 
     const hardDelete = useCallback(async (id: string): Promise<boolean> => {
         try {
             const { error: err } = await supabaseAnonKey
@@ -193,22 +193,19 @@ export function useEmailConfig(options: Options = {}): UseEmailConfigReturn {
         }
     }, [fetchPage])
 
-    // ── Toggle Active ──────────────────────────────────────────
-    const toggleActive = useCallback(async (id: string, current: boolean): Promise<boolean> => {
+    //  Toggle Active 
+    const toggleActive = useCallback(async (id: string, _current: boolean): Promise<boolean> => {
         try {
-            if (!current) {
-                // Aktifkan → nonaktifkan yang lain dulu
-                await supabaseAnonKey
-                    .from('email_config')
-                    .update({ is_active: false, updated_at: new Date().toISOString() })
-                    .neq('id', id)
-            }
+            // Cukup aktifkan target — trigger DB otomatis nonaktifkan yang lain
             const { data, error: err } = await supabaseAnonKey
                 .from('email_config')
-                .update({ is_active: !current, updated_at: new Date().toISOString() })
-                .eq('id', id).select().single()
+                .update({ is_active: true, updated_at: new Date().toISOString() })
+                .eq('id', id)
+                .select()
+                .single()
             if (err) throw err
-            // Kalau ada perubahan is_active di row lain, refetch supaya konsisten
+
+            // Refetch penuh agar semua row yang di-nonaktifkan trigger ikut ter-update di UI
             await fetchPage(pageRef.current, true)
             return true
         } catch (err: any) {
