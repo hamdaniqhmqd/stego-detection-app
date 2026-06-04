@@ -14,23 +14,60 @@ export default function FormRegister() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
-    if (password !== confirmPassword) {
-      setError('Password dan konfirmasi password tidak sama');
-      return;
+    const newErrors = {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    };
+
+    let hasError = false;
+
+    if (!username.trim()) {
+      newErrors.username = 'Username wajib diisi';
+      hasError = true;
     }
 
-    if (password.length < 8) {
-      setError('Password minimal 8 karakter');
-      return;
+    if (!email.trim()) {
+      newErrors.email = 'Email wajib diisi';
+      hasError = true;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Format email tidak valid';
+      hasError = true;
     }
+
+    if (!password) {
+      newErrors.password = 'Password wajib diisi';
+      hasError = true;
+    } else if (password.length < 8) {
+      newErrors.password = 'Password minimal 8 karakter';
+      hasError = true;
+    }
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Konfirmasi password wajib diisi';
+      hasError = true;
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword =
+        'Password dan konfirmasi password tidak sama';
+      hasError = true;
+    }
+
+    setErrors(newErrors);
+
+    if (hasError) return;
 
     setIsLoading(true);
 
@@ -43,13 +80,20 @@ export default function FormRegister() {
       });
 
       if (result.success) {
-        // Redirect ke halaman info untuk cek email
-        router.push(`/auth/check-email?email=${encodeURIComponent(email)}`);
+        router.push(
+          `/auth/check-email?email=${encodeURIComponent(email)}`
+        );
       } else {
-        setError(result.message || 'Registrasi gagal');
+        setErrors((prev) => ({
+          ...prev,
+          email: result.message || 'Registrasi gagal',
+        }));
       }
-    } catch (err) {
-      setError('Terjadi kesalahan. Silakan coba lagi.');
+    } catch {
+      setErrors((prev) => ({
+        ...prev,
+        email: 'Terjadi kesalahan. Silakan coba lagi.',
+      }));
     } finally {
       setIsLoading(false);
     }
@@ -76,24 +120,28 @@ export default function FormRegister() {
             md:shadow-[-10px_10px_0_rgba(26,26,46,1)]
           ">
 
-            {error && (
-              <div className="mt-6 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                {error}
-              </div>
-            )}
-
             <form className="form mt-2" onSubmit={handleSubmit}>
               <div className="form-group">
                 <label className="block font-medium text-neutral-600 text-md">
                   Username <span className="text-red-600 font-semibold">*</span>
                 </label>
+                {errors.username && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.username}
+                  </p>
+                )}
                 <input
                   id="username"
                   type="text"
                   name="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900"
+                  className={`block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm 
+                    focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900 
+                    ${errors.username
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'border-neutral-400'
+                    }`}
                   placeholder="Masukkan username Anda"
                   required
                   disabled={isLoading}
@@ -104,13 +152,22 @@ export default function FormRegister() {
                 <label className="block font-medium text-md text-neutral-600">
                   Email <span className="text-red-600 font-semibold">*</span>
                 </label>
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.email}
+                  </p>
+                )}
                 <input
                   id="email"
                   type="email"
                   name="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900"
+                  className={`block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm 
+                    focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900 ${errors.email
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'border-neutral-400'
+                    }`}
                   placeholder="Masukkan email Anda"
                   required
                   disabled={isLoading}
@@ -124,6 +181,11 @@ export default function FormRegister() {
                     (minimal 8 karakter) <span className="text-red-600 font-semibold">*</span>
                   </span>
                 </label>
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.password}
+                  </p>
+                )}
                 <div className="relative">
                   <input
                     id="password"
@@ -131,7 +193,11 @@ export default function FormRegister() {
                     name="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900"
+                    className={`block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm 
+                      focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900 ${errors.password
+                        ? 'border-red-500 focus:ring-red-500'
+                        : 'border-neutral-400'
+                      }`}
                     placeholder="Masukkan kata sandi Anda"
                     required
                     minLength={8}
@@ -174,6 +240,11 @@ export default function FormRegister() {
                 <label className="block font-medium text-md text-neutral-600">
                   Konfirmasi Kata Sandi
                 </label>
+                {errors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.confirmPassword}
+                  </p>
+                )}
                 <div className="relative">
                   <input
                     id="confirmPassword"
@@ -181,7 +252,11 @@ export default function FormRegister() {
                     name="confirmPassword"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900"
+                    className={`block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm 
+                      focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900 ${errors.confirmPassword
+                        ? 'border-red-500 focus:ring-red-500'
+                        : 'border-neutral-400'
+                      }`}
                     placeholder="Masukkan kata sandi Anda Lagi"
                     required
                     disabled={isLoading}

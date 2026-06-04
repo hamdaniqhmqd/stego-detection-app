@@ -14,70 +14,100 @@ export default function FormLogin() {
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({
+    emailOrUsername: '',
+    password: '',
+  });
+
+  const [serverError, setServerError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const errorParam = searchParams.get('error');
     if (errorParam === 'email_not_registered') {
-      setError('Email Anda belum terdaftar. Silakan mendaftar terlebih dahulu.');
+      setServerError('Email Anda belum terdaftar. Silakan mendaftar terlebih dahulu.');
     } else if (errorParam === 'google_auth_failed') {
-      setError('Gagal login dengan Google. Silakan coba lagi.');
+      setServerError('Gagal login dengan Google. Silakan coba lagi.');
     } else if (errorParam) {
-      setError('Terjadi kesalahan saat login dengan Google.');
+      setServerError('Terjadi kesalahan saat login dengan Google.');
     }
   }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+
+    setServerError('');
+
+    const newErrors = {
+      emailOrUsername: '',
+      password: '',
+    };
+
+    let hasError = false;
+
+    if (!emailOrUsername.trim()) {
+      newErrors.emailOrUsername =
+        'Username atau email wajib diisi';
+      hasError = true;
+    }
+
+    if (!password) {
+      newErrors.password = 'Password wajib diisi';
+      hasError = true;
+    }
+
+    setErrors(newErrors);
+
+    if (hasError) return;
+
     setSuccess('');
     setIsLoading(true);
 
     try {
-      const result = await login(emailOrUsername, password);
+      const result = await login(
+        emailOrUsername,
+        password
+      );
 
-      console.log('Login result:', result);
-
-      // Handle redirect untuk email belum verified
       if (!result.success && result.redirectUrl) {
-        setError(result.message || 'Email Anda belum diverifikasi.');
+        setServerError(
+          result.message || 'Email belum diverifikasi'
+        );
+
         setTimeout(() => {
           router.push(result.redirectUrl!);
         }, 2000);
+
         return;
       }
 
-      // Handle error lainnya
       if (!result.success) {
-        setError(result.message || 'Login gagal');
+        setServerError(
+          result.message || 'Login gagal'
+        );
         return;
       }
 
-      // Handle success
       if (result.success && result.data) {
         const role = result.data.role;
 
         setSuccess('Login berhasil! Mengalihkan...');
 
-        // Redirect berdasarkan role
-        let redirectPath = '/dashboard'; // default
+        let redirectPath = '/dashboard';
 
-        if (role === 'pengguna') {
-          redirectPath = '/dashboard';
-        } else if (role === 'superadmin') {
+        if (role === 'superadmin') {
           redirectPath = '/admin';
         }
 
-        // Delay untuk user melihat success message
         setTimeout(() => {
           router.push(redirectPath);
         }, 500);
       }
     } catch (err) {
-      console.error('Login error:', err);
-      setError('Terjadi kesalahan. Silakan coba lagi.');
+      setServerError(
+        'Terjadi kesalahan. Silakan coba lagi.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -103,18 +133,6 @@ export default function FormLogin() {
             md:shadow-[-10px_10px_0_rgba(26,26,46,1)]
           ">
 
-            {/* Error Alert */}
-            {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-start">
-                  <svg className="h-5 w-5 text-red-600 mt-0.5 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className="text-sm text-red-800">{error}</p>
-                </div>
-              </div>
-            )}
-
             {/* Success Alert */}
             {success && (
               <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -139,7 +157,11 @@ export default function FormLogin() {
                   name="emailOrUsername"
                   value={emailOrUsername}
                   onChange={(e) => setEmailOrUsername(e.target.value)}
-                  className="block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900"
+                  className={`block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900
+                    ${errors.emailOrUsername
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'border-neutral-400'
+                    }`}
                   placeholder="Masukkan email atau username"
                   required
                   disabled={isLoading}
@@ -160,7 +182,11 @@ export default function FormLogin() {
                     name="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900"
+                    className={`block w-full px-4 h-12 mt-3 text-neutral-700 placeholder-neutral-500 bg-white border border-neutral-400 rounded-sm focus:border-neutral-700 focus:ring-opacity-40 focus:outline-none focus:ring focus:ring-neutral-900
+                      ${errors.password
+                        ? 'border-red-500 focus:ring-red-500'
+                        : 'border-neutral-400'
+                      }`}
                     placeholder="Masukkan kata sandi Anda"
                     required
                     disabled={isLoading}
