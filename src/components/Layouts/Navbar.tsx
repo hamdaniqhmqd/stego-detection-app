@@ -27,43 +27,46 @@ export default function Navbar() {
 
     return (
         <nav
-            className={`
-                fixed top-0 left-0 right-0 z-50 font-mono
+            className="fixed inset-x-0 top-0 z-50 font-mono"
+        >
+            <div className={`
+                mx-auto w-full
                 transition-all duration-300 ease-in-out
                 ${scrolled
-                    ? 'mx-3 sm:mx-6 mt-3 rounded-lg bg-white/40 backdrop-blur-md shadow-lg shadow-neutral-900/10 border border-neutral-200'
-                    : 'mx-0 mt-0 rounded-none bg-neutral-50 border-b border-neutral-200'
+                    ? 'mt-3 mx-3 sm:mx-6 lg:mx-auto max-w-7xl rounded-lg bg-white/40 backdrop-blur-md shadow-lg shadow-neutral-900/10 border border-neutral-200'
+                    : 'mt-0 rounded-none bg-neutral-50 border-b border-neutral-200'
                 }
             `}
-        >
-            <div className="container mx-auto flex items-center justify-between px-4 py-3 md:py-4">
-                {/* Brand */}
-                <Link
-                    href="/"
-                    className="flex items-center space-x-2 rtl:space-x-reverse"
-                >
-                    <span className="self-center whitespace-nowrap text-lg md:text-xl font-semibold text-neutral-900">
-                        Deteksi Stego
-                    </span>
-                </Link>
+            >
 
-                {/* Desktop Nav */}
-                <div className="hidden md:flex items-center gap-2 md:gap-3">
+                <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 md:py-4">
+                    {/* Brand */}
                     <Link
-                        href="/auth/login"
-                        className="
+                        href="/"
+                        className="flex items-center space-x-2 rtl:space-x-reverse"
+                    >
+                        <span className="self-center whitespace-nowrap text-lg md:text-xl font-semibold text-neutral-900">
+                            Deteksi Stego
+                        </span>
+                    </Link>
+
+                    {/* Desktop Nav */}
+                    <div className="hidden md:flex items-center gap-2 md:gap-3">
+                        <Link
+                            href="/auth/login"
+                            className="
                             relative flex items-center
                             rounded-sm py-1.5 md:py-2 px-4 md:px-6 text-sm
                             bg-neutral-800 font-semibold text-white hover:bg-neutral-900
                             transition-all duration-300 ease-in-out
                             hover:-translate-y-0.5 hover:shadow-[-4px_4px_0_rgba(107,114,128,1)]
                         "
-                    >
-                        Masuk
-                    </Link>
-                    <Link
-                        href="/auth/register"
-                        className="
+                        >
+                            Masuk
+                        </Link>
+                        <Link
+                            href="/auth/register"
+                            className="
                             relative flex items-center
                             rounded-sm py-1.5 md:py-2 px-4 md:px-6 text-sm
                             font-semibold text-neutral-700 border border-neutral-400
@@ -71,22 +74,24 @@ export default function Navbar() {
                             transition-all duration-300 ease-in-out
                             hover:-translate-y-0.5 hover:shadow-[-4px_4px_0_rgba(26,26,46,1)]
                         "
+                        >
+                            Daftar
+                        </Link>
+                    </div>
+
+                    {/* Hamburger Button (Mobile) */}
+                    <button
+                        className="md:hidden flex flex-col justify-center items-center w-9 h-9 gap-1.5 rounded-sm border border-neutral-300 bg-white/70 hover:bg-neutral-100 transition-colors duration-200"
+                        onClick={() => setMenuOpen((prev) => !prev)}
+                        aria-label="Toggle menu"
+                        aria-expanded={menuOpen}
                     >
-                        Daftar
-                    </Link>
+                        <span className={`block w-4.5 h-0.5 bg-neutral-800 transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} style={{ width: '18px' }} />
+                        <span className={`block h-0.5 bg-neutral-800 transition-all duration-300 ${menuOpen ? 'opacity-0 scale-x-0' : 'opacity-100'}`} style={{ width: '18px' }} />
+                        <span className={`block h-0.5 bg-neutral-800 transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} style={{ width: '18px' }} />
+                    </button>
                 </div>
 
-                {/* Hamburger Button (Mobile) */}
-                <button
-                    className="md:hidden flex flex-col justify-center items-center w-9 h-9 gap-1.5 rounded-sm border border-neutral-300 bg-white/70 hover:bg-neutral-100 transition-colors duration-200"
-                    onClick={() => setMenuOpen((prev) => !prev)}
-                    aria-label="Toggle menu"
-                    aria-expanded={menuOpen}
-                >
-                    <span className={`block w-4.5 h-0.5 bg-neutral-800 transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} style={{ width: '18px' }} />
-                    <span className={`block h-0.5 bg-neutral-800 transition-all duration-300 ${menuOpen ? 'opacity-0 scale-x-0' : 'opacity-100'}`} style={{ width: '18px' }} />
-                    <span className={`block h-0.5 bg-neutral-800 transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} style={{ width: '18px' }} />
-                </button>
             </div>
 
             {/* Mobile Dropdown Menu */}

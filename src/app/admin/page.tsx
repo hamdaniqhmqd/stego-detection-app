@@ -10,16 +10,27 @@ import { useInterpretasiAI } from '@/hooks/useInterpretasiAI'
 
 export default function DashboardAdminPage() {
     const {
-        items: users, total: usersTotal,
+        items: users,
+        totalPengguna,
+        totalSuperadmin,
+        totalVerified
     } = useUsers()
 
     const {
-        items: analysis, total: analysisTotal,
+        items: analysis,
     } = useAnalysis()
+    const activeAnalysis = useAnalysis(false)
+    const deletedAnalysis = useAnalysis(true)
+    const totalAnalysis = activeAnalysis.total + deletedAnalysis.total
 
     const {
-        items: interpretasi, total: interpretasiTotal,
+        items: interpretasi,
     } = useInterpretasiAI()
+    const activeInterpretasi = useInterpretasiAI({ includeDeleted: false })
+    const deletedInterpretasi = useInterpretasiAI({ includeDeleted: true })
+    const { counts: globalCountsActive } = activeInterpretasi.globalStats
+    const { counts: globalCountsDeleted } = deletedInterpretasi.globalStats
+    const totalInterpretasi = (globalCountsActive.Aman + globalCountsActive.Mencurigakan + globalCountsActive.Berbahaya) + (globalCountsDeleted.Aman + globalCountsDeleted.Mencurigakan + globalCountsDeleted.Berbahaya)
 
     return (
         <DashboardLayoutAdmins>
@@ -34,15 +45,15 @@ export default function DashboardAdminPage() {
                     <DashboardOverview
                         // Users
                         users={users}
-                        usersTotal={usersTotal}
-
+                        totalPengguna={totalPengguna}
+                        totalSuperadmin={totalSuperadmin}
+                        totalVerified={totalVerified}
                         // Analysis
                         analysis={analysis}
-                        analysisTotal={analysisTotal}
-
+                        totalAnalysis={totalAnalysis}
                         // Interpretasi
                         interpretasi={interpretasi}
-                        interpretasiTotal={interpretasiTotal}
+                        totalInterpretasi={totalInterpretasi}
                     />
                 </div>
             </div>

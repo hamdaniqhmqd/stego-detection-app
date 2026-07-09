@@ -7,7 +7,6 @@ import { Channel } from "@/types/shared";
 // LSB Encode
 // Setiap kanal aktif menyimpan pesan yang IDENTIK secara independen.
 // Kanal R menyimpan seluruh pesan, kanal G menyimpan seluruh pesan, dst.
-// Kapasitas = coords.length / 8 karakter per kanal (bukan dikali jumlah kanal).
 export async function encodeLSB(imageFile: File, message: string, config: StegoConfig): Promise<string> {
     return new Promise((resolve, reject) => {
         const endMarker = config.marker || DEFAULT_MARKER;

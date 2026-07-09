@@ -7,22 +7,22 @@ export function generateCoordinates(width: number, height: number, mode: Travers
     const coords: [number, number][] = [];
 
     switch (mode) {
-        case 'top-bottom-left-right':
+        case 'left-right-top-bottom':
             for (let y = 0; y < height; y++)
                 for (let x = 0; x < width; x++)
                     coords.push([x, y]);
             break;
-        case 'top-bottom-right-left':
+        case 'right-left-top-bottom':
             for (let y = 0; y < height; y++)
                 for (let x = width - 1; x >= 0; x--)
                     coords.push([x, y]);
             break;
-        case 'bottom-top-left-right':
+        case 'left-right-bottom-top':
             for (let y = height - 1; y >= 0; y--)
                 for (let x = 0; x < width; x++)
                     coords.push([x, y]);
             break;
-        case 'bottom-top-right-left':
+        case 'right-left-bottom-top':
             for (let y = height - 1; y >= 0; y--)
                 for (let x = width - 1; x >= 0; x--)
                     coords.push([x, y]);

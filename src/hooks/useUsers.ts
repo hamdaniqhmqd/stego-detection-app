@@ -9,6 +9,9 @@ const PAGE_SIZE = 5
 interface UseUsersState {
     items: User[]
     total: number
+    totalPengguna: number
+    totalSuperadmin: number
+    totalVerified: number
     currentPage: number
     totalPages: number
     isLoading: boolean
@@ -31,7 +34,7 @@ export interface UseUsersReturn extends UseUsersState {
 
 export function useUsers(includeDeleted = false): UseUsersReturn {
     const [state, setState] = useState<UseUsersState>({
-        items: [], total: 0, currentPage: 1, totalPages: 1,
+        items: [], total: 0, totalPengguna: 0, totalSuperadmin: 0, totalVerified: 0, currentPage: 1, totalPages: 1,
         isLoading: true, isLoadingMore: false, hasMore: false, error: null,
     })
     const pageRef = useRef(1)
@@ -50,8 +53,12 @@ export function useUsers(includeDeleted = false): UseUsersReturn {
             let countQ = supabaseAnonKey.from(TABLE).select('*', { count: 'exact', head: true })
             if (!includeDeleted) countQ = countQ.is('deleted_at', null)
             else countQ = countQ.not('deleted_at', 'is', null)
+
             const { count, error: cErr } = await countQ
             if (cErr) throw cErr
+
+            const { data: users, error: uErr } = await supabaseAnonKey.from(TABLE).select('role, is_verified').not('role', 'is', null)
+            if (uErr) throw uErr
 
             const total = count ?? 0
             const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
@@ -70,6 +77,9 @@ export function useUsers(includeDeleted = false): UseUsersReturn {
                 ...s,
                 items,
                 total,
+                totalPengguna: users.filter(u => u.role === 'pengguna').length,
+                totalSuperadmin: users.filter(u => u.role === 'superadmin').length,
+                totalVerified: users.filter(u => u.is_verified === true).length,
                 totalPages,
                 currentPage: safePage,
                 hasMore: safePage < totalPages,

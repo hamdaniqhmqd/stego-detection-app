@@ -105,7 +105,7 @@ export function ChartGrowthChart({ users, analysis, interpretasi }: GrowthChartP
                     <h3 className="text-sm font-semibold text-neutral-800">Pertumbuhan Aktivitas</h3>
                     <p className="text-xs text-neutral-400 mt-0.5">Pengguna, Analisis & Interpretasi</p>
                 </div>
-                <div className="flex gap-2 p-0.5">
+                <div className="flex flex-wrap justify-end gap-2 p-0.5">
                     {(['7d', '30d', '6m'] as const).map(r => (
                         <button
                             key={r}

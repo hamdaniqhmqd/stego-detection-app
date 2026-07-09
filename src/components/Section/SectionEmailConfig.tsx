@@ -33,7 +33,7 @@ export function SectionEmailConfig() {
     // Stats dari active (tidak berubah saat toggle)
     const stats = useMemo(() => ({
         totalActive: active.items.filter(c => c.is_active).length,
-        total: active.total,
+        total: active.total + deleted.total,
         deleted: deleted.total,
         activeConfig: active.items.find(c => c.is_active),
     }), [active.items, active.total, deleted.total])

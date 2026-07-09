@@ -135,7 +135,7 @@ export default function ProfilePage() {
                     border border-neutral-700 p-8
                     shadow-[-10px_10px_0_rgba(26,26,46,1)]">
 
-                    {/* ── Avatar ── */}
+                    {/*  Avatar  */}
                     <div className="flex flex-col items-center gap-1 mb-4">
                         <Tooltip text="Klik untuk mengganti foto profil. Format yang didukung: JPG, PNG, WebP. Maksimal ukuran file 5MB.">
                             <button
@@ -171,12 +171,12 @@ export default function ProfilePage() {
                         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
                     </div>
 
-                    {/* ── Heading ── */}
+                    {/*  Heading  */}
                     <h2 className="text-center text-lg md:text-xl lg:text-2xl font-semibold text-neutral-900 mb-6">
                         Edit Profil
                     </h2>
 
-                    {/* ── Form ── */}
+                    {/*  Form  */}
                     <div className="space-y-4 mb-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -270,7 +270,7 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    {/* ── Feedback ── */}
+                    {/*  Feedback  */}
                     {saveSuccess && (
                         <div className="mt-4 mb-4 flex items-center gap-2 px-4 py-3 rounded-md bg-neutral-200 text-neutral-800 text-sm">
                             <svg className="w-4 h-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -288,7 +288,7 @@ export default function ProfilePage() {
                         </div>
                     )}
 
-                    {/* ── Actions ── */}
+                    {/*  Actions  */}
                     <div className="flex flex-col-reverse justify-between gap-4 md:flex-row md:gap-3">
 
                         <Tooltip text="Menghapus akun secara permanen. Semua data analisis yang terkait juga akan diarsipkan. Tindakan ini tidak dapat dibatalkan.">
@@ -345,7 +345,7 @@ export default function ProfilePage() {
                 </div>
             </section>
 
-            {/* ── MODAL HAPUS AKUN ── */}
+            {/*  MODAL HAPUS AKUN  */}
             {showDeleteModal && (
                 <div
                     className="fixed inset-0 bg-neutral-900/50 flex items-center justify-center z-50 px-4"
