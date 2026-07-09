@@ -102,7 +102,7 @@ export function StatPill({ label, value, tooltip, colorClass = 'text-neutral-700
 }
 
 // AI Interpretation block
-function AIInterpretationBlock({ interpretation }: { interpretation: HasilInterpretasi }) {
+export function AIInterpretationBlock({ interpretation }: { interpretation: HasilInterpretasi }) {
     const status = interpretation.status_ancaman as StatusAncaman
 
     const containerColor: Record<StatusAncaman, string> = {
@@ -133,9 +133,9 @@ function AIInterpretationBlock({ interpretation }: { interpretation: HasilInterp
                     {status}
                 </span>
             </div>
-            <p className={`text-xs leading-relaxed ${labelColor[status] ?? 'text-neutral-600'}`}>
+            <div className={`text-xs leading-relaxed ${labelColor[status] ?? 'text-neutral-600'}`}>
                 <AIInterpretationText text={interpretation.interpretation} />
-            </p>
+            </div>
         </div>
     )
 }
@@ -153,7 +153,7 @@ interface ChannelBlockProps {
     arah: TeknikArah
 }
 
-function ChannelBlock({ ch, rawItem, bitItem, status, interpretation, hasAI, copy, copiedKey, arah }: ChannelBlockProps) {
+export function ChannelBlock({ ch, rawItem, bitItem, status, interpretation, hasAI, copy, copiedKey, arah }: ChannelBlockProps) {
     const [expandedBit, setExpandedBit] = useState(false)
     const [expandedRaw, setExpandedRaw] = useState(false)
 

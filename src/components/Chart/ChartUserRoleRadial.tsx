@@ -5,22 +5,22 @@ import { useMemo } from "react"
 import { Chart } from "./ChartDashboard"
 
 interface UserRadialProps {
-    users: User[]
+    users: User[];
+    totalPengguna: number;
+    totalSuperadmin: number;
+    totalVerified: number;
 }
 
-export default function ChartUserRoleRadial({ users }: UserRadialProps) {
+export default function ChartUserRoleRadial({ users, totalPengguna, totalSuperadmin, totalVerified }: UserRadialProps) {
     const { superadmin, pengguna, verified } = useMemo(() => {
-        const active = users.filter(u => !u.deleted_at)
         return {
-            superadmin: active.filter(u => u.role === 'superadmin').length,
-            pengguna: active.filter(u => u.role === 'pengguna').length,
-            verified: active.filter(u => u.is_verified).length,
+            superadmin: totalSuperadmin,
+            pengguna: totalPengguna,
+            verified: totalVerified,
         }
-    }, [users])
+    }, [users, totalPengguna, totalSuperadmin, totalVerified])
 
-    const total = superadmin + pengguna
-    const verifiedPct = total > 0 ? Math.round((verified / total) * 100) : 0
-    const superadminPct = total > 0 ? Math.round((superadmin / total) * 100) : 0
+    const total = totalSuperadmin + totalPengguna
 
     const options: ApexCharts.ApexOptions = {
         chart: { type: 'radialBar', fontFamily: 'inherit', background: 'transparent' },
@@ -31,7 +31,14 @@ export default function ChartUserRoleRadial({ users }: UserRadialProps) {
                 track: { background: '#f1f5f9', strokeWidth: '97%' },
                 dataLabels: {
                     name: { fontSize: '12px', color: '#64748b', offsetY: -4 },
-                    value: { fontSize: '16px', fontWeight: 700, color: '#1e293b', offsetY: 4 },
+                    value: {
+                        fontSize: '16px',
+                        fontWeight: 700,
+                        color: '#1e293b',
+                        offsetY: 4,
+                        // Tampilkan angka asli, bukan persen
+                        formatter: () => String(total),
+                    },
                     total: {
                         show: true,
                         label: 'Total Aktif',
@@ -50,9 +57,30 @@ export default function ChartUserRoleRadial({ users }: UserRadialProps) {
             fontFamily: 'inherit',
             markers: { size: 8 },
             itemMargin: { horizontal: 8, vertical: 4 },
+            // Tampilkan angka asli di legend juga
+            formatter: (seriesName, opts) => {
+                const idx = opts?.seriesIndex
+                if (idx === 0) return `${seriesName}: ${pengguna}`
+                if (idx === 1) return `${seriesName}: ${superadmin}`
+                if (idx === 2) return `${seriesName}: ${verified}`
+                return seriesName
+            },
         },
         stroke: { lineCap: 'round' },
         dataLabels: { enabled: false },
+        // Tooltip juga tampilkan angka asli
+        tooltip: {
+            enabled: true,
+            y: {
+                formatter: (val, opts) => {
+                    const idx = opts?.seriesIndex
+                    if (idx === 0) return `${pengguna} pengguna`
+                    if (idx === 1) return `${superadmin} superadmin`
+                    if (idx === 2) return `${verified} terverifikasi`
+                    return String(val)
+                },
+            },
+        },
     }
 
     return (
@@ -69,9 +97,9 @@ export default function ChartUserRoleRadial({ users }: UserRadialProps) {
                 <Chart
                     options={options}
                     series={[
-                        total > 0 ? Math.round((pengguna / total) * 100) : 0,
-                        superadminPct,
-                        verifiedPct,
+                        total > 0 ? Math.round((totalPengguna / total) * 100) : 0,
+                        totalSuperadmin > 0 ? Math.round((totalSuperadmin / total) * 100) : 0,
+                        totalVerified > 0 ? Math.round((totalVerified / total) * 100) : 0,
                     ]}
                     type="radialBar"
                     height={260}

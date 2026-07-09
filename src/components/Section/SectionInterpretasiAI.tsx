@@ -1,3 +1,4 @@
+// src/components/Section/SectionInterpretasiAI.tsx
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -39,19 +40,7 @@ export function SectionInterpretasiAI() {
 
     const current = showDeleted ? deleted : active
 
-    const globalCounts = useMemo(() => {
-        const all = active.items.flatMap(i => i.hasil ?? [])
-        return {
-            Aman: all.filter(h => (h.status_ancaman as StatusAncaman) === 'Aman').length,
-            Mencurigakan: all.filter(h => (h.status_ancaman as StatusAncaman) === 'Mencurigakan').length,
-            Berbahaya: all.filter(h => (h.status_ancaman as StatusAncaman) === 'Berbahaya').length,
-        }
-    }, [active.items])
-
-    const totalTokensAll = useMemo(() =>
-        active.items.reduce((sum, i) => sum + (i.token_usage?.total_tokens ?? 0), 0),
-        [active.items]
-    )
+    const { counts: globalCounts, totalTokens: totalTokensAll } = current.globalStats
 
     const handleSoftDelete = async (id: string) => {
         await active.softDelete(id)

@@ -31,7 +31,7 @@ export function SectionGeminiTokens() {
     // Mini stats dari data aktif (tidak terpengaruh toggle)
     const stats = useMemo(() => ({
         active: active.items.filter(t => t.is_active).length,
-        total: active.total,
+        total: active.total + deleted.total,
         deleted: deleted.total,
         defaultToken: active.items.find(t => t.is_default),
     }), [active.items, active.total, deleted.total])

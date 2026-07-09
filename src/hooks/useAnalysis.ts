@@ -28,6 +28,7 @@ interface UseAnalysisState {
 }
 
 export interface UseAnalysisReturn extends UseAnalysisState {
+    aiCount: number
     goToPage: (page: number) => Promise<void>
     loadMore: () => Promise<void>
     refresh: () => Promise<void>
@@ -110,6 +111,7 @@ export function useAnalysis(includeDeleted = false): UseAnalysisReturn {
         items: [], total: 0, currentPage: 1, totalPages: 1,
         isLoading: true, isLoadingMore: false, hasMore: false, error: null,
     })
+    const [aiCount, setAiCount] = useState(0)
     const pageRef = useRef(0)
 
     const baseQuery = useCallback(() => {
@@ -171,7 +173,17 @@ export function useAnalysis(includeDeleted = false): UseAnalysisReturn {
         }
     }, [baseQuery, includeDeleted])
 
+    // Fetch halaman pertama
     const fetchInitial = useCallback(() => fetchPage(1), [fetchPage])
+
+    const fetchAiCount = useCallback(async () => {
+        // Count analysis yang punya setidaknya 1 interpretasi AI aktif
+        const { count } = await supabaseAnonKey
+            .from('analysis_interpretasi_ai')
+            .select('analysis_id', { count: 'exact', head: true })
+            .is('deleted_at', null)
+        setAiCount(count ?? 0)
+    }, [])
 
     // dipakai komponen pagination
     const goToPage = useCallback(async (page: number) => {
@@ -311,16 +323,18 @@ export function useAnalysis(includeDeleted = false): UseAnalysisReturn {
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'analysis_interpretasi_ai' }, (payload) => {
                 const ai = payload.new as AnalysisInterpretasiAI
                 setState(s => ({ ...s, items: s.items.map(i => i.force_decode?.id === ai.analysis_forcedecode_id ? { ...i, ai_interpretasi: ai } : i) }))
+                fetchAiCount()
             })
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'analysis_interpretasi_ai' }, (payload) => {
                 const ai = payload.new as AnalysisInterpretasiAI
                 setState(s => ({ ...s, items: s.items.map(i => i.ai_interpretasi?.id === ai.id ? { ...i, ai_interpretasi: ai } : i) }))
+                fetchAiCount()
             })
             .subscribe()
         return () => { supabaseAnonKey.removeChannel(channel) }
     }, [includeDeleted, fetchPage])
 
-    useEffect(() => { fetchInitial() }, [fetchInitial])
+    useEffect(() => { fetchInitial(), fetchAiCount() }, [fetchInitial, fetchAiCount])
 
-    return { ...state, goToPage, loadMore, refresh: fetchInitial, getById, create, update, softDelete, restore, hardDelete }
+    return { ...state, aiCount, goToPage, loadMore, refresh: fetchInitial, getById, create, update, softDelete, restore, hardDelete }
 }

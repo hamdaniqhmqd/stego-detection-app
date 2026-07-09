@@ -13,27 +13,27 @@ import { StatusAncaman } from '@/types/aiInterpretasi'
 
 interface DashboardOverviewProps {
     users: User[]
-    usersTotal: number
-
+    totalPengguna: number
+    totalSuperadmin: number
+    totalVerified: number
     analysis: AnalysisListItem[]
-    analysisTotal: number
-
+    totalAnalysis: number
     interpretasi: AnalysisInterpretasiAI[]
-    interpretasiTotal: number
+    totalInterpretasi: number
 }
 
 export function DashboardOverview({
-    users, usersTotal,
-
-    analysis, analysisTotal,
-
-    interpretasi, interpretasiTotal,
+    users,
+    totalPengguna,
+    totalSuperadmin,
+    totalVerified,
+    analysis,
+    totalAnalysis,
+    interpretasi,
+    totalInterpretasi,
 }: DashboardOverviewProps) {
 
     // Stat counts
-    const activeUsers = users.filter(u => !u.deleted_at).length
-    const activeAnalysis = analysis.filter(a => !a.deleted_at).length
-    const activeInterp = interpretasi.filter(i => !i.deleted_at).length
     const berbahayaCount = interpretasi
         .filter(i => !i.deleted_at)
         .flatMap(i => i.hasil ?? [])
@@ -54,7 +54,7 @@ export function DashboardOverview({
                             </svg>
                         }
                         label="Pengguna"
-                        value={usersTotal || activeUsers}
+                        value={totalPengguna + totalSuperadmin}
                         sub="Akun terdaftar"
                         accent="blue"
                     />
@@ -69,7 +69,7 @@ export function DashboardOverview({
                             </svg>
                         }
                         label="Analisis"
-                        value={analysisTotal || activeAnalysis}
+                        value={totalAnalysis}
                         sub="Proses selesai"
                         accent="violet"
                     />
@@ -81,7 +81,7 @@ export function DashboardOverview({
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M200,56H56A24,24,0,0,0,32,80V192a24,24,0,0,0,24,24H200a24,24,0,0,0,24-24V80A24,24,0,0,0,200,56ZM164,184H92a20,20,0,0,1,0-40h72a20,20,0,0,1,0,40Z" opacity="0.2"></path><path d="M200,48H136V16a8,8,0,0,0-16,0V48H56A32,32,0,0,0,24,80V192a32,32,0,0,0,32,32H200a32,32,0,0,0,32-32V80A32,32,0,0,0,200,48Zm16,144a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V80A16,16,0,0,1,56,64H200a16,16,0,0,1,16,16ZM72,108a12,12,0,1,1,12,12A12,12,0,0,1,72,108Zm88,0a12,12,0,1,1,12,12A12,12,0,0,1,160,108Zm4,28H92a28,28,0,0,0,0,56h72a28,28,0,0,0,0-56Zm-24,16v24H116V152ZM80,164a12,12,0,0,1,12-12h8v24H92A12,12,0,0,1,80,164Zm84,12h-8V152h8a12,12,0,0,1,0,24Z"></path></svg>
                         }
                         label="Interpretasi"
-                        value={interpretasiTotal || activeInterp}
+                        value={totalInterpretasi}
                         sub="Hasil AI"
                         accent="emerald"
                     />
@@ -104,8 +104,13 @@ export function DashboardOverview({
 
             <ChartDashboard
                 users={users as User[]}
+                totalPengguna={totalPengguna}
+                totalSuperadmin={totalSuperadmin}
+                totalVerified={totalVerified}
                 analysis={analysis}
+                totalAnalysis={totalAnalysis}
                 interpretasi={interpretasi}
+                totalInterpretasi={totalInterpretasi}
             />
 
         </div>

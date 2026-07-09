@@ -18,7 +18,7 @@ export default function BuatStegoPage() {
     const [message, setMessage] = useState('');
     const [config, setConfig] = useState<StegoConfig>({
         channels: ['R', 'G', 'B'],
-        traversal: 'top-bottom-left-right',
+        traversal: 'left-right-top-bottom',
         marker: DEFAULT_MARKER,
     });
     const [result, setResult] = useState<string | null>(null);
@@ -173,7 +173,7 @@ export default function BuatStegoPage() {
                     {/* Main Grid */}
                     <section className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-                        {/* ── Left Column ── */}
+                        {/*  Left Column  */}
                         <div className="flex flex-col gap-5">
 
                             {/* Image Upload */}
@@ -353,7 +353,7 @@ export default function BuatStegoPage() {
                             )}
                         </div>
 
-                        {/* ── Right Column ── */}
+                        {/*  Right Column  */}
                         <div className="flex flex-col gap-5">
 
                             {/* Channel Selector */}
@@ -478,7 +478,7 @@ export default function BuatStegoPage() {
                         </div>
                     </section>
 
-                    {/* ── Results ── */}
+                    {/*  Results  */}
                     {(result || decodedMessage !== null) && (
                         <section className="max-w-5xl mx-auto mt-8">
                             <div className="h-px bg-linear-to-r from-transparent via-neutral-400 to-transparent my-6" />

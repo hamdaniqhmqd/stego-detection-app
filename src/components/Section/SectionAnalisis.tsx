@@ -51,7 +51,7 @@ export function SectionAnalisis() {
 
     const stats = useMemo(() => ({
         active: active.total,
-        ai: active.items.filter(i => i.ai_interpretasi).length,
+        ai: active.aiCount,
         deleted: deleted.total,
     }), [active.items, active.total, deleted.total])
 

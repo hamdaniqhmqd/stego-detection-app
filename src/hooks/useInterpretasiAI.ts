@@ -59,7 +59,7 @@ export interface InterpretasiAIWithUser extends AnalysisInterpretasiAI {
     user?: InterpretasiUser
 }
 
-// ── Detail result type (menggantikan useInterpretasiDetail) ────────────────
+//  Detail result type 
 export interface InterpretasiDetailResult {
     interpretasi: AnalysisInterpretasiAI
     analysis: Analysis | null
@@ -118,13 +118,17 @@ interface UseInterpretasiAIState {
 }
 
 export interface UseInterpretasiAIReturn extends UseInterpretasiAIState, UseInterpretasiDetailState {
+    globalStats: {
+        counts: Record<StatusAncaman, number>
+        totalTokens: number
+    }
     goToPage: (page: number) => Promise<void>
     loadMore: () => Promise<void>
     refresh: () => Promise<void>
-    // ── Detail (menggantikan useInterpretasiDetail) ──────────────────────────
+    //  Detail 
     fetchDetail: (id: string) => Promise<void>
     refreshDetail: () => Promise<void>
-    // ── CRUD ────────────────────────────────────────────────────────────────
+    //  CRUD 
     getById: (id: string) => Promise<InterpretasiAIWithUser | null>
     getByForceDecodeId: (fdId: string) => Promise<InterpretasiAIWithUser[]>
     create: (payload: InterpretasiInsert) => Promise<AnalysisInterpretasiAI>
@@ -152,6 +156,11 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         isLoading: true, isLoadingMore: false, hasMore: false, error: null,
     })
 
+    const [globalStats, setGlobalStats] = useState({
+        counts: { Aman: 0, Mencurigakan: 0, Berbahaya: 0 },
+        totalTokens: 0,
+    })
+
     const [detailState, setDetailState] = useState<UseInterpretasiDetailState>({
         detail: null,
         isDetailLoading: !!detailId,
@@ -171,7 +180,7 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         return q
     }, [forceDecodeId, analysisId, includeDeleted])
 
-    // ── Fetch halaman ─────────────────────────────────────────────────────
+    //  Fetch halaman ─
     const fetchPage = useCallback(async (page: number, silent = false) => {
         if (!silent) setState(s => ({ ...s, isLoading: true, error: null }))
         try {
@@ -210,6 +219,31 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
 
     const fetchInitial = useCallback(() => fetchPage(1), [fetchPage])
 
+    const fetchGlobalStats = useCallback(async () => {
+        let q = supabaseAnonKey.from(TABLE).select('hasil, token_usage')
+        if (forceDecodeId) q = q.eq('analysis_forcedecode_id', forceDecodeId)
+        else if (analysisId) q = q.eq('analysis_id', analysisId)
+        if (!includeDeleted) q = q.is('deleted_at', null)
+        else q = q.not('deleted_at', 'is', null)
+
+        const { data, error } = await q
+        if (error || !data) return
+
+        const counts = { Aman: 0, Mencurigakan: 0, Berbahaya: 0 }
+        let totalTokens = 0
+
+        for (const row of data as Pick<AnalysisInterpretasiAI, 'hasil' | 'token_usage'>[]) {
+            const hasil: HasilInterpretasi[] = Array.isArray(row.hasil) ? row.hasil : []
+            for (const h of hasil) {
+                const s = h.status_ancaman as StatusAncaman
+                if (s in counts) counts[s]++
+            }
+            totalTokens += (row.token_usage as any)?.total_tokens ?? 0
+        }
+
+        setGlobalStats({ counts, totalTokens })
+    }, [forceDecodeId, analysisId, includeDeleted])
+
     const goToPage = useCallback(async (page: number) => {
         if (page === pageRef.current) return
         setState(s => ({ ...s, isLoading: true }))
@@ -221,7 +255,7 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         await goToPage(pageRef.current + 1)
     }, [goToPage, state.isLoadingMore, state.hasMore])
 
-    // ── Detail fetch (menggantikan useInterpretasiDetail) ─────────────────
+    //  Detail fetch ─
     const fetchDetail = useCallback(async (id: string) => {
         if (!id) return
         lastDetailIdRef.current = id
@@ -286,7 +320,7 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         if (lastDetailIdRef.current) await fetchDetail(lastDetailIdRef.current)
     }, [fetchDetail])
 
-    // ── CRUD ──────────────────────────────────────────────────────────────
+    //  CRUD 
     const getById = useCallback(async (id: string): Promise<InterpretasiAIWithUser | null> => {
         const { data, error } = await supabaseAnonKey.from(TABLE).select('*').eq('id', id).single()
         if (error) throw new Error(error.message)
@@ -374,7 +408,7 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         }))
     }, [])
 
-    // ── Realtime ──────────────────────────────────────────────────────────
+    //  Realtime 
     useEffect(() => {
         const rtFilter = forceDecodeId
             ? `analysis_forcedecode_id=eq.${forceDecodeId}`
@@ -383,10 +417,11 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         const ch = supabaseAnonKey
             .channel(`rt-${TABLE}-${forceDecodeId ?? analysisId ?? 'all'}-${includeDeleted}`)
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: TABLE, ...(rtFilter ? { filter: rtFilter } : {}) },
-                () => { fetchPage(1, true) }
+                () => { fetchPage(1, true), fetchGlobalStats() }
             )
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: TABLE, ...(rtFilter ? { filter: rtFilter } : {}) },
                 async (p) => {
+                    fetchGlobalStats()
                     const row = p.new as AnalysisInterpretasiAI
                     setState(s => {
                         const existing = s.items.find(i => i.id === row.id)
@@ -411,6 +446,7 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
             )
             .on('postgres_changes', { event: 'DELETE', schema: 'public', table: TABLE, ...(rtFilter ? { filter: rtFilter } : {}) },
                 (p) => {
+                    fetchGlobalStats()
                     setState(s => ({
                         ...s,
                         items: s.items.filter(i => i.id !== p.old.id),
@@ -422,8 +458,8 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         return () => { supabaseAnonKey.removeChannel(ch) }
     }, [forceDecodeId, analysisId, includeDeleted, fetchPage])
 
-    // ── Init ──────────────────────────────────────────────────────────────
-    useEffect(() => { fetchInitial() }, [fetchInitial])
+    //  Init 
+    useEffect(() => { fetchInitial(), fetchGlobalStats() }, [fetchInitial, fetchGlobalStats])
 
     // Auto-fetch detail jika detailId diberikan lewat options
     useEffect(() => {
@@ -433,6 +469,7 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
     return {
         ...state,
         ...detailState,
+        globalStats,
         goToPage, loadMore, refresh: fetchInitial,
         fetchDetail, refreshDetail,
         getById, getByForceDecodeId,

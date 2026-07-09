@@ -178,7 +178,7 @@ export default function DecodeCard({
                         </Tooltip>
 
                         <div className="flex items-center gap-2">
-                            <Tooltip text={`${bitItem.total_bits.toLocaleString()} bit ÷ 8 = ${item.total_chars.toLocaleString()} karakter.`}>
+                            <Tooltip text={`${bitItem.total_bits.toLocaleString()}} karakter.`}>
                                 <span className="text-xs text-neutral-900 font-mono cursor-default">
                                     {bitItem.total_bits.toLocaleString()} bit
                                 </span>
@@ -239,9 +239,9 @@ export default function DecodeCard({
                         </span>
                     </Tooltip>
                     <div className="flex items-center gap-2">
-                        <Tooltip text={`${item.total_chars.toLocaleString()} karakter total — ${printablePercent}% printable, ${100 - printablePercent}% non-printable.`}>
+                        <Tooltip text={`${rawText.length.toLocaleString()} karakter total — ${printablePercent}% printable, ${100 - printablePercent}% non-printable.`}>
                             <span className="text-xs text-neutral-800 font-mono cursor-default">
-                                {item.total_chars.toLocaleString()} char
+                                {rawText.length.toLocaleString()} char
                             </span>
                         </Tooltip>
 

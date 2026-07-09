@@ -6,8 +6,6 @@ import { InterpretResult } from '@/types/aiInterpretasi'
 import { recordTokenError } from './recordTokenError'
 import { incrementTokenUsage } from './incrementTokenUsage'
 
-export const runtime = 'nodejs'
-
 export async function interpretWithAI(
     text: string,
     token: GeminiTokenRecord
@@ -46,7 +44,7 @@ export async function interpretWithAI(
         }
 
         const data = await response.json()
-        // console.log('Gemini API response:', data)
+        console.log('Gemini API response:', data)
 
         const interpretationText: string =
             data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
