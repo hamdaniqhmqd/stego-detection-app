@@ -204,11 +204,12 @@ export default function ForceDecodeSimulation() {
                                     return (
                                         <div
                                             key={key}
-                                            className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-[10px] font-semibold rounded-sm border transition-colors duration-150 ${isActive
-                                                ? 'bg-neutral-900 text-neutral-100 border-neutral-900'
-                                                : isVisited
-                                                    ? 'bg-neutral-300 text-neutral-800 border-neutral-400'
-                                                    : 'bg-white text-neutral-400 border-neutral-200'
+                                            className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-[10px] font-semibold rounded-sm border transition-colors duration-150 
+                                                ${isActive
+                                                    ? 'bg-neutral-900 text-neutral-100 border-neutral-900'
+                                                    : isVisited
+                                                        ? 'bg-neutral-300 text-neutral-800 border-neutral-400'
+                                                        : 'bg-white text-neutral-400 border-neutral-200'
                                                 }`}
                                         >
                                             {idx + 1}

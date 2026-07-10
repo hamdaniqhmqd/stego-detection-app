@@ -14,6 +14,8 @@ import { useAnalysis } from '@/hooks/useAnalysis'
 import { processForceDecode } from '@/services/forceDecodeService'
 import { processAIInterpretation } from '@/services/aiService'
 import Swal from 'sweetalert2'
+import { MethodForceDecode } from '@/types/forceDecode'
+import { cleanupFailedAnalysis } from '@/services/cleanupFailedAnalysis'
 
 interface InputAnalisisProps {
     user?: AuthUser
@@ -147,6 +149,10 @@ export default function InputAnalisis({
         if (readOnly || !selectedImage || !user) return
         setIsAnalyzing(true)
         onLoading?.(true, 'Mengunggah gambar...')
+
+        let uploadedImageUrl: string | null = null
+        let createdAnalysisId: string | null = null
+
         try {
             const kombinasi = buildKombinasi()
 
@@ -154,36 +160,53 @@ export default function InputAnalisis({
             const fd = new FormData()
             fd.append('file', selectedImage)
             const img = await uploadImage(fd)
+            uploadedImageUrl = img.url
 
             // Buat analisis
             onLoading?.(true, 'Membuat analisis...')
             const analysis = await createAnalysis({
                 user_id: user.id,
-                file_path: img.url,
+                file_path: uploadedImageUrl,
                 metode: 'force-decode',
                 teknik: kombinasi,
                 interpretasi_ai: useAI,
             })
+            createdAnalysisId = analysis.id
 
             // Jalan force decode
             onLoading?.(true, `Menjalankan force decode (${totalKombinasi} kombinasi)...`)
-            const forceDecode = await processForceDecode(analysis.id, img.url, kombinasi)
+            const { fdRecord: forceDecode, methodRecord: method } = await processForceDecode(createdAnalysisId, uploadedImageUrl, kombinasi)
 
             // Interpretasi AI (jika perlu)
             if (useAI) {
                 onLoading?.(true, 'AI menganalisis semua hasil...')
+
+                const selectedItems: DecodedRawItem[] = (method ?? []).map((m: MethodForceDecode) => ({
+                    channel: m.channel,
+                    arah: m.arah,
+                    text: m.decoded_raw?.text ?? '',
+                    base64_encoded: m.decoded_raw?.base64_encoded,
+                    printable_ratio: m.decoded_raw?.printable_ratio ?? 0,
+                    total_chars: m.decoded_raw?.total_chars ?? 0,
+                }))
+
                 await processAIInterpretation(
-                    analysis.id as string,
+                    createdAnalysisId as string,
                     forceDecode.id as string,
-                    forceDecode.decoded_raw ?? [] as DecodedRawItem[],
+                    selectedItems,
                 )
             }
 
             onLoading?.(false, '')
             router.push(`/dashboard/analisis_stego/${analysis.id}`)
         } catch (err: any) {
-            alert(`Error: ${err.message}`)
+            onLoading?.(true, 'Proses gagal, membersihkan data...')
+
+            // Rollback: hapus analysis + turunannya + gambar yang sudah terlanjur upload
+            await cleanupFailedAnalysis(createdAnalysisId, uploadedImageUrl)
+
             onLoading?.(false, '')
+            alert(`Error: ${err.message}\n\nData yang gagal diproses sudah dihapus otomatis.`)
         } finally {
             setIsAnalyzing(false)
         }
