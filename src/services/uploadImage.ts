@@ -27,3 +27,20 @@ export async function uploadImage(formData: FormData) {
         size: file.size,
     }
 }
+
+export async function deleteUploadedImage(imageUrl: string) {
+    const BUCKET_NAME = 'stego-images'
+
+    const marker = `/object/public/${BUCKET_NAME}/`
+    const idx = imageUrl.indexOf(marker)
+    if (idx === -1) {
+        console.warn('[deleteUploadedImage] Tidak bisa parse path dari URL:', imageUrl)
+        return
+    }
+    const filePath = imageUrl.slice(idx + marker.length)
+
+    const { error } = await supabaseAnonKey.storage.from(BUCKET_NAME).remove([filePath])
+    if (error) {
+        console.error('[deleteUploadedImage] Gagal hapus file storage:', error.message)
+    }
+}

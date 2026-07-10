@@ -68,11 +68,15 @@ export async function processForceDecode(
         }
     })
 
-    const { error: methodError } = await supabaseAnonKey
+    const { data: methodRecord, error: methodError } = await supabaseAnonKey
         .from('method_forcedecode')
         .insert(methodRows)
+        .select()
 
     if (methodError) throw methodError
 
-    return fdRecord
+    return {
+        fdRecord,
+        methodRecord
+    }
 }

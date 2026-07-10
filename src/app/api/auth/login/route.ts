@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // ✅ PERBAIKAN: Cari user berdasarkan email ATAU username
+    // Cari user berdasarkan email atau username
     const { data: users, error: userError } = await supabaseServer
       .from('users')
       .select('id, username, email, password, role, fullname, photo, is_verified, verified_at, created_at, deleted_at')

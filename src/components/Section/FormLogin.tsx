@@ -145,6 +145,18 @@ export default function FormLogin() {
               </div>
             )}
 
+            {/* Error Alert */}
+            {serverError && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start">
+                  <svg className="h-5 w-5 text-red-600 mt-0.5 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <p className="text-sm text-red-800">{serverError}</p>
+                </div>
+              </div>
+            )}
+
             <form className="form mt-2" onSubmit={handleSubmit}>
               {/* Email/Username Field */}
               <div className="form-group">
@@ -309,6 +321,6 @@ export default function FormLogin() {
           </div>
         </div>
       </div>
-    </section>
+    </section >
   );
 }

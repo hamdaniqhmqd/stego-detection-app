@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/provider/AuthProvider';
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const { user, isLoading, isAuthenticated, logout } = useAuth();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -24,6 +26,11 @@ export default function Navbar() {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    const handleLogout = async () => {
+        await logout();
+        setMenuOpen(false);
+    };
 
     return (
         <nav
@@ -52,31 +59,65 @@ export default function Navbar() {
 
                     {/* Desktop Nav */}
                     <div className="hidden md:flex items-center gap-2 md:gap-3">
-                        <Link
-                            href="/auth/login"
-                            className="
-                            relative flex items-center
-                            rounded-sm py-1.5 md:py-2 px-4 md:px-6 text-sm
-                            bg-neutral-800 font-semibold text-white hover:bg-neutral-900
-                            transition-all duration-300 ease-in-out
-                            hover:-translate-y-0.5 hover:shadow-[-4px_4px_0_rgba(107,114,128,1)]
-                        "
-                        >
-                            Masuk
-                        </Link>
-                        <Link
-                            href="/auth/register"
-                            className="
-                            relative flex items-center
-                            rounded-sm py-1.5 md:py-2 px-4 md:px-6 text-sm
-                            font-semibold text-neutral-700 border border-neutral-400
-                            hover:text-neutral-900 hover:bg-neutral-50 hover:border hover:border-neutral-900
-                            transition-all duration-300 ease-in-out
-                            hover:-translate-y-0.5 hover:shadow-[-4px_4px_0_rgba(26,26,46,1)]
-                        "
-                        >
-                            Daftar
-                        </Link>
+                        {isLoading ? (
+                            <div className="h-9 w-24 rounded-sm bg-neutral-200 animate-pulse" />
+                        ) : isAuthenticated ? (
+                            <>
+                                <Link
+                                    href="/dashboard"
+                                    className="
+                                    relative flex items-center
+                                    rounded-sm py-1.5 md:py-2 px-4 md:px-6 text-sm
+                                    bg-neutral-800 font-semibold text-white hover:bg-neutral-900
+                                    transition-all duration-300 ease-in-out
+                                    hover:-translate-y-0.5 hover:shadow-[-4px_4px_0_rgba(107,114,128,1)]
+                                "
+                                >
+                                    Dashboard
+                                </Link>
+                                <button
+                                    onClick={handleLogout}
+                                    className="
+                                    relative flex items-center
+                                    rounded-sm py-1.5 md:py-2 px-4 md:px-6 text-sm
+                                    font-semibold text-neutral-700 border border-neutral-400
+                                    hover:text-neutral-900 hover:bg-neutral-50 hover:border hover:border-neutral-900
+                                    transition-all duration-300 ease-in-out
+                                    hover:-translate-y-0.5 hover:shadow-[-4px_4px_0_rgba(26,26,46,1)]
+                                "
+                                >
+                                    Keluar
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    href="/auth/login"
+                                    className="
+                                    relative flex items-center
+                                    rounded-sm py-1.5 md:py-2 px-4 md:px-6 text-sm
+                                    bg-neutral-800 font-semibold text-white hover:bg-neutral-900
+                                    transition-all duration-300 ease-in-out
+                                    hover:-translate-y-0.5 hover:shadow-[-4px_4px_0_rgba(107,114,128,1)]
+                                "
+                                >
+                                    Masuk
+                                </Link>
+                                <Link
+                                    href="/auth/register"
+                                    className="
+                                    relative flex items-center
+                                    rounded-sm py-1.5 md:py-2 px-4 md:px-6 text-sm
+                                    font-semibold text-neutral-700 border border-neutral-400
+                                    hover:text-neutral-900 hover:bg-neutral-50 hover:border hover:border-neutral-900
+                                    transition-all duration-300 ease-in-out
+                                    hover:-translate-y-0.5 hover:shadow-[-4px_4px_0_rgba(26,26,46,1)]
+                                "
+                                >
+                                    Daftar
+                                </Link>
+                            </>
+                        )}
                     </div>
 
                     {/* Hamburger Button (Mobile) */}
@@ -102,31 +143,64 @@ export default function Navbar() {
                 `}
             >
                 <div className="flex flex-col gap-2 px-4 pb-4">
-                    <Link
-                        href="/auth/login"
-                        onClick={() => setMenuOpen(false)}
-                        className="
-                            flex items-center justify-center
-                            rounded-sm py-2 px-4 text-sm
-                            bg-neutral-800 font-semibold text-white hover:bg-neutral-900
-                            transition-all duration-200
-                        "
-                    >
-                        Masuk
-                    </Link>
-                    <Link
-                        href="/auth/register"
-                        onClick={() => setMenuOpen(false)}
-                        className="
-                            flex items-center justify-center
-                            rounded-sm py-2 px-4 text-sm
-                            font-semibold text-neutral-700 border border-neutral-400
-                            hover:text-neutral-900 hover:bg-neutral-50 hover:border-neutral-900
-                            transition-all duration-200
-                        "
-                    >
-                        Daftar
-                    </Link>
+                    {isLoading ? (
+                        <div className="h-9 w-full rounded-sm bg-neutral-200 animate-pulse" />
+                    ) : isAuthenticated ? (
+                        <>
+                            <Link
+                                href="/dashboard"
+                                onClick={() => setMenuOpen(false)}
+                                className="
+                                    flex items-center justify-center
+                                    rounded-sm py-2 px-4 text-sm
+                                    bg-neutral-800 font-semibold text-white hover:bg-neutral-900
+                                    transition-all duration-200
+                                "
+                            >
+                                Dashboard
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="
+                                    flex items-center justify-center
+                                    rounded-sm py-2 px-4 text-sm
+                                    font-semibold text-neutral-700 border border-neutral-400
+                                    hover:text-neutral-900 hover:bg-neutral-50 hover:border-neutral-900
+                                    transition-all duration-200
+                                "
+                            >
+                                Keluar
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link
+                                href="/auth/login"
+                                onClick={() => setMenuOpen(false)}
+                                className="
+                                    flex items-center justify-center
+                                    rounded-sm py-2 px-4 text-sm
+                                    bg-neutral-800 font-semibold text-white hover:bg-neutral-900
+                                    transition-all duration-200
+                                "
+                            >
+                                Masuk
+                            </Link>
+                            <Link
+                                href="/auth/register"
+                                onClick={() => setMenuOpen(false)}
+                                className="
+                                    flex items-center justify-center
+                                    rounded-sm py-2 px-4 text-sm
+                                    font-semibold text-neutral-700 border border-neutral-400
+                                    hover:text-neutral-900 hover:bg-neutral-50 hover:border-neutral-900
+                                    transition-all duration-200
+                                "
+                            >
+                                Daftar
+                            </Link>
+                        </>
+                    )}
                 </div>
             </div>
         </nav>

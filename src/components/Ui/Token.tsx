@@ -99,12 +99,12 @@ export function TokenUsageSection({ usage }: { usage: TokenUsageSummary }) {
             {/* Detail per-item */}
             {activeItems.length > 0 && (
                 <div className="space-y-1">
-                    <p className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide mb-2">
+                    <p className="text-[10px] font-medium text-neutral-500 uppercase tracking-wide mb-2">
                         Rincian per Kombinasi ({activeItems.length} request)
                     </p>
                     <div className="divide-y divide-neutral-100 rounded-sm border border-neutral-200 overflow-hidden">
                         {usage.per_item.map((item, i) => (
-                            <div key={i} className={`px-3 py-2.5 ${item.total_tokens === 0 ? 'opacity-40 bg-neutral-50' : 'bg-white'}`}>
+                            <div key={i} className={`px-3 py-2.5 ${item.total_tokens === 0 ? 'opacity-80 bg-neutral-50' : 'bg-white'}`}>
                                 {/* Baris atas: channel, arah, total token */}
                                 <div className="flex items-center gap-2 mb-1.5">
                                     {/* Channel pill */}
@@ -127,7 +127,7 @@ export function TokenUsageSection({ usage }: { usage: TokenUsageSummary }) {
                                             <span className="text-[9px] font-normal text-neutral-400 ml-0.5">tok</span>
                                         </span>
                                     ) : (
-                                        <span className="text-[10px] text-neutral-300 italic shrink-0">
+                                        <span className="text-[10px] text-neutral-500 italic shrink-0">
                                             Dilewati
                                         </span>
                                     )}

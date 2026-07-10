@@ -20,6 +20,7 @@ export default function FormRegister() {
     password: '',
     confirmPassword: '',
   });
+  const [serverError, setServerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -32,6 +33,7 @@ export default function FormRegister() {
       password: '',
       confirmPassword: '',
     };
+    setServerError('');
 
     let hasError = false;
 
@@ -84,16 +86,10 @@ export default function FormRegister() {
           `/auth/check-email?email=${encodeURIComponent(email)}`
         );
       } else {
-        setErrors((prev) => ({
-          ...prev,
-          email: result.message || 'Registrasi gagal',
-        }));
+        setServerError(result.message || 'Terjadi kesalahan. Silakan coba lagi.');
       }
     } catch {
-      setErrors((prev) => ({
-        ...prev,
-        email: 'Terjadi kesalahan. Silakan coba lagi.',
-      }));
+      setServerError('Terjadi kesalahan. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
     }
@@ -119,6 +115,18 @@ export default function FormRegister() {
             shadow-[-7px_7px_0_rgba(26,26,46,1)]
             md:shadow-[-10px_10px_0_rgba(26,26,46,1)]
           ">
+
+            {/* Error Alert */}
+            {serverError && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start">
+                  <svg className="h-5 w-5 text-red-600 mt-0.5 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <p className="text-sm text-red-800">{serverError}</p>
+                </div>
+              </div>
+            )}
 
             <form className="form mt-2" onSubmit={handleSubmit}>
               <div className="form-group">
