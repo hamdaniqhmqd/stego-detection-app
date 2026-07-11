@@ -153,7 +153,7 @@ export function SectionGeminiTokens() {
                         )}
                     </div>
                 }
-                headers={['Label & Deskripsi', 'API Key', 'Kuota', 'Pemakaian', 'Status', 'Dibuat', 'Aksi']}
+                headers={['Label & Deskripsi', 'API Key', 'Kuota', 'Pemakaian', 'Status', 'Diperbarui', 'Aksi']}
                 isEmpty={!current.isLoading && current.items.length === 0}
                 emptyText={showDeleted ? 'Tidak ada token yang diarsipkan.' : 'Belum ada token Gemini API. Tambahkan token untuk memulai.'}
             >
@@ -270,10 +270,10 @@ export function SectionGeminiTokens() {
                                 </div>
                             </td>
 
-                            {/* Dibuat */}
+                            {/* Diperbarui */}
                             <td className="px-4 py-3 text-xs text-neutral-700 whitespace-nowrap">
-                                <span className="block">{fmt(token.created_at)}</span>
-                                <span className="block text-neutral-500">{fmtTime(token.created_at)}</span>
+                                <span className="block">{fmt(token.updated_at)}</span>
+                                <span className="block text-neutral-500">{fmtTime(token.updated_at)}</span>
                             </td>
 
                             {/* Aksi */}

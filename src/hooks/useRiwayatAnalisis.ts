@@ -42,7 +42,7 @@ export function useRiwayatAnalisis(userId: string | undefined): UseRiwayatAnalis
     const pageRef = useRef(0)           // halaman terakhir yang sudah di-fetch
     const totalRef = useRef(0)          // total record dari count
 
-    // ─── Initial fetch + hitung total ────────────────────────────────────────
+    //  Initial fetch + hitung total 
 
     const fetchInitial = useCallback(async () => {
         if (!userId) return
@@ -82,7 +82,7 @@ export function useRiwayatAnalisis(userId: string | undefined): UseRiwayatAnalis
         }
     }, [userId])
 
-    // ─── Load more (infinite scroll pagination) ──────────────────────────────
+    //  Load more (infinite scroll pagination) 
 
     const loadMore = useCallback(async () => {
         if (!userId || isLoadingMore || !hasMore) return
@@ -113,13 +113,13 @@ export function useRiwayatAnalisis(userId: string | undefined): UseRiwayatAnalis
         }
     }, [userId, isLoadingMore, hasMore])
 
-    // ─── Initial load ─────────────────────────────────────────────────────────
+    //  Initial load 
 
     useEffect(() => {
         fetchInitial()
     }, [fetchInitial])
 
-    // ─── supabaseAnonKey Realtime subscription ──────────────────────────────────────
+    //  supabaseAnonKey Realtime subscription 
 
     useEffect(() => {
         if (!userId) return

@@ -147,6 +147,7 @@ export function useAnalysis(includeDeleted = false): UseAnalysisReturn {
             const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
             const safePage = Math.min(page, totalPages)
             const from = (safePage - 1) * PAGE_SIZE
+            console.log(`[useAnalysis]`, `total ${total}`, `totalPages ${totalPages}`, `safePage ${safePage}`, `from ${from}`,)
 
             const { data: analysisRows, error: analysisError } = await baseQuery()
                 .order('created_at', { ascending: false })

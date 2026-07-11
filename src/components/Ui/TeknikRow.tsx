@@ -1,6 +1,5 @@
 import { StatusAncaman } from "@/types/aiInterpretasi"
 import { CHANNEL_COLOR, STATUS_BG, STATUS_DOT, STATUS_RING, STATUS_TEXT } from "@/utils/Channel"
-import { formatArah } from "@/utils/format"
 
 export function TeknikRow({
     arah,
@@ -21,7 +20,7 @@ export function TeknikRow({
         >
             {/* Arah scan */}
             <span className={`font-medium whitespace-nowrap ${status ? STATUS_TEXT[status] : 'text-neutral-600'}`}>
-                {formatArah(arah)}
+                {arah}
             </span>
 
             {/* Channel badges */}
