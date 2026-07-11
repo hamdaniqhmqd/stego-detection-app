@@ -46,7 +46,7 @@ export function useGeminiTokens(options: Options = {}): UseGeminiTokensReturn {
     })
     const pageRef = useRef(1)
 
-    // ── Fetch page ─────────────────────────────────────────────
+    //  Fetch page 
     const fetchPage = useCallback(async (page: number, silent = false) => {
         if (!silent) setState(s => ({ ...s, isLoading: true, error: null }))
         try {
@@ -100,7 +100,7 @@ export function useGeminiTokens(options: Options = {}): UseGeminiTokensReturn {
 
     useEffect(() => { fetchInitial() }, [fetchInitial])
 
-    // ── Create ─────────────────────────────────────────────────
+    //  Create 
     const createToken = useCallback(async (
         payload: CreateGeminiTokenPayload
     ): Promise<GeminiToken | null> => {
@@ -120,7 +120,7 @@ export function useGeminiTokens(options: Options = {}): UseGeminiTokensReturn {
         return data as GeminiToken
     }, [fetchInitial])
 
-    // ── Update ─────────────────────────────────────────────────
+    //  Update 
     const updateToken = useCallback(async (
         id: string,
         payload: UpdateGeminiTokenPayload
@@ -139,7 +139,7 @@ export function useGeminiTokens(options: Options = {}): UseGeminiTokensReturn {
         return true
     }, [])
 
-    // ── Soft Delete ────────────────────────────────────────────
+    //  Soft Delete 
     const softDelete = useCallback(async (id: string): Promise<boolean> => {
         const { error: err } = await supabaseAnonKey
             .from(TABLE)
@@ -150,7 +150,7 @@ export function useGeminiTokens(options: Options = {}): UseGeminiTokensReturn {
         return true
     }, [fetchPage])
 
-    // ── Restore ────────────────────────────────────────────────
+    //  Restore 
     const restore = useCallback(async (id: string): Promise<boolean> => {
         const { error: err } = await supabaseAnonKey
             .from(TABLE).update({ deleted_at: null }).eq('id', id)
@@ -159,7 +159,7 @@ export function useGeminiTokens(options: Options = {}): UseGeminiTokensReturn {
         return true
     }, [fetchPage])
 
-    // ── Hard Delete ────────────────────────────────────────────
+    //  Hard Delete 
     const hardDelete = useCallback(async (id: string): Promise<boolean> => {
         const { error: err } = await supabaseAnonKey.from(TABLE).delete().eq('id', id)
         if (err) { setState(s => ({ ...s, error: err.message })); return false }
@@ -167,7 +167,7 @@ export function useGeminiTokens(options: Options = {}): UseGeminiTokensReturn {
         return true
     }, [fetchPage])
 
-    // ── Set Default ────────────────────────────────────────────
+    //  Set Default 
     const setDefault = useCallback(async (id: string): Promise<boolean> => {
         await supabaseAnonKey.from(TABLE).update({ is_default: false }).eq('is_default', true)
         const { data, error: err } = await supabaseAnonKey
@@ -182,7 +182,7 @@ export function useGeminiTokens(options: Options = {}): UseGeminiTokensReturn {
         return true
     }, [])
 
-    // ── Toggle Active ──────────────────────────────────────────
+    //  Toggle Active 
     const toggleActive = useCallback(async (id: string, current: boolean): Promise<boolean> => {
         const { data, error: err } = await supabaseAnonKey
             .from(TABLE).update({ is_active: !current }).eq('id', id).select().single()

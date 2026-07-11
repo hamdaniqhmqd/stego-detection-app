@@ -1,3 +1,5 @@
+// src/components/Section/ForceDecodeSimulation.tsx
+
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -12,8 +14,12 @@ type ScanMode = {
     gen: (w: number, h: number) => Coord[];
 };
 
-const W = 6;
-const H = 6;
+type Channel = 'R' | 'G' | 'B';
+
+type Pixel = { r: number; g: number; b: number };
+
+const W = 8;
+const H = 8;
 
 const MODES: ScanMode[] = [
     {
@@ -106,21 +112,101 @@ const MODES: ScanMode[] = [
     },
 ];
 
+const CHANNELS: { key: Channel; label: string; dot: string }[] = [
+    { key: 'R', label: 'Merah (R)', dot: 'bg-red-500' },
+    { key: 'G', label: 'Hijau (G)', dot: 'bg-green-500' },
+    { key: 'B', label: 'Biru (B)', dot: 'bg-blue-500' },
+];
+
+// PRNG sederhana & deterministik (mulberry32) supaya data piksel selalu sama
+// di setiap render (menghindari mismatch hydration Next.js) namun tetap
+// "terlihat acak" seperti gambar sungguhan.
+function mulberry32(seed: number) {
+    let a = seed;
+    return function () {
+        a |= 0;
+        a = (a + 0x6d2b79f5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+// Pesan rahasia yang sengaja disisipkan pada LSB kanal Biru, dibaca dengan
+// urutan 'row-lr-tb' (kiri→kanan, atas→bawah). 36 piksel = 36 bit tersedia,
+// cukup untuk 4 karakter ASCII penuh (32 bit) + 4 bit sisa yang diabaikan.
+const HIDDEN_MESSAGE = 'abcdefgh';
+
+function messageToBits(msg: string): number[] {
+    const bits: number[] = [];
+    for (const ch of msg) {
+        const code = ch.charCodeAt(0);
+        for (let b = 7; b >= 0; b--) bits.push((code >> b) & 1);
+    }
+    return bits;
+}
+
+// Bangun grid piksel sintetis: kanal R & G sepenuhnya acak, kanal B punya
+// LSB berisi bit pesan (sesuai urutan row-lr-tb), 7 bit tersisanya acak.
+function buildPixelGrid(w: number, h: number): Pixel[][] {
+    const rand = mulberry32(1337);
+    const grid: Pixel[][] = Array.from({ length: h }, () => Array(w));
+    const rowOrder = MODES[0].gen(w, h); // row-lr-tb
+    const bits = messageToBits(HIDDEN_MESSAGE);
+
+    rowOrder.forEach(([x, y], i) => {
+        const bit = i < bits.length ? bits[i] : Math.round(rand());
+        const rBase = Math.floor(rand() * 256) & 0xfe;
+        const gBase = Math.floor(rand() * 256) & 0xfe;
+        const bBase = Math.floor(rand() * 256) & 0xfe;
+        grid[y][x] = {
+            r: rBase | Math.round(rand()),
+            g: gBase | Math.round(rand()),
+            b: bBase | bit,
+        };
+    });
+
+    return grid;
+}
+
+function lsb(pixel: Pixel, channel: Channel): number {
+    const v = channel === 'R' ? pixel.r : channel === 'G' ? pixel.g : pixel.b;
+    return v & 1;
+}
+
+function bitsToBytes(bits: number[]): number[] {
+    const bytes: number[] = [];
+    for (let i = 0; i + 8 <= bits.length; i += 8) {
+        let byte = 0;
+        for (let k = 0; k < 8; k++) byte = (byte << 1) | bits[i + k];
+        bytes.push(byte);
+    }
+    return bytes;
+}
+
+function byteToDisplayChar(byte: number): string {
+    return byte >= 32 && byte <= 126 ? String.fromCharCode(byte) : '·';
+}
+
 export default function ForceDecodeSimulation() {
     const [modeIdx, setModeIdx] = useState(0);
+    const [channel, setChannel] = useState<Channel>('R');
     const [step, setStep] = useState(0);
     const [playing, setPlaying] = useState(false);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const logEndRef = useRef<HTMLDivElement | null>(null);
 
     const mode = MODES[modeIdx];
     const coords = useMemo(() => mode.gen(W, H), [mode]);
     const total = W * H;
 
+    const pixelGrid = useMemo(() => buildPixelGrid(W, H), []);
+
     useEffect(() => {
         setStep(0);
         setPlaying(false);
         if (timerRef.current) clearInterval(timerRef.current);
-    }, [modeIdx]);
+    }, [modeIdx, channel]);
 
     useEffect(() => {
         if (!playing) return;
@@ -148,6 +234,47 @@ export default function ForceDecodeSimulation() {
 
     const active = step > 0 ? coords[step - 1] : null;
 
+    // Bit-bit yang sudah "diekstrak" sejauh langkah saat ini, sesuai
+    // urutan pemindaian (mode) dan kanal warna yang dipilih.
+    const extractedBits = useMemo(() => {
+        const bits: number[] = [];
+        for (let i = 0; i < step; i++) {
+            const [x, y] = coords[i];
+            bits.push(lsb(pixelGrid[y][x], channel));
+        }
+        return bits;
+    }, [coords, step, pixelGrid, channel]);
+
+    const bytes = useMemo(() => bitsToBytes(extractedBits), [extractedBits]);
+    const decodedText = useMemo(() => bytes.map(byteToDisplayChar).join(''), [bytes]);
+    const printableRatio = useMemo(() => {
+        if (bytes.length === 0) return 0;
+        const printable = bytes.filter((b) => b >= 32 && b <= 126).length;
+        return printable / bytes.length;
+    }, [bytes]);
+
+    const isLikelyCorrect = mode.key === 'row-lr-tb' && channel === 'B';
+    const finished = step >= total;
+
+    // Log animasi: satu baris per piksel yang sudah "disinggahi", tumbuh
+    // seiring 'step' bertambah — ini yang membuat koordinat & bit LSB
+    // terasa "muncul berdasarkan animasi" alih-alih langsung tampil semua.
+    const coordLog = useMemo(() => {
+        const lines: { i: number; x: number; y: number; bit: number; byteDone: boolean }[] = [];
+        for (let i = 0; i < step; i++) {
+            const [x, y] = coords[i];
+            const bit = lsb(pixelGrid[y][x], channel);
+            const byteDone = (i + 1) % 8 === 0;
+            lines.push({ i: i + 1, x, y, bit, byteDone });
+        }
+        return lines;
+    }, [coords, step, pixelGrid, channel]);
+
+    // Auto-scroll log ke baris terbaru setiap kali step bertambah.
+    useEffect(() => {
+        logEndRef.current?.scrollIntoView({ block: 'end' });
+    }, [step]);
+
     const handlePlay = () => {
         if (playing) {
             setPlaying(false);
@@ -165,7 +292,7 @@ export default function ForceDecodeSimulation() {
     return (
         <div className="w-full border border-neutral-900 rounded-sm bg-neutral-50 p-5 sm:p-8">
             {/* Mode selector */}
-            <div className="mb-6">
+            <div className="mb-4">
                 <span className="block text-[11px] uppercase tracking-wide text-neutral-500 font-semibold mb-2">
                     Pilih arah pembacaan piksel (8 pola)
                 </span>
@@ -187,6 +314,30 @@ export default function ForceDecodeSimulation() {
                 </div>
             </div>
 
+            {/* Channel selector */}
+            <div className="mb-6">
+                <span className="block text-[11px] uppercase tracking-wide text-neutral-500 font-semibold mb-2">
+                    Pilih kanal warna yang diuji (LSB)
+                </span>
+                <div className="flex flex-wrap gap-2">
+                    {CHANNELS.map((c) => (
+                        <button
+                            key={c.key}
+                            onClick={() => setChannel(c.key)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-sm border transition-all ${channel === c.key
+                                ? 'bg-neutral-900 text-neutral-100 border-neutral-900 -translate-y-0.5 shadow-[-3px_3px_0_rgba(26,26,46,0.8)]'
+                                : `bg-transparent text-neutral-700 border-neutral-300
+                                    duration-300 ease-in-out
+                                    hover:-translate-y-0.5 hover:border-neutral-900 hover:shadow-[-3px_3px_0_rgba(26,26,46,0.8)]`
+                                }`}
+                        >
+                            <span className={`w-2 h-2 rounded-full inline-block ${c.dot}`} />
+                            {c.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             <div className="grid sm:grid-cols-[auto_1fr] gap-8 items-start">
                 {/* Grid */}
                 <div className="flex flex-col gap-3 items-center sm:items-start">
@@ -201,10 +352,11 @@ export default function ForceDecodeSimulation() {
                                     const key = `${x},${y}`;
                                     const isActive = active && active[0] === x && active[1] === y;
                                     const isVisited = visited.has(key) && !isActive;
+                                    const bitVal = lsb(pixelGrid[y][x], channel);
                                     return (
                                         <div
                                             key={key}
-                                            className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-[10px] font-semibold rounded-sm border transition-colors duration-150 
+                                            className={`w-9 h-9 sm:w-10 sm:h-10 flex flex-col items-center justify-center text-[10px] font-semibold rounded-sm border transition-colors duration-150 
                                                 ${isActive
                                                     ? 'bg-neutral-900 text-neutral-100 border-neutral-900'
                                                     : isVisited
@@ -212,7 +364,10 @@ export default function ForceDecodeSimulation() {
                                                         : 'bg-white text-neutral-400 border-neutral-200'
                                                 }`}
                                         >
-                                            {idx + 1}
+                                            <span>{idx + 1}</span>
+                                            {(isActive || isVisited) && (
+                                                <span className="text-[8px] opacity-70 leading-none">bit {bitVal}</span>
+                                            )}
                                         </div>
                                     );
                                 })
@@ -251,19 +406,118 @@ export default function ForceDecodeSimulation() {
                 </div>
 
                 {/* Info panel */}
-                <div className="text-sm leading-relaxed">
-                    <div className="text-[11px] uppercase tracking-wide text-neutral-500 font-semibold mb-1">
-                        {mode.axis === 'Baris' ? 'Pola berbasis baris' : 'Pola berbasis kolom'}
+                <div className="text-sm leading-relaxed flex flex-col gap-4">
+                    <div>
+                        <div className="text-[11px] uppercase tracking-wide text-neutral-500 font-semibold mb-1">
+                            {mode.axis === 'Baris' ? 'Pola berbasis baris' : 'Pola berbasis kolom'} · kanal {channel}
+                        </div>
+                        <div className="font-semibold text-neutral-900 mb-2">{mode.label}</div>
+                        <p className="text-neutral-600 mb-2">{mode.desc}</p>
+                        <p className="text-neutral-600">
+                            Setiap piksel yang disinggahi diperlakukan sama: sistem mengambil bit LSB dari
+                            kanal warna yang sedang diuji, lalu menambahkannya ke rangkaian bit. Karena
+                            steganalisis tidak tahu pola mana yang dipakai saat penyisipan, kedelapan pola ini
+                            dicoba satu per satu terhadap kombinasi kanal R, G, dan B — sampai ditemukan
+                            rangkaian bit yang, setelah didekode ke ASCII, membentuk teks yang bermakna.
+                        </p>
                     </div>
-                    <div className="font-semibold text-neutral-900 mb-2">{mode.label}</div>
-                    <p className="text-neutral-600 mb-4">{mode.desc}</p>
-                    <p className="text-neutral-600">
-                        Setiap piksel yang disinggahi diperlakukan sama: sistem mengambil bit LSB dari
-                        kanal warna yang sedang diuji, lalu menambahkannya ke rangkaian bit. Karena
-                        steganalisis tidak tahu pola mana yang dipakai saat penyisipan, kedelapan pola ini
-                        dicoba satu per satu terhadap kombinasi kanal R, G, dan B — sampai ditemukan
-                        rangkaian bit yang, setelah didekode ke ASCII, membentuk teks yang bermakna.
-                    </p>
+
+                    <div className="flex flex-col md:flex-row gap-4">
+
+                        {/* Panel hasil ekstraksi */}
+                        <div className="flex-1 border border-neutral-200 rounded-sm bg-white p-3">
+                            <div className="text-[11px] uppercase tracking-wide text-neutral-500 font-semibold mb-2">
+                                Hasil ekstraksi bit ({extractedBits.length}/{total} bit)
+                            </div>
+
+                            <div className="font-mono text-[11px] text-neutral-700 break-all mb-2">
+                                {extractedBits.length > 0 ? extractedBits.join('') : '—'}
+                            </div>
+
+                            <div className="text-[11px] uppercase tracking-wide text-neutral-500 font-semibold mb-1">
+                                Byte penuh terbentuk ({bytes.length})
+                            </div>
+                            <div className="flex flex-wrap gap-1 mb-2">
+                                {bytes.length > 0 ? (
+                                    bytes.map((b, i) => (
+                                        <span
+                                            key={i}
+                                            className="px-1.5 py-0.5 rounded-sm border border-neutral-200 bg-neutral-50 text-[10px] font-mono text-neutral-700"
+                                            title={`0x${b.toString(16).padStart(2, '0')} = ${b}`}
+                                        >
+                                            {byteToDisplayChar(b)}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="text-[11px] text-neutral-400">belum ada</span>
+                                )}
+                            </div>
+
+                            <div className="text-[11px] uppercase tracking-wide text-neutral-500 font-semibold mb-1">
+                                Dekode ASCII
+                            </div>
+                            <div className="font-mono text-sm text-neutral-900 mb-2">
+                                {decodedText || '—'}
+                            </div>
+
+                            {finished && (
+                                <div
+                                    className={`text-[11px] font-semibold px-2 py-1 rounded-sm inline-block ${printableRatio >= 0.75
+                                        ? 'bg-green-100 text-green-800 border border-green-300'
+                                        : 'bg-red-100 text-red-800 border border-red-300'
+                                        }`}
+                                >
+                                    {printableRatio >= 0.75
+                                        ? `Kemungkinan pesan valid (${Math.round(printableRatio * 100)}% karakter tercetak)`
+                                        : `Tidak bermakna (${Math.round(printableRatio * 100)}% karakter tercetak)`}
+                                </div>
+                            )}
+
+                            {finished && isLikelyCorrect && (
+                                <p className="text-[11px] text-neutral-500 mt-2">
+                                    Kombinasi ini (pola {mode.label.toLowerCase()}, kanal {channel}) adalah kombinasi
+                                    yang memang dipakai saat data disisipkan pada simulasi ini, sehingga hasilnya
+                                    terbaca sebagai teks yang bermakna.
+                                </p>
+                            )}
+                        </div>
+
+
+                        {/* Log koordinat + bit, muncul baris demi baris seiring animasi berjalan */}
+                        <div className="flex-1 w-full border border-neutral-200 rounded-sm bg-white">
+                            <div className="text-[11px] uppercase tracking-wide text-neutral-500 font-semibold px-3 pt-2">
+                                Log koordinat (animasi)
+                            </div>
+                            <div className="h-64 overflow-y-auto px-3 pb-2 pt-1 font-mono text-[11px] leading-relaxed text-neutral-700 scrollbar_y_custom">
+                                {coordLog.length === 0 ? (
+                                    <span className="text-neutral-400">
+                                        Tekan &quot;Putar&quot; untuk mulai mengambil koordinat satu per satu…
+                                    </span>
+                                ) : (
+                                    coordLog.map((row) => (
+                                        <div
+                                            key={row.i}
+                                            className={`flex items-center gap-2 ${row.i === step ? 'text-neutral-900 font-semibold' : ''
+                                                }`}
+                                        >
+                                            <span className="text-neutral-400 w-7 text-right shrink-0">#{row.i}</span>
+                                            <span>{`(x=${row.x}, y=${row.y})`}</span>
+                                            <span className="text-neutral-400">→</span>
+                                            <span>
+                                                LSB({channel})=<span className="text-neutral-900">{row.bit}</span>
+                                            </span>
+                                            {row.byteDone && (
+                                                <span className="ml-1 px-1 rounded-sm bg-neutral-900 text-neutral-100 text-[9px]">
+                                                    1 byte lengkap
+                                                </span>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                                <div ref={logEndRef} />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

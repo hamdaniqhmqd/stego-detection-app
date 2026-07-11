@@ -2,8 +2,8 @@
 
 export function getWaktuWIB() {
     const nowUTC = new Date();
-    const nowWIB = new Date(nowUTC.getTime() + 7 * 60 * 60 * 1000);
-    return nowWIB;
+    // const nowWIB = new Date(nowUTC.getTime() + 7 * 60 * 60 * 1000);
+    return nowUTC;
 }
 
 export const formatDateTime = (dateString: string) => {
@@ -14,13 +14,13 @@ export const formatDateTime = (dateString: string) => {
 
     if (dateString.includes('+') || dateString.includes('Z')) {
         day = utcDate.getUTCDate().toString().padStart(2, '0');
-        month = months[utcDate.getUTCMonth()];
+        month = months[utcDate.getUTCMonth()].slice(0, 3);
         year = utcDate.getUTCFullYear();
         hours = utcDate.getUTCHours().toString().padStart(2, '0');
         minutes = utcDate.getUTCMinutes().toString().padStart(2, '0');
     } else {
         day = utcDate.getDate().toString().padStart(2, '0');
-        month = months[utcDate.getMonth()];
+        month = months[utcDate.getMonth()].slice(0, 3);
         year = utcDate.getFullYear();
         hours = utcDate.getHours().toString().padStart(2, '0');
         minutes = utcDate.getMinutes().toString().padStart(2, '0');
@@ -37,11 +37,11 @@ export const formatDateMonthYears = (dateString: string) => {
 
     if (dateString.includes('+') || dateString.includes('Z')) {
         day = utcDate.getUTCDate().toString().padStart(2, '0');
-        month = months[utcDate.getUTCMonth()];
+        month = months[utcDate.getUTCMonth()].slice(0, 3);
         year = utcDate.getUTCFullYear();
     } else {
         day = utcDate.getDate().toString().padStart(2, '0');
-        month = months[utcDate.getMonth()];
+        month = months[utcDate.getMonth()].slice(0, 3);
         year = utcDate.getFullYear();
     }
 
@@ -87,36 +87,84 @@ export const formatTime = (dateString: string) => {
     return `${hours}:${minutes}`;
 };
 
-export const fmt = (d: string) =>
-    new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+export const fmt = (dateString: string) => {
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const utcDate = new Date(dateString);
 
-export const fmtTime = (d: string) =>
-    new Date(d).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+    let day: string, month: string, year: number;
 
-export const fmtDayMonth = (d: string) =>
-    new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })
+    if (dateString.includes('+') || dateString.includes('Z')) {
+        day = utcDate.getUTCDate().toString().padStart(2, '0');
+        month = months[utcDate.getUTCMonth()].slice(0, 3);
+        year = utcDate.getUTCFullYear();
+    } else {
+        day = utcDate.getDate().toString().padStart(2, '0');
+        month = months[utcDate.getMonth()].slice(0, 3);
+        year = utcDate.getFullYear();
+    }
 
-export const fmtMonth = (d: string) =>
-    new Date(d).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })
+    return `${day} ${month} ${year}`;
+}
+
+export const fmtTime = (dateString: string) => {
+    const utcDate = new Date(dateString);
+
+    let hours: string, minutes: string;
+
+    if (dateString.includes('+') || dateString.includes('Z')) {
+        hours = utcDate.getUTCHours().toString().padStart(2, '0');
+        minutes = utcDate.getUTCMinutes().toString().padStart(2, '0');
+    } else {
+        hours = utcDate.getHours().toString().padStart(2, '0');
+        minutes = utcDate.getMinutes().toString().padStart(2, '0');
+    }
+
+    return `${hours}:${minutes}`;
+}
+
+export const fmtDayMonth = (dateString: string) => {
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const utcDate = new Date(dateString);
+
+    let day: string, month: string;
+
+    if (dateString.includes('+') || dateString.includes('Z')) {
+        day = utcDate.getUTCDate().toString().padStart(2, '0');
+        month = months[utcDate.getUTCMonth()].slice(0, 3);
+    } else {
+        day = utcDate.getDate().toString().padStart(2, '0');
+        month = months[utcDate.getMonth()].slice(0, 3);
+    }
+
+    return `${day} ${month}`;
+}
+
+export const fmtMonth = (dateString: string) => {
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const utcDate = new Date(dateString);
+
+    let day: string, month: string, year: number;
+
+    if (dateString.includes('+') || dateString.includes('Z')) {
+        month = months[utcDate.getUTCMonth()].slice(0, 3);
+    } else {
+        month = months[utcDate.getMonth()].slice(0, 3);
+    }
+
+    return `${month}`;
+}
 
 export const fmtDate = (d?: string) => d
     ? new Date(d).toLocaleDateString('id-ID', {
         day: '2-digit', month: 'long', year: 'numeric',
         hour: '2-digit', minute: '2-digit',
+        timeZone: 'Asia/Jakarta'
     })
     : '—'
 
 export function fmtTokens(n: number): string {
     if (n >= 1000) return `${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}k`
     return String(n)
-}
-
-export function formatArah(arah: string): string {
-    return arah
-        .replace('kiri-kanan-atas-bawah', 'Kiri → Kanan, Atas → Bawah')
-        .replace('kanan-kiri-bawah-atas', 'Kanan → Kiri, Bawah → Atas')
-        .replace('atas-bawah-kiri-kanan', 'Atas → Bawah, Kiri → Kanan')
-        .replace('bawah-atas-kanan-kiri', 'Bawah → Atas, Kanan → Kiri')
 }
 
 export const filename = (p?: string) => p?.split('/').pop() ?? '—'

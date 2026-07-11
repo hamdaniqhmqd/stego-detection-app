@@ -180,7 +180,7 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         return q
     }, [forceDecodeId, analysisId, includeDeleted])
 
-    //  Fetch halaman ─
+    //  Fetch halaman 
     const fetchPage = useCallback(async (page: number, silent = false) => {
         if (!silent) setState(s => ({ ...s, isLoading: true, error: null }))
         try {
@@ -255,7 +255,7 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         await goToPage(pageRef.current + 1)
     }, [goToPage, state.isLoadingMore, state.hasMore])
 
-    //  Detail fetch ─
+    //  Detail fetch 
     const fetchDetail = useCallback(async (id: string) => {
         if (!id) return
         lastDetailIdRef.current = id

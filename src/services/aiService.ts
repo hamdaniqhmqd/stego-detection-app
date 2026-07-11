@@ -29,7 +29,7 @@ export async function processAIInterpretation(
     // per_item dari sesi INI saja — nanti di-merge ke per_item lama (jika ada)
     const sessionPerItem: PerItemTokenUsage[] = []
 
-    // --- Jalankan AI untuk setiap item (tidak berubah) ---
+    // Jalankan AI untuk setiap item (tidak berubah)
     for (const item of selectedItems) {
         const decodedText = decodeItemText(item)
 
@@ -92,7 +92,7 @@ export async function processAIInterpretation(
 
     const waktuProses = `${((Date.now() - start) / 1000).toFixed(2)}s`
 
-    // --- Update last_used_at token (tidak berubah) ---
+    // Update last_used_at token (tidak berubah)
     await supabaseAnonKey
         .from('gemini_tokens')
         .update({ last_used_at: getWaktuWIB().toISOString() })
@@ -101,7 +101,7 @@ export async function processAIInterpretation(
             if (error) console.error('[aiService] Gagal update last_used_at:', error.message)
         })
 
-    // --- UPSERT: cek apakah record untuk analysis_id + forcedecode_id sudah ada ---
+    // cek apakah record untuk analysis_id + forcedecode_id sudah ada
     const { data: existing, error: selectError } = await supabaseAnonKey
         .from('analysis_interpretasi_ai')
         .select('id, hasil, token_usage')
@@ -112,7 +112,7 @@ export async function processAIInterpretation(
 
     if (selectError) throw selectError
 
-    // Helper: merge array per_item berdasarkan channel+arah (timpa jika sama, append jika baru)
+    // merge array per_item berdasarkan channel+arah (timpa jika sama, append jika baru)
     function mergePerItem(
         oldItems: PerItemTokenUsage[],
         newItems: PerItemTokenUsage[]
@@ -128,7 +128,7 @@ export async function processAIInterpretation(
         return merged
     }
 
-    // Helper: hitung ulang total dari per_item yang sudah final (bukan akumulasi manual)
+    // hitung ulang total dari per_item yang sudah final (bukan akumulasi manual)
     function recalcTotals(perItem: PerItemTokenUsage[]) {
         return perItem.reduce(
             (acc, item) => ({
@@ -141,7 +141,7 @@ export async function processAIInterpretation(
     }
 
     if (existing) {
-        // --- Merge hasil[] (channel+arah sama → timpa, baru → append) ---
+        // Merge hasil[] (channel+arah sama → timpa, baru → append)
         const existingHasil: HasilInterpretasi[] =
             typeof existing.hasil === 'string' ? JSON.parse(existing.hasil) : existing.hasil
 
@@ -154,7 +154,7 @@ export async function processAIInterpretation(
             else mergedHasil.push(newItem)
         }
 
-        // --- Merge token_usage.per_item dengan aturan yang sama ---
+        // Merge token_usage.per_item dengan aturan yang sama
         const existingTokenUsage: TokenUsageSummary =
             typeof existing.token_usage === 'string'
                 ? JSON.parse(existing.token_usage)

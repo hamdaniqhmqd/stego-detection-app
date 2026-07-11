@@ -16,6 +16,7 @@ import { processAIInterpretation } from '@/services/aiService'
 import Swal from 'sweetalert2'
 import { MethodForceDecode } from '@/types/forceDecode'
 import { cleanupFailedAnalysis } from '@/services/cleanupFailedAnalysis'
+import { formatDateTime } from '@/utils/format'
 
 interface InputAnalisisProps {
     user?: AuthUser
@@ -50,7 +51,7 @@ export default function InputAnalisis({
     const [useAI, setUseAI] = useState<boolean>(readOnlyData?.useAI ?? false)
     const [isAnalyzing, setIsAnalyzing] = useState(false)
 
-    // 
+    // untuk toggle channel dan teknik, dengan minimal 1 dipilih
     const toggleChannel = (ch: Channel) => {
         if (readOnly) return
         setSelectedChannels(prev => {
@@ -79,6 +80,7 @@ export default function InputAnalisis({
         })
     }
 
+    // untuk membangun kombinasi channel + teknik yang akan dijalankan
     const buildKombinasi = (): DecodeTeknik[] => {
         const list: DecodeTeknik[] = []
         for (const channel of CHANNELS) {
@@ -202,7 +204,7 @@ export default function InputAnalisis({
         } catch (err: any) {
             onLoading?.(true, 'Proses gagal, membersihkan data...')
 
-            // Rollback: hapus analysis + turunannya + gambar yang sudah terlanjur upload
+            // hapus analysis + turunannya + gambar yang sudah terlanjur upload
             await cleanupFailedAnalysis(createdAnalysisId, uploadedImageUrl)
 
             onLoading?.(false, '')
@@ -298,7 +300,7 @@ export default function InputAnalisis({
                             <p className="text-xs text-neutral-500">
                                 <span className="text-neutral-600">Dibuat:</span>{' '}
                                 <strong className="font-semibold text-neutral-900">
-                                    {new Date(readOnlyData.analysis.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
+                                    {formatDateTime(readOnlyData.analysis.created_at)}
                                 </strong>
                             </p>
                         </div>
