@@ -32,8 +32,8 @@ export function SectionPengguna({ onDetail }: SectionPenggunaProps) {
 
     const stats = useMemo(() => ({
         active: active.total,
-        verified: active.items.filter(i => i.is_verified).length,
-        unverified: active.items.filter(i => !i.is_verified).length,
+        verified: active.totalVerified,
+        unverified: active.totalNonVerified,
         deleted: deleted.total,
     }), [active.items, active.total, deleted.total])
 

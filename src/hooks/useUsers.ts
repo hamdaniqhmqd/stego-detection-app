@@ -12,6 +12,7 @@ interface UseUsersState {
     totalPengguna: number
     totalSuperadmin: number
     totalVerified: number
+    totalNonVerified: number
     currentPage: number
     totalPages: number
     isLoading: boolean
@@ -34,7 +35,7 @@ export interface UseUsersReturn extends UseUsersState {
 
 export function useUsers(includeDeleted = false): UseUsersReturn {
     const [state, setState] = useState<UseUsersState>({
-        items: [], total: 0, totalPengguna: 0, totalSuperadmin: 0, totalVerified: 0, currentPage: 1, totalPages: 1,
+        items: [], total: 0, totalPengguna: 0, totalSuperadmin: 0, totalVerified: 0, totalNonVerified: 0, currentPage: 1, totalPages: 1,
         isLoading: true, isLoadingMore: false, hasMore: false, error: null,
     })
     const pageRef = useRef(1)
@@ -80,6 +81,7 @@ export function useUsers(includeDeleted = false): UseUsersReturn {
                 totalPengguna: users.filter(u => u.role === 'pengguna').length,
                 totalSuperadmin: users.filter(u => u.role === 'superadmin').length,
                 totalVerified: users.filter(u => u.is_verified === true).length,
+                totalNonVerified: users.filter(u => u.is_verified === false).length,
                 totalPages,
                 currentPage: safePage,
                 hasMore: safePage < totalPages,

@@ -2,6 +2,7 @@
 
 'use client';
 
+import { Channel } from '@/types/shared';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 type Coord = [number, number];
@@ -13,8 +14,6 @@ type ScanMode = {
     desc: string;
     gen: (w: number, h: number) => Coord[];
 };
-
-type Channel = 'R' | 'G' | 'B';
 
 type Pixel = { r: number; g: number; b: number };
 
@@ -118,9 +117,7 @@ const CHANNELS: { key: Channel; label: string; dot: string }[] = [
     { key: 'B', label: 'Biru (B)', dot: 'bg-blue-500' },
 ];
 
-// PRNG sederhana & deterministik (mulberry32) supaya data piksel selalu sama
-// di setiap render (menghindari mismatch hydration Next.js) namun tetap
-// "terlihat acak" seperti gambar sungguhan.
+// Untuk membuat grid piksel sintetis, kita butuh PRNG deterministik agar hasilnya selalu sama setiap kali komponen ini dirender ulang.
 function mulberry32(seed: number) {
     let a = seed;
     return function () {
@@ -132,9 +129,7 @@ function mulberry32(seed: number) {
     };
 }
 
-// Pesan rahasia yang sengaja disisipkan pada LSB kanal Biru, dibaca dengan
-// urutan 'row-lr-tb' (kiri→kanan, atas→bawah). 36 piksel = 36 bit tersedia,
-// cukup untuk 4 karakter ASCII penuh (32 bit) + 4 bit sisa yang diabaikan.
+// Pesan rahasia yang sengaja disisipkan pada LSB kanal Biru
 const HIDDEN_MESSAGE = 'abcdefgh';
 
 function messageToBits(msg: string): number[] {
@@ -146,10 +141,9 @@ function messageToBits(msg: string): number[] {
     return bits;
 }
 
-// Bangun grid piksel sintetis: kanal R & G sepenuhnya acak, kanal B punya
-// LSB berisi bit pesan (sesuai urutan row-lr-tb), 7 bit tersisanya acak.
+// Bangun grid piksel sintetis: kanal R & G sepenuhnya acak, kanal B punya pesan rahasia
 function buildPixelGrid(w: number, h: number): Pixel[][] {
-    const rand = mulberry32(1337);
+    const rand = mulberry32(1955);
     const grid: Pixel[][] = Array.from({ length: h }, () => Array(w));
     const rowOrder = MODES[0].gen(w, h); // row-lr-tb
     const bits = messageToBits(HIDDEN_MESSAGE);
@@ -185,7 +179,7 @@ function bitsToBytes(bits: number[]): number[] {
 }
 
 function byteToDisplayChar(byte: number): string {
-    return byte >= 32 && byte <= 126 ? String.fromCharCode(byte) : '·';
+    return byte >= 0 && byte <= 254 ? String.fromCharCode(byte) : '·';
 }
 
 export default function ForceDecodeSimulation() {

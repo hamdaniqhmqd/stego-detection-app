@@ -136,8 +136,6 @@ export interface UseInterpretasiAIReturn extends UseInterpretasiAIState, UseInte
     softDelete: (id: string) => Promise<void>
     restore: (id: string) => Promise<void>
     hardDelete: (id: string) => Promise<void>
-    summarize: (record: AnalysisInterpretasiAI) => InterpretasiSummary
-    buildTeknikMap: (hasil: HasilInterpretasi[]) => TeknikStatusMap
 }
 
 interface Options {
@@ -474,7 +472,5 @@ export function useInterpretasiAI(options: Options = {}): UseInterpretasiAIRetur
         fetchDetail, refreshDetail,
         getById, getByForceDecodeId,
         create, update, softDelete, restore, hardDelete,
-        summarize: (r) => summarizeInterpretasi(r),
-        buildTeknikMap: (h) => buildTeknikStatusMap(h),
     }
 }

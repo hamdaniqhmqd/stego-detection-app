@@ -105,7 +105,7 @@ class AuthService {
             const result = await response.json();
             return result;
         } catch (error) {
-            console.error('Refresh token error:', error);
+            // console.error('Refresh token error:', error);
             return { success: false };
         }
     }
@@ -127,7 +127,7 @@ class AuthService {
                         method: 'GET',
                         credentials: 'include',
                     });
-                    console.log('Retry response:', retryResponse);
+                    // console.log('Retry response:', retryResponse);
 
                     if (retryResponse.ok) {
                         const data = await retryResponse.json();
@@ -140,7 +140,7 @@ class AuthService {
             const data = await response.json();
             return data.user;
         } catch (error) {
-            console.error('Get current user error:', error);
+            // console.error('Get current user error:', error);
             return null;
         }
     }
