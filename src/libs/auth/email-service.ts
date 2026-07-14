@@ -68,7 +68,7 @@ async function createEmailTransporter() {
     try {
         await transporter.verify();
     } catch (error) {
-        console.error('Failed to verify email transporter:', error);
+        // console.error('Failed to verify email transporter:', error);
         throw new Error('Failed to verify email configuration');
     }
 
