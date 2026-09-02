@@ -1,7 +1,7 @@
 // src/app/dashboard/analisis_stego/InputAnalisis.tsx
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Analysis } from '@/types/analysis'
 import { TEKNIK_LABEL, Channel, TeknikArah, DecodeTeknik, DecodedRawItem } from '@/types/shared'
@@ -17,6 +17,9 @@ import Swal from 'sweetalert2'
 import { MethodForceDecode } from '@/types/forceDecode'
 import { cleanupFailedAnalysis } from '@/services/cleanupFailedAnalysis'
 import { formatDateTime } from '@/utils/format'
+import supabaseAnonKey from '@/libs/supabase/anon_key'
+
+const MAX_ANALYSIS_LIMIT = 3
 
 interface InputAnalisisProps {
     user?: AuthUser
@@ -50,6 +53,30 @@ export default function InputAnalisis({
     )
     const [useAI, setUseAI] = useState<boolean>(readOnlyData?.useAI ?? false)
     const [isAnalyzing, setIsAnalyzing] = useState(false)
+    const [analysisCount, setAnalysisCount] = useState<number>(0)
+    const [isCheckingLimit, setIsCheckingLimit] = useState<boolean>(true)
+
+    const fetchAnalysisCount = useCallback(async () => {
+        if (!user?.id) return
+        const { count, error } = await supabaseAnonKey
+            .from('analysis')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .is('deleted_at', null)
+        if (!error) setAnalysisCount(count ?? 0)
+    }, [user?.id])
+
+    useEffect(() => {
+        if (readOnly || !user?.id) {
+            setIsCheckingLimit(false)
+            return
+        }
+        setIsCheckingLimit(true)
+        fetchAnalysisCount().finally(() => setIsCheckingLimit(false))
+    }, [readOnly, user?.id, fetchAnalysisCount])
+
+    const remainingAnalysis = Math.max(0, MAX_ANALYSIS_LIMIT - analysisCount)
+    const limitReached = !readOnly && !isCheckingLimit && remainingAnalysis <= 0
 
     // untuk toggle channel dan teknik, dengan minimal 1 dipilih
     const toggleChannel = (ch: Channel) => {
@@ -149,6 +176,25 @@ export default function InputAnalisis({
 
     const handleAnalyze = async () => {
         if (readOnly || !selectedImage || !user) return
+
+        if (limitReached) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Batas analisis tercapai',
+                text: `Kamu hanya bisa melakukan analisis maksimal ${MAX_ANALYSIS_LIMIT} kali.`,
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#171717',
+                background: '#fafafa',
+                color: '#171717',
+                customClass: {
+                    popup: 'rounded-sm border border-neutral-900 shadow-[-6px_7px_0_rgba(26,26,46,1)]',
+                    confirmButton: 'rounded-sm font-bold text-sm',
+                }
+            })
+            return
+        }
+
+        // Upload gambar
         setIsAnalyzing(true)
         onLoading?.(true, 'Mengunggah gambar...')
 
@@ -211,6 +257,7 @@ export default function InputAnalisis({
             alert(`Error: ${err.message}\n\nData yang gagal diproses sudah dihapus otomatis.`)
         } finally {
             setIsAnalyzing(false)
+            fetchAnalysisCount()
         }
     }
 
@@ -479,13 +526,14 @@ export default function InputAnalisis({
                 {/* Tombol Analisa */}
                 <Tooltip text={
                     readOnly ? 'Mode lihat detail — analisis tidak dapat dijalankan ulang dari sini.'
-                        : !selectedImage ? 'Upload gambar terlebih dahulu sebelum menjalankan analisis.'
-                            : isAnalyzing ? 'Proses analisis sedang berjalan...'
-                                : `Jalankan force-decode pada ${totalKombinasi} kombinasi${useAI ? ', lalu interpretasi AI otomatis.' : '.'}`
+                        : limitReached ? `Kamu sudah mencapai batas maksimal ${MAX_ANALYSIS_LIMIT} analisis.`
+                            : !selectedImage ? 'Upload gambar terlebih dahulu sebelum menjalankan analisis.'
+                                : isAnalyzing ? 'Proses analisis sedang berjalan...'
+                                    : `Jalankan force-decode pada ${totalKombinasi} kombinasi${useAI ? ', lalu interpretasi AI otomatis.' : '.'} (Sisa ${remainingAnalysis} dari ${MAX_ANALYSIS_LIMIT} analisis)`
                 }>
                     <button
                         onClick={handleAnalyze}
-                        disabled={readOnly || !selectedImage || isAnalyzing}
+                        disabled={readOnly || limitReached || !selectedImage || isAnalyzing}
                         className={`w-full py-3 px-4 flex items-center justify-center
                             rounded-sm font-semibold text-neutral-900
                             border border-neutral-900 text-base
@@ -505,6 +553,8 @@ export default function InputAnalisis({
                                 </svg>
                                 Mode Lihat Detail
                             </span>
+                        ) : limitReached ? (
+                            <span className="flex items-center justify-center gap-2">Batas Analisis Tercapai</span>
                         ) : isAnalyzing ? (
                             <span className="flex items-center justify-center gap-2">
                                 <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
