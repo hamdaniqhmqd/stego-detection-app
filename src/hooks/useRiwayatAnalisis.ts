@@ -26,6 +26,7 @@ export function toRiwayatItem(row: RiwayatRow): RiwayatItem {
 
 interface UseRiwayatAnalisisReturn {
     items: RiwayatItem[]
+    total: number
     isLoading: boolean
     isLoadingMore: boolean
     hasMore: boolean
@@ -35,14 +36,13 @@ interface UseRiwayatAnalisisReturn {
 
 export function useRiwayatAnalisis(userId: string | undefined): UseRiwayatAnalisisReturn {
     const [items, setItems] = useState<RiwayatItem[]>([])
+    const [total, setTotal] = useState(0)
     const [isLoading, setIsLoading] = useState(true)
     const [isLoadingMore, setIsLoadingMore] = useState(false)
     const [hasMore, setHasMore] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const pageRef = useRef(0)           // halaman terakhir yang sudah di-fetch
-    const totalRef = useRef(0)          // total record dari count
-
-    //  Initial fetch + hitung total 
+    const pageRef = useRef(0)
+    const totalRef = useRef(0)
 
     const fetchInitial = useCallback(async () => {
         if (!userId) return
@@ -51,7 +51,6 @@ export function useRiwayatAnalisis(userId: string | undefined): UseRiwayatAnalis
         pageRef.current = 0
 
         try {
-            // Ambil total count
             const { count } = await supabaseAnonKey
                 .from('analysis')
                 .select('*', { count: 'exact', head: true })
@@ -59,8 +58,8 @@ export function useRiwayatAnalisis(userId: string | undefined): UseRiwayatAnalis
                 .is('deleted_at', null)
 
             totalRef.current = count ?? 0
+            setTotal(totalRef.current)
 
-            // Fetch halaman pertama
             const { data, error: fetchError } = await supabaseAnonKey
                 .from('analysis')
                 .select('id, created_at, teknik, metode')
@@ -81,8 +80,6 @@ export function useRiwayatAnalisis(userId: string | undefined): UseRiwayatAnalis
             setIsLoading(false)
         }
     }, [userId])
-
-    //  Load more (infinite scroll pagination) 
 
     const loadMore = useCallback(async () => {
         if (!userId || isLoadingMore || !hasMore) return
@@ -113,13 +110,9 @@ export function useRiwayatAnalisis(userId: string | undefined): UseRiwayatAnalis
         }
     }, [userId, isLoadingMore, hasMore])
 
-    //  Initial load 
-
     useEffect(() => {
         fetchInitial()
     }, [fetchInitial])
-
-    //  supabaseAnonKey Realtime subscription 
 
     useEffect(() => {
         if (!userId) return
@@ -128,30 +121,21 @@ export function useRiwayatAnalisis(userId: string | undefined): UseRiwayatAnalis
             .channel(`riwayat-analisis-${userId}`)
             .on(
                 'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'analysis',
-                    filter: `user_id=eq.${userId}`,
-                },
+                { event: 'INSERT', schema: 'public', table: 'analysis', filter: `user_id=eq.${userId}` },
                 (payload) => {
-                    // Tambahkan item baru di paling atas
                     const newItem = toRiwayatItem(payload.new as Analysis)
                     setItems((prev) => [newItem, ...prev])
                     totalRef.current += 1
+                    setTotal(totalRef.current)
                 }
             )
             .on(
                 'postgres_changes',
-                {
-                    event: 'DELETE',
-                    schema: 'public',
-                    table: 'analysis',
-                    filter: `user_id=eq.${userId}`,
-                },
+                { event: 'DELETE', schema: 'public', table: 'analysis', filter: `user_id=eq.${userId}` },
                 (payload) => {
                     setItems((prev) => prev.filter((i) => i.id !== payload.old.id))
                     totalRef.current = Math.max(0, totalRef.current - 1)
+                    setTotal(totalRef.current)
                 }
             )
             .subscribe()
@@ -161,5 +145,5 @@ export function useRiwayatAnalisis(userId: string | undefined): UseRiwayatAnalis
         }
     }, [userId])
 
-    return { items, isLoading, isLoadingMore, hasMore, loadMore, error }
+    return { items, total, isLoading, isLoadingMore, hasMore, loadMore, error }
 }
